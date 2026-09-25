@@ -533,11 +533,11 @@ function bootGame(){
  if(!A)return;
  loadGame();
  setInterval(saveGame,3000);
- window.addEventListener("beforeunload",saveGame); window.addEventListener("hashchange",topicRoute);
+ window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
  window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
- render(); setTimeout(topicRoute,0);
+ render();
 }
 document.addEventListener("click",function(e){
  const shop=e.target.closest&&e.target.closest("[data-shop]");
