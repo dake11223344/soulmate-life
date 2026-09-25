@@ -652,7 +652,7 @@ function openContact(i){
  ensureSocialState();if(!state.officialPartners)state.officialPartners={};const n=npcs[i];if(!n)return phone();i=Number(i);
  const friend=state.friends.includes(i),official=state.officialPartners[i]||"";
  const status=official?'❤️ '+official:(friend?'💙 Friend':'');
- A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p>'+(status?'<p><b>'+status+'</b></p>':'')+'<button class="primary" onclick="messageMenu('+i+')">💬 Message</button>'+(!friend?'<button class="option" onclick="friendAdvice('+i+')">💙 Ask a friend for advice</button>':'')+(friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button>':official?'<button class="option" onclick="askDate('+i+')">💕 Plan a Date</button>':'<button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button><button class="option" onclick="friendZone('+i+')">💙 Become Platonic Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
+ A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p>'+(status?'<p><b>'+status+'</b></p>':'')+'<button class="primary" onclick="messageMenu('+i+')">💬 Message</button>' +(friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button>':official?'<button class="option" onclick="askDate('+i+')">💕 Plan a Date</button>':'<button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button><button class="option" onclick="friendZone('+i+')">💙 Become Platonic Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
 }
 function friendZone(i){
  ensureSocialState();i=Number(i);if(!state.officialPartners)state.officialPartners={};
@@ -872,11 +872,44 @@ function addIncomingMessage(sender,msg){
  state.incomingMessages[key]=Object.assign({sender:Number(sender),day:state.day||1,read:false},msg||{});
  return key;
 }
-function friendTipTarget(friendId){
- ensureNpcRelationships();
- const candidates=(state.contacts||[]).map(Number).filter(i=>i!==Number(friendId)&&!(state.friends||[]).includes(i)&&!state.relationshipReveals?.[i]&&npcDatingStatus(i)==="single");
+function friendAdviceTarget(friendId){
+ ensureDatingStory();ensureRelationshipDestiny();
+ const candidates=Object.keys(state.dateCounts||{}).map(Number).filter(i=>i!==Number(friendId)&&!(state.friends||[]).includes(i)&&!state.relationshipReveals?.[i]&&(state.dateCounts[i]||0)>=2);
  if(!candidates.length)return null;
- return candidates[((state.day||1)*3+Number(friendId))%candidates.length];
+ return candidates[((state.day||1)+Number(friendId)*3)%candidates.length];
+}
+function friendDatingAdvice(friendId,target){
+ const count=state.dateCounts[target]||0,type=hiddenRelationshipType(target),n=npcs[target],first=n.name.split(" ")[0];
+ // Early friends are supportive on purpose: no hidden-match clues before the relationship develops.
+ if(count<=6){
+  const early=["You two are really cute together! I want to hear how the next date goes.","Okay, I kind of love you two together so far. You seem happy!","I like seeing you excited about "+first+". I hope it keeps going well."];
+  return early[(target+count+friendId)%early.length];
+ }
+ if(count<=9){
+  const neutral=["How are things going with "+first+"? You two have been seeing each other for a while now.","You and "+first+" seem to be getting closer. How are you feeling about it?","I need an update on you and "+first+" sometime!"];
+  return neutral[(target+count+friendId)%neutral.length];
+ }
+ if(type==="soulmate"||type==="strong"){
+  const good=["Honestly, you and "+first+" still seem really good together.","I like the way you are when you're with "+first+". You seem really happy.","You and "+first+" have made it pretty far. I can actually see why."];
+  return good[(target+count+friendId)%good.length];
+ }
+ if(type==="risky"){
+  const risky=["I don't know if I'm overthinking it, but something about "+first+" has been bothering me lately.","Can I say something? I'm not totally sure "+first+" is as serious about this as you are.","I heard something weird about "+first+". I don't know if it's true, so just... keep your eyes open."];
+  return risky[(target+count+friendId)%risky.length];
+ }
+ const story=unavailableStoryFor(target);
+ const bad={
+  cheating:["I saw "+first+" with another woman, and it looked a little too close to be nothing.","I really hope I'm wrong, but I saw "+first+" with someone else and it made me uncomfortable."],
+  married:["I heard a rumor that "+first+" might already be married. Please don't panic—I don't know if it's true yet.","Someone told me something really weird about "+first+" being married. I think you should ask him directly."],
+  values:["The more I hear about you two, the more I wonder if you and "+first+" actually want the same things long-term.","I like "+first+", but I'm starting to think you two might be very different where it really matters."],
+  move:["I heard "+first+" might be planning to move away. Has he talked to you about that?","Did "+first+" mention anything about moving? I heard something and thought you should know."],
+  commitment:["I don't want to interfere, but I'm starting to wonder whether "+first+" wants the same kind of relationship you do.","You really like "+first+", but make sure he actually wants a future too."],
+  breakup:["You've seemed less happy after your dates with "+first+" lately. Are you sure everything is okay?","I care about you, and something about you and "+first+" hasn't felt right lately."],
+  secret:["I heard something strange about "+first+" that doesn't match what he's told you. I think you should be careful.","There are a couple things about "+first+" that aren't adding up for me."],
+  legal:["I heard "+first+" may be dealing with some serious legal trouble. I don't know the whole story, but you should know.","Someone mentioned "+first+" is in some kind of legal trouble. Have you heard anything about that?"]
+ };
+ const list=bad[story.id]||["I care about you, and I'm starting to think "+first+" might not be a good match for you.","Something about this relationship worries me. Just promise me you won't ignore red flags."];
+ return list[(target+count+friendId)%list.length];
 }
 function createIncomingMessage(){
  ensureIncoming();ensureSocialState();ensureNpcRelationships();
@@ -887,9 +920,9 @@ function createIncomingMessage(){
   if(todays.some(m=>m&&m.sender===fi))return;
   const roll=(day+fi*11+idx*7)%11;
   if(roll===0){addIncomingMessage(fi,{friendPlan:true});return}
-  if(roll===1||roll===2){
-   const target=friendTipTarget(fi);
-   if(target!=null)addIncomingMessage(fi,{friendTip:true,target:target});
+  if(roll===1||roll===2||roll===3){
+   const target=friendAdviceTarget(fi);
+   if(target!=null)addIncomingMessage(fi,{friendDatingAdvice:true,target:target,text:friendDatingAdvice(fi,target)});
   }
  });
  const ids=Array.isArray(state.contacts)?state.contacts.map(Number):[];
@@ -911,6 +944,7 @@ function incomingCards(){
   const i=Number(m.sender!=null?m.sender:key),n=npcs[i];if(!n)return "";
   if(m.friendPlan)return '<div class="card"><h3>📩 New message from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> Want to make plans and hang out?</p><button class="primary" onclick="friendInviteMessage('+i+',\''+key+'\')">Reply</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Maybe later</button></div>';
   if(m.friendTip){const t=npcs[Number(m.target)];if(!t)return "";return '<div class="card"><h3>💙 Tip from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> Hey, I know you were talking to '+t.name.split(" ")[0]+'. I heard '+t.name.split(" ")[0]+' is single now. Just thought you might want to know.</p><button class="primary" onclick="openFriendTip(\''+key+'\')">See '+t.name.split(" ")[0]+'</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Thanks</button></div>'}
+  if(m.friendDatingAdvice){const t=npcs[Number(m.target)];if(!t)return "";return '<div class="card"><h3>💙 Message from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> '+m.text+'</p><button class="primary" onclick="ignoreIncomingKey(\''+key+'\')">Reply later</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Thanks for telling me</button></div>'}
   const t=incomingMessageTemplates[m.template];return '<div class="card"><h3>📩 New message from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> '+t.text+'</p><button class="primary" onclick="openIncomingKey(\''+key+'\')">Reply</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Ignore for now</button></div>';
  }).join("");
 }
