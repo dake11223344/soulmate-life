@@ -227,6 +227,12 @@ function relationships(){
 }
 function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
 function render(){var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
-function bootGame(){if(!A)return;render()}
+function bootGame(){
+ if(!A)return;
+ window.goOut=goOut; window.meetAt=meetAt; window.talk=talk; window.day=day; window.endDay=endDay;
+ window.work=work; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
+ window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.relationships=relationships;
+ render();
+}
 try{bootGame()}catch(e){A=document.querySelector("#app");A.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${e.message}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`}
 </script></body></html>
