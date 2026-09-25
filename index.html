@@ -275,53 +275,47 @@ function openContact(i){
  const n=npcs[i],a=affinity(i);
  A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
 }
-const chatTopics=["仕事","休日","食べ物","映画","音楽","旅行","家族","子どもの頃","趣味","ペット","料理","季節","買い物","カフェ","運動","本","ゲーム","将来","友達","最近あったこと"];
-const chatOpeners=["今日はどんな一日だった？","そういえば、ちょっと聞きたいんだけど","ふと思い出したんだけど","今ちょっと時間ある？","この前の話なんだけど"];
-const chatMoods=["😊","🙂","😂","😌","🤔"];
-const chatReplies=[
- "それ、けっこうわかる。僕も似たようなことあるよ。",
- "へえ、そうなんだ。もう少し聞いてみたい。",
- "それいいね。なんか君らしい気がする。",
- "僕はちょっと違うかも。でもそういう考え方も好きだな。",
- "面白いね。今度会ったときにもその話しようよ。"
+const chatCategories=[
+ {name:"日常",icon:"☀️",topics:["今日あったこと","仕事","ランチ","帰り道","天気","眠い","最近忙しい？","今日の予定"]},
+ {name:"趣味",icon:"🎧",topics:["音楽","映画","ドラマ","ゲーム","本","スポーツ","料理","写真"]},
+ {name:"好きなもの",icon:"🍜",topics:["好きな食べ物","コーヒー","甘いもの","お酒","好きな店","服","旅行先","季節"]},
+ {name:"もっと知りたい",icon:"💭",topics:["休日の過ごし方","子どもの頃","学生時代","友達","ペット","得意なこと","苦手なこと","最近ハマってること"]},
+ {name:"価値観",icon:"🌱",topics:["仕事と生活","家族","お金の使い方","一人の時間","連絡頻度","将来","住みたい場所","人生で大切なこと"]},
+ {name:"恋愛",icon:"💕",topics:["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]},
+ {name:"ふざける",icon:"😂",topics:["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]}
 ];
-function chatVariant(i){
- const d=state.day||1,a=affinity(i),seed=(d*37+i*71+a*13+(state.dailyActions||0)*17);
- const topic=chatTopics[seed%chatTopics.length],opener=chatOpeners[Math.floor(seed/3)%chatOpeners.length],reply=chatReplies[Math.floor(seed/7)%chatReplies.length],mood=chatMoods[Math.floor(seed/11)%chatMoods.length];
- return {topic,opener,reply,mood,id:(seed%2000)+1};
-}
-function npcAvailable(i){
- const n=npcs[i],c=calendarInfo(),p=state.period||"morning";
- if(n.schedule==="evening"||n.schedule==="afterwork"||n.schedule==="quietnight")return p==="night";
- if(n.schedule==="weekendday")return c.weekend?(p==="afternoon"||p==="night"):p==="night";
- if(n.schedule==="shift")return ((c.d+i)%3===0)?p==="afternoon":p==="night";
- return true;
-}
-function replyTiming(i){
- const n=npcs[i],p=state.period||"morning";
- if(n.schedule==="afterwork"&&p!=="night")return "仕事中みたい。返信は夜になりそう。";
- if(n.textStyle==="space")return "返信は少しゆっくりめ。";
- if(n.textStyle==="frequent")return "すぐに返信がきた。";
- return "少しして返信がきた。";
+const chatOpeners=["今日はどうだった？","そういえば聞いてみたかったんだけど","ふと思ったんだけど","ねえ、ちょっと聞いていい？","この前から気になってたんだけど","急に思い出した（笑）","ところでさ","全然関係ないんだけど"];
+const chatReplies=["それ、けっこうわかる。僕も似たようなことあるよ。","へえ、そうなんだ。もう少し聞きたい。","それいいね。なんか君らしい気がする。","僕はちょっと違うかも。でもその考え方もわかる。","面白いね。今度会ったときにもその話しようよ。","それ初めて聞いた。意外かも。","いい質問だね。僕ならたぶんそうするかな。","なんか話してたら時間あっという間だね。"];
+function allChatTopics(){return chatCategories.flatMap((c,ci)=>c.topics.map((t,ti)=>({category:c.name,icon:c.icon,topic:t,ci,ti})))}
+function chatVariant(i,topicIndex){
+ const list=allChatTopics(),d=state.day||1,a=affinity(i),seed=d*37+i*71+a*13+(state.dailyActions||0)*17;
+ const x=list[topicIndex==null?seed%list.length:Number(topicIndex)%list.length];
+ return {category:x.category,icon:x.icon,topic:x.topic,opener:chatOpeners[Math.floor(seed/3+x.ti)%chatOpeners.length],reply:chatReplies[Math.floor(seed/7+x.ci)%chatReplies.length],id:(seed+x.ci*83+x.ti*19)%2000+1};
 }
 function messageMenu(i){
- const n=npcs[i],v=chatVariant(i);
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">今日の話題：${v.topic}</p><button class="option" onclick="casualMessage(${i})">💬 何でもない話をする</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+ const n=npcs[i];
+ A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><button class="option" onclick="topicMenu(${i})">💬 話題を選んで話す</button><button class="option" onclick="casualMessage(${i},-1)">🎲 おまかせで話す</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
 }
-function casualMessage(i){
- if(!state.lastChatDay)state.lastChatDay={}; if(!state.chatStreak)state.chatStreak={};
+function topicMenu(i){
+ A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${chatCategories.map((c,ci)=>`<button class="option" onclick="topicList(${i},${ci})">${c.icon} ${c.name}</button>`).join("")}</div><button class="secondary" onclick="messageMenu(${i})">← 戻る</button>`;
+}
+function topicList(i,ci){
+ const c=chatCategories[ci],offset=chatCategories.slice(0,ci).reduce((n,x)=>n+x.topics.length,0);
+ A.innerHTML=`<h2>${c.icon} ${c.name}</h2><div class="card">${c.topics.map((t,j)=>`<button class="option" onclick="casualMessage(${i},${offset+j})">${t}</button>`).join("")}</div><button class="secondary" onclick="topicMenu(${i})">← 話題へ</button>`;
+}
+function casualMessage(i,topicIndex){
+ if(!state.lastChatDay)state.lastChatDay={};if(!state.chatStreak)state.chatStreak={};
  if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日できる行動を使い切りました。</p><button class="primary" onclick="day()">戻る</button></div>';return}
  const n=npcs[i],today=state.day||1,last=state.lastChatDay[i]||0;
  if(last===today){A.innerHTML='<div class="card"><h2>💬 今日はもう話した</h2><p>また明日にしよう。</p><button class="primary" onclick="messageMenu('+i+')">戻る</button></div>';return}
- const consecutive=last===today-1; state.chatStreak[i]=consecutive?(state.chatStreak[i]||1)+1:1;
- state.lastChatDay[i]=today;state.dailyActions=(state.dailyActions||0)+1;
- const v=chatVariant(i);let gain=2+(v.id%4),reaction="",timing=replyTiming(i);
+ const consecutive=last===today-1;state.chatStreak[i]=consecutive?(state.chatStreak[i]||1)+1:1;state.lastChatDay[i]=today;state.dailyActions=(state.dailyActions||0)+1;
+ const v=chatVariant(i,Number(topicIndex)<0?null:topicIndex);let gain=2+(v.id%4),reaction="",timing=replyTiming(i);
  if(n.textStyle==="space"&&state.chatStreak[i]>=3){gain=-3;reaction="毎日メッセージが続いて、少し返信がそっけなくなった。";}
- else if(n.textStyle==="frequent"){gain+=2;reaction="連絡を取り合うのが好きみたい。返信も早い。";}
+ else if(n.textStyle==="frequent"){gain+=2;reaction="連絡を取り合うのが好きみたい。返信も楽しそう。";}
  else reaction="自然に会話が続いた。";
  addAffinity(i,gain);
- const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。"][v.id%5];
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.mood} ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
+ const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。","それ面白いね。私はどうだろう。","わかる！私も似た感じ。","へえ、もっと聞きたい。"][v.id%8];
+ A.innerHTML=`<h2>${v.icon} ${v.topic}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
 }
 function askDate(i){
  const n=npcs[i],a=affinity(i);
@@ -358,7 +352,7 @@ function bootGame(){
  if(!A)return;
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
+ window.topicMenu=topicMenu; window.topicList=topicList; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
