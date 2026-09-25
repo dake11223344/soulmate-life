@@ -456,6 +456,13 @@ function topicMenu(i){
  document.getElementById("messageTopicBack").onclick=function(){messageMenu(Number(window.activeTopicPerson));};
 }
 window.topicMenu=topicMenu;
+function replyTiming(i){
+ const n=npcs[i];
+ if(!n)return "返信なし";
+ if(n.textStyle==="frequent")return "すぐに返信がきた。";
+ if(n.textStyle==="space")return "少し時間がたってから返信がきた。";
+ return "しばらくして返信がきた。";
+}
 function casualMessage(i,topicIndex){
  if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
