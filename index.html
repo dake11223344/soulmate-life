@@ -832,44 +832,74 @@ const incomingMessageTemplates=[
  ]}
 ];
 function ensureIncoming(){
- if(!state.incomingMessages)state.incomingMessages={};
+ if(!state.incomingMessages||Array.isArray(state.incomingMessages)||typeof state.incomingMessages!=="object")state.incomingMessages={};
  if(!state.ignoredMessages)state.ignoredMessages={};
 }
+function addIncomingMessage(sender,msg){
+ ensureIncoming();
+ const key=String(sender)+"_"+String(state.day||1)+"_"+Object.keys(state.incomingMessages).length;
+ state.incomingMessages[key]=Object.assign({sender:Number(sender),day:state.day||1,read:false},msg||{});
+ return key;
+}
+function friendTipTarget(friendId){
+ ensureNpcRelationships();
+ const candidates=(state.contacts||[]).map(Number).filter(i=>i!==Number(friendId)&&!(state.friends||[]).includes(i)&&!state.relationshipReveals?.[i]&&npcDatingStatus(i)==="single");
+ if(!candidates.length)return null;
+ return candidates[((state.day||1)*3+Number(friendId))%candidates.length];
+}
 function createIncomingMessage(){
- ensureIncoming();ensureSocialState();
- const friendIds=(state.friends||[]).map(Number);
- if(friendIds.length&&(state.day||1)%5===0&&!Object.values(state.incomingMessages).some(m=>m&&m.day===(state.day||1))){
-  const fi=friendIds[(state.day||1)%friendIds.length];
-  state.incomingMessages[fi]={day:state.day||1,friendPlan:true,read:false};saveGame();return;
- }
- if(state.incomingHandledDay===(state.day||1))return;const ids=Array.isArray(state.contacts)?state.contacts:[];if(!ids.length)return;
- const eligible=ids.filter(i=>affinity(i)>=8 || (Array.isArray(state.friends)&&state.friends.includes(Number(i))));if(!eligible.length)return;
- const day=state.day||1;if(Object.values(state.incomingMessages).some(m=>m&&m.day===day))return;
- const i=eligible[(day*7+eligible.length)%eligible.length],n=npcs[i];const chance=n.textStyle==="frequent"?2:n.textStyle==="warm"?3:5;
- if((day+i*3)%chance!==0)return;
- const t=(day+i)%incomingMessageTemplates.length;
- state.incomingMessages[i]={day:day,template:t,read:false};saveGame();
+ ensureIncoming();ensureSocialState();ensureNpcRelationships();
+ const day=state.day||1,friendIds=(state.friends||[]).map(Number);
+ const todays=Object.values(state.incomingMessages).filter(m=>m&&m.day===day);
+ // Friends sometimes initiate plans or pass along dating news. Multiple friends may text on the same day.
+ friendIds.forEach(function(fi,idx){
+  if(todays.some(m=>m&&m.sender===fi))return;
+  const roll=(day+fi*11+idx*7)%11;
+  if(roll===0){addIncomingMessage(fi,{friendPlan:true});return}
+  if(roll===1||roll===2){
+   const target=friendTipTarget(fi);
+   if(target!=null)addIncomingMessage(fi,{friendTip:true,target:target});
+  }
+ });
+ const ids=Array.isArray(state.contacts)?state.contacts.map(Number):[];
+ const eligible=ids.filter(i=>affinity(i)>=8 || friendIds.includes(i));
+ eligible.forEach(function(i,idx){
+  if(Object.values(state.incomingMessages).some(m=>m&&m.day===day&&m.sender===i))return;
+  const n=npcs[i],chance=n.textStyle==="frequent"?4:n.textStyle==="warm"?6:8;
+  if((day+i*3+idx)%chance!==0)return;
+  addIncomingMessage(i,{template:(day+i)%incomingMessageTemplates.length});
+ });
+ saveGame();
 }
 function incomingCount(){ensureIncoming();return Object.values(state.incomingMessages).filter(m=>m&&!m.read).length}
-function morningMessage(){
+function incomingCards(){
  createIncomingMessage();ensureIncoming();
- const entries=Object.entries(state.incomingMessages).filter(([i,m])=>m&&m.day===(state.day||1)&&!m.read);
+ const entries=Object.entries(state.incomingMessages).filter(([key,m])=>m&&m.day===(state.day||1)&&!m.read);
  if(!entries.length)return "";
- const [i,m]=entries[0],n=npcs[Number(i)];if(m.friendPlan)return `<div class="card"><h3>📩 New message from ${n.name.split(" ")[0]}</h3><p><b>${n.name.split(" ")[0]}:</b> Want to make plans and hang out?</p><button class="primary" onclick="friendInviteMessage(${i})">Reply</button><button class="secondary" onclick="ignoreIncoming(${i})">Maybe later</button></div>`;const t=incomingMessageTemplates[m.template];
- return `<div class="card"><h3>📩 New message from ${n.name.split(" ")[0]}</h3><p><b>${n.name.split(" ")[0]}:</b> ${t.text}</p><button class="primary" onclick="openIncoming(${i})">Reply</button><button class="secondary" onclick="ignoreIncoming(${i})">Ignore for now</button></div>`;
+ return entries.map(([key,m])=>{
+  const i=Number(m.sender!=null?m.sender:key),n=npcs[i];if(!n)return "";
+  if(m.friendPlan)return '<div class="card"><h3>📩 New message from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> Want to make plans and hang out?</p><button class="primary" onclick="friendInviteMessage('+i+',\''+key+'\')">Reply</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Maybe later</button></div>';
+  if(m.friendTip){const t=npcs[Number(m.target)];if(!t)return "";return '<div class="card"><h3>💙 Tip from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> Hey, I know you were talking to '+t.name.split(" ")[0]+'. I heard '+t.name.split(" ")[0]+' is single now. Just thought you might want to know.</p><button class="primary" onclick="openFriendTip(\''+key+'\')">See '+t.name.split(" ")[0]+'</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Thanks</button></div>'}
+  const t=incomingMessageTemplates[m.template];return '<div class="card"><h3>📩 New message from '+n.name.split(" ")[0]+'</h3><p><b>'+n.name.split(" ")[0]+':</b> '+t.text+'</p><button class="primary" onclick="openIncomingKey(\''+key+'\')">Reply</button><button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Ignore for now</button></div>';
+ }).join("");
 }
-function openIncoming(i){
- i=Number(i);ensureIncoming();const m=state.incomingMessages[i];if(!m)return phone();const n=npcs[i],t=incomingMessageTemplates[m.template];m.read=true;saveGame();
- A.innerHTML=`<h2>📩 ${n.name.split(" ")[0]}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${t.text}</p><p class="small">Choose your reply</p>${t.choices.map((x,k)=>`<button class="option" onclick="replyIncoming(${i},${k})">${x.text}</button>`).join("")}<button class="secondary" onclick="ignoreIncoming(${i})">Ignore for now</button></div>`;
+function morningMessage(){return incomingCards()}
+function openFriendTip(key){
+ ensureIncoming();const m=state.incomingMessages[key];if(!m)return day();m.read=true;saveGame();openContact(Number(m.target));
 }
-function replyIncoming(i,k){
- i=Number(i);k=Number(k);ensureIncoming();const m=state.incomingMessages[i];if(!m)return phone();const n=npcs[i],t=incomingMessageTemplates[m.template],ch=t.choices[k]||t.choices[0];
- addAffinity(i,3);delete state.incomingMessages[i];state.incomingHandledDay=state.day||1;saveGame();
- A.innerHTML=`<h2>💬 ${n.name.split(" ")[0]}</h2><div class="card"><p><b>You:</b> ${ch.text}</p><p><b>${n.name.split(" ")[0]}:</b> ${ch.reply}</p><button class="primary" onclick="messageMenu(${i})">Keep talking</button><button class="secondary" onclick="day()">Back to day</button></div>`;
+function openIncomingKey(key){
+ ensureIncoming();const m=state.incomingMessages[key];if(!m)return phone();const i=Number(m.sender),n=npcs[i],t=incomingMessageTemplates[m.template];m.read=true;saveGame();
+ A.innerHTML='<h2>📩 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+t.text+'</p><p class="small">Choose your reply</p>'+t.choices.map((x,k)=>'<button class="option" onclick="replyIncomingKey(\''+key+'\','+k+')">'+x.text+'</button>').join("")+'<button class="secondary" onclick="ignoreIncomingKey(\''+key+'\')">Ignore for now</button></div>';
 }
-function ignoreIncoming(i){
- i=Number(i);ensureIncoming();const m=state.incomingMessages[i];if(m)m.read=true;state.incomingHandledDay=state.day||1;saveGame();day();
+function replyIncomingKey(key,k){
+ ensureIncoming();k=Number(k);const m=state.incomingMessages[key];if(!m)return phone();const i=Number(m.sender),n=npcs[i],t=incomingMessageTemplates[m.template],ch=t.choices[k]||t.choices[0];
+ addAffinity(i,3);delete state.incomingMessages[key];saveGame();
+ A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>You:</b> '+ch.text+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+ch.reply+'</p><button class="primary" onclick="messageMenu('+i+')">Keep talking</button><button class="secondary" onclick="day()">Back to day</button></div>';
 }
+function ignoreIncomingKey(key){ensureIncoming();if(state.incomingMessages[key])state.incomingMessages[key].read=true;saveGame();day()}
+function openIncoming(i){const e=Object.entries(state.incomingMessages||{}).find(([k,m])=>m&&(m.sender===Number(i)||k===String(i)));if(e)return openIncomingKey(e[0]);phone()}
+function replyIncoming(i,k){const e=Object.entries(state.incomingMessages||{}).find(([key,m])=>m&&(m.sender===Number(i)||key===String(i)));if(e)return replyIncomingKey(e[0],k);phone()}
+function ignoreIncoming(i){const e=Object.entries(state.incomingMessages||{}).find(([key,m])=>m&&(m.sender===Number(i)||key===String(i)));if(e)return ignoreIncomingKey(e[0]);day()}
 function ensureDatingStory(){
  if(!state.dateCounts||typeof state.dateCounts!=="object")state.dateCounts={};
  if(!state.relationshipReveals||typeof state.relationshipReveals!=="object")state.relationshipReveals={};
@@ -926,6 +956,7 @@ function bootGame(){
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.careerMenu=careerMenu; window.jobMarket=jobMarket; window.chooseJob=chooseJob; window.schoolMenu=schoolMenu; window.startSchool=startSchool; window.attendSchool=attendSchool; window.quitSchool=quitSchool; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
  window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.extendGameOneYear=extendGameOneYear;
+ window.openIncomingKey=openIncomingKey; window.replyIncomingKey=replyIncomingKey; window.ignoreIncomingKey=ignoreIncomingKey; window.openFriendTip=openFriendTip;
  window.friendAdvice=friendAdvice; window.friendInviteMessage=friendInviteMessage;
  window.friendZone=friendZone; window.friendPlans=friendPlans; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledDate=cancelScheduledDate; window.goScheduledDate=goScheduledDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
