@@ -185,6 +185,13 @@ function work(){
  state.money+=168; state.energy=Math.max(0,state.energy-20);
  A.innerHTML=`<div class="statbar"><span class="pill">${c.month} ${c.date} · ${c.weekday} 5:00 PM</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`;
 }
+let currentNpc=0,convoStep=0;
+const meetings=[
+ {place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。僕はいつもラテ頼むんだけど、君はコーヒー好き？",qs:["そうなんだ。僕、今日は仕事帰りなんだ。君も仕事してる？","僕は理学療法士をしてるよ。仕事じゃない日は何してることが多い？","僕は休みの日、散歩したり新しい店を探すのが好き。最近どこかいいところ行った？"]},
+ {place:"🌳 公園",cost:0,intro:"ベンチの近くで落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。僕ここでよく散歩するんだけど、君もよく来る？",qs:["今日は天気いいよね。外で過ごすの好き？","僕は普段ソフトウェアの仕事してて座りっぱなしだから、休みは歩きたくなるんだ。君はどんな仕事してる？","この辺でおすすめの場所とかある？"]},
+ {place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？君も初めて買う？",qs:["買い物って決めてから来るタイプ？それとも見ながら決める？","僕は仕事柄、人と話すこと多いんだけど、休みの日も結局出かけちゃうんだ。君は？","このあとまだ買い物するの？"]},
+ {place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が、手に持っている本を見て声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段もよく本読む？","僕は数字ばっかり見る仕事だから、休みは全然違うもの読みたくなるんだ。君はどんな仕事してる？","静かな場所好き？それとも賑やかなところの方が好き？"]}
+];
 function goOut(){
  A.innerHTML=`<h2>どこへ行く？</h2><div class="card" id="outingList">
  <button class="option outingBtn" data-place="0">☕ カフェ <span class="small">1時間 · $8</span></button>
