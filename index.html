@@ -234,18 +234,33 @@ function calendarInfo(){
 }
 function moodCheck(){
  state.stress=Math.max(0,Math.min(100,state.stress||0));
- if(state.stress>=90 && (state.lowMoodUntil||0)<(state.day||1)) state.lowMoodUntil=(state.day||1)+3;
- return (state.lowMoodUntil||0)>=(state.day||1);
+ const d=state.day||1;
+ if(state.stress>=90 && (state.lowMoodUntil||0)<d) state.lowMoodUntil=d+2;
+ if(state.energy<=10 && (state.sickUntil||0)<d) state.sickUntil=d;
+ return (state.lowMoodUntil||0)>=d || (state.sickUntil||0)>=d;
+}
+function moodStatus(){
+ const d=state.day||1,e=state.energy==null?100:state.energy,s=state.stress||0;
+ if((state.lowMoodUntil||0)>=d)return {blocked:true,title:"😣 Overwhelmed",text:"You feel extremely stressed and need time to recover. You can't work, go out, study, date, or shop today."};
+ if((state.sickUntil||0)>=d)return {blocked:true,title:"🤒 Sick",text:"You've pushed yourself too hard and feel sick today. You need to rest for the whole day."};
+ if(e<=25)return {blocked:false,title:"😴 Tired recently",text:"Your energy has been very low lately. Rest soon or you may get sick."};
+ if(s>=75)return {blocked:false,title:"😰 Feeling very stressed",text:"Stress is getting dangerously high. Take some time to relax before you become overwhelmed."};
+ if(e<=45)return {blocked:false,title:"🥱 A little tired",text:"You could use some rest."};
+ if(s>=55)return {blocked:false,title:"😟 Stressed",text:"You've been under a lot of pressure lately."};
+ return null;
 }
 function periodLabel(){return state.period==="morning"?"🌅 AM":state.period==="afternoon"?"☀️ PM":"🌙 Night"}
 function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()} ${state.periodHours==null?4:state.periodHours}h</span><span class="pill">🌸 Year 1</span><span class="pill">${c.month} ${c.date}<br>${c.weekday}</span><span class="pill">📅 ${c.d}/365</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ${state.stress||0}%</span><span class="pill">🕒 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
 function day(){
- const c=calendarInfo(),low=moodCheck(),worked=state.workedDay===c.d;
+ const c=calendarInfo(),blocked=moodCheck(),m=moodStatus(),worked=state.workedDay===c.d;
  if(!state.period)state.period="morning";
- let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。しばらく休息を優先しましょう。</p></div>`:"";
  const isMorning=state.period==="morning",isAfternoon=state.period==="afternoon",isNight=state.period==="night";
- const intro=isMorning?(c.weekend?"休日の朝。今日は自由に過ごせる。":"朝。今日をどう過ごそう？"):isAfternoon?"昼になった。まだ時間がある。":"夜になった。今日の残りをどう過ごそう？";
- A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?(state.school?'<button class="primary" onclick="attendSchool()">🎓 Go to School</button>':'<button class="primary" onclick="work()">💼 Go to Work</button>'):''}<button class="option" onclick="careerMenu()">💼 Career & School</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
+ const intro=isMorning?(c.weekend?"It's a free morning. How do you want to spend today?":"Morning. How do you want to spend today?"):isAfternoon?"It's afternoon. You still have some time.":"It's evening. How do you want to finish the day?";
+ let note=m?'<div class="card"><h3>'+m.title+'</h3><p>'+m.text+'</p></div>':'';
+ if(blocked){
+  A.innerHTML=statusBar(c)+note+'<div class="card"><h2>Rest Day</h2><p>Your body and mind need recovery today.</p><button class="primary" onclick="endDay()">🛌 Rest for the whole day</button></div>'+nav();return;
+ }
+ A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+'<div class="card"><h2>Day '+c.d+' — '+periodLabel()+'</h2><p class="event">'+intro+'</p>'+((isMorning&&!c.weekend&&!worked)?(state.school?'<button class="primary" onclick="attendSchool()">🎓 Go to School</button>':'<button class="primary" onclick="work()">💼 Go to Work</button>'):'')+'<button class="option" onclick="careerMenu()">💼 Career & School</button><button class="secondary" onclick="goOut()">🗺️ Go Out</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Relax</button>'+(!isNight?'<button class="primary" onclick="nextPeriod()">⏩ Next Time</button>':'<button class="primary" onclick="endDay()">🌙 Sleep</button>')+'</div>'+nav();
 }
 function nextPeriod(){
  if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
@@ -262,7 +277,7 @@ function showNewDay(){
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>Year 1 Complete 🎉</h2><p>You made it through 365 days.</p><button class="primary" onclick="state.screen='day';render()">Back to Day 365</button></div>`;return}
- state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";saveGame();showNewDay();
+ state.day=(state.day||1)+1;state.energy=Math.min(100,(state.energy||0)+35);state.stress=Math.max(0,(state.stress||0)-12);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";saveGame();showNewDay();
 }
 const careerJobs=[
  {id:"retail",track:"retail",name:"Retail Associate",education:"High School",pay:144,stress:14,energy:16},
