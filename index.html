@@ -447,17 +447,12 @@ function randomMessage(i){
  const seed=(state.day||1)*97+i*43+(state.chatCount&&state.chatCount[i]||0)*31+(state.period==="afternoon"?11:state.period==="night"?23:5);
  casualMessage(i,seed%list.length);
 }
+function startSelectedTopic(){const sel=document.getElementById("topicSelect");if(!sel)return;const ci=Number(sel.value),person=Number(window.activeTopicPerson);let start=0;for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;const count=chatCategories[ci].topics.length;casualMessage(person,start+(((state.day||1)*31+person*13)%count));}
+window.startSelectedTopic=startSelectedTopic;
 function topicMenu(i){
  window.activeTopicPerson=Number(i);
- A.innerHTML=`<h2>💬 何を話す？</h2><div class="card"><label class="small">話題カテゴリー</label><select id="topicSelect" style="width:100%;padding:18px;margin:12px 0 18px;border:1px solid #ddd;border-radius:18px;font-size:18px;background:white">${chatCategories.map((c,ci)=>`<option value="${ci}">${c.icon} ${c.name}</option>`).join("")}</select><button type="button" class="primary" id="topicSendBtn">この話題でメッセージする</button></div><button type="button" class="secondary" id="messageTopicBack">← 戻る</button>`;
- document.getElementById("topicSendBtn").onclick=function(){
-   const ci=Number(document.getElementById("topicSelect").value);
-   let start=0;for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;
-   const count=chatCategories[ci].topics.length;
-   const person=Number(window.activeTopicPerson);
-   const seed=(state.day||1)*31+(state.chatCount&&state.chatCount[person]||0)*17+person*13;
-   casualMessage(person,start+(seed%count));
- };
+ A.innerHTML=`<h2>💬 何を話す？</h2><div class="card"><label class="small">話題カテゴリー</label><select id="topicSelect" onchange="startSelectedTopic()" style="width:100%;padding:18px;margin:12px 0 18px;border:1px solid #ddd;border-radius:18px;font-size:18px;background:white">${chatCategories.map((c,ci)=>`<option value="${ci}">${c.icon} ${c.name}</option>`).join("")}</select><button type="button" class="primary" id="topicSendBtn">この話題でメッセージする</button></div><button type="button" class="secondary" id="messageTopicBack">← 戻る</button>`;
+ document.getElementById("topicSendBtn").onclick=startSelectedTopic;
  document.getElementById("messageTopicBack").onclick=function(){messageMenu(Number(window.activeTopicPerson));};
 }
 window.topicMenu=topicMenu;
