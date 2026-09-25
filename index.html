@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{},officialPartners:{},friendInvites:{},npcRelationships:{},friendAdviceSeen:{},gameYears:2};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{},officialPartners:{},friendInvites:{},npcRelationships:{},friendAdviceSeen:{},gameYears:2,encounterHistory:{},platonicCandidates:[]};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -170,6 +170,20 @@ function hiddenRelationshipType(i){
  if((d.risky||[]).includes(i))return "risky";
  return "unavailable";
 }
+function ensureEncounterSocial(){
+ if(!state.encounterHistory||typeof state.encounterHistory!=="object")state.encounterHistory={};
+ if(!Array.isArray(state.platonicCandidates))state.platonicCandidates=[];
+ if(state.platonicCandidates.length<5){
+  const pool=npcs.map((n,i)=>i).filter(i=>i!==state.relationshipDestiny?.soulmate);
+  state.platonicCandidates=pool.filter((i,k)=>((i*13+7)%pool.length)<Math.max(5,Math.floor(pool.length/5))).slice(0,5);
+  if(state.platonicCandidates.length<5)state.platonicCandidates=pool.slice(0,5);
+ }
+}
+function recordEncounter(i,where){
+ ensureEncounterSocial();i=Number(i);
+ const h=state.encounterHistory[i]||{count:0,places:[]};h.count++;if(where&&!h.places.includes(where))h.places.push(where);h.lastDay=state.day||1;state.encounterHistory[i]=h;saveGame();return h;
+}
+function isPlatonicCandidate(i){ensureEncounterSocial();return state.platonicCandidates.includes(Number(i))}
 function ensureNpcRelationships(){
  if(!state.npcRelationships||typeof state.npcRelationships!=="object")state.npcRelationships={};
  if(!state.friendAdviceSeen||typeof state.friendAdviceSeen!=="object")state.friendAdviceSeen={};
@@ -457,13 +471,21 @@ function attendSchool(){
  const c=calendarInfo(),x=schools.find(a=>a.id===state.school);if(!x)return careerMenu();if(c.weekend||state.period!=="morning")return day();
  state.schoolDays++;state.energy=Math.max(0,state.energy-18);state.stress=Math.min(100,(state.stress||0)+12);state.period="night";state.time="6:00 PM";state.periodHours=4;
  if(state.schoolDays>=x.days){state.education=x.result;state.school=null;state.schoolDays=0;saveGame();A.innerHTML='<div class="card"><h2>🎓 Graduation!</h2><p>You completed '+x.name+'. New careers are now available.</p><button class="primary" onclick="jobMarket()">See unlocked jobs</button></div>';return}
- saveGame();A.innerHTML=statusBar(c)+'<div class="card"><h2>🎓 School day complete</h2><p>'+x.name+' · '+state.schoolDays+'/'+x.days+' days</p><p class="small">⚡ -18 · 🧠 Stress +12</p><button class="primary" onclick="day()">Continue</button></div>';
+ saveGame();const social=workSchoolFriendEncounter("school");A.innerHTML=statusBar(c)+social+'<div class="card"><h2>🎓 School day complete</h2><p>'+x.name+' · '+state.schoolDays+'/'+x.days+' days</p><p class="small">⚡ -18 · 🧠 Stress +12</p><button class="primary" onclick="day()">Continue</button></div>';
 }
 function quitSchool(){state.school=null;state.schoolDays=0;saveGame();careerMenu()}
+function workSchoolFriendEncounter(source){
+ ensureEncounterSocial();const day=state.day||1;if(day%9!==0)return "";
+ const pool=state.platonicCandidates.filter(i=>!state.contacts.includes(i));if(!pool.length)return "";
+ const i=pool[day%pool.length],n=npcs[i];recordEncounter(i,source==="work"?"Work":"School");
+ if(!state.contacts.includes(i))state.contacts.push(i);if(!state.friends.includes(i))state.friends.push(i);saveGame();
+ return '<div class="card"><h3>💙 You met someone at '+(source==="work"?"work":"school")+'</h3><p>You and <b>'+n.name+'</b> got talking and clicked as friends. You exchanged contact information.</p></div>';
+}
 function work(){
  initCareer();const c=calendarInfo(); if(state.school)return careerMenu();if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
  const job=currentCareer();ensureCareerExperience();state.careerExperience[job.track]=(state.careerExperience[job.track]||0)+1;state.workedDay=c.d;state.money+=job.pay;state.energy=Math.max(0,state.energy-job.energy);state.stress=Math.min(100,(state.stress||0)+job.stress);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();saveGame();
- A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 ${job.name} — Shift Complete</h2><p>You worked through the morning and afternoon.</p><p class="small">+${job.pay} · ⚡ -${job.energy} · 🧠 Stress +${job.stress}</p><button class="primary" onclick="goOut()">Go out after work</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Refresh</button><button class="secondary" onclick="day()">Go home</button><button class="secondary" onclick="endDay()">🌙 Sleep</button></div>`;
+ const social=workSchoolFriendEncounter("work");
+ A.innerHTML=statusBar(c)+social+`<div class="card"><h2>💼 ${job.name} — Shift Complete</h2><p>You worked through the morning and afternoon.</p><p class="small">+${job.pay} · ⚡ -${job.energy} · 🧠 Stress +${job.stress}</p><button class="primary" onclick="goOut()">Go out after work</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Refresh</button><button class="secondary" onclick="day()">Go home</button><button class="secondary" onclick="endDay()">🌙 Sleep</button></div>`;
 }
 function shopItems(){return [
  ["☕ 好きなドリンク",6,6],["🍰 スイーツ",8,8],["🕯️ キャンドル",15,12],
@@ -584,9 +606,16 @@ function meetAt(placeIndex){
   if(!encounter)return soloOutingResult(m);
   let candidates=npcs.map((n,idx)=>idx).filter(idx=>!npcs[idx].blocked&&npcInterests(npcs[idx],idx).some(t=>m.tags.includes(t)));
   if(!candidates.length)candidates=npcs.map((n,idx)=>idx).filter(idx=>!n.blocked);
-  const seed=(state.day||1)*11+place*7+state.encounterCount*5;window.currentNpc=candidates[seed%candidates.length];window.convoStep=0;
-  const n=npcs[window.currentNpc];
-  A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><div class="name">'+n.name+', '+n.age+'</div><div class="small">'+n.job+'</div></div><div class="card"><p class="event">'+m.intro+'</p><p><b>'+n.name.split(" ")[0]+':</b> “'+m.open+'”</p><button class="option" onclick="talk()">💬 Talk</button><button class="option" onclick="day()">👋 Keep enjoying your outing</button></div>';
+  const seed=(state.day||1)*11+place*7+state.encounterCount*5;
+  ensureEncounterSocial();
+  const metCandidates=candidates.filter(idx=>state.encounterHistory[idx]&&state.encounterHistory[idx].count>0);
+  const repeat=metCandidates.length&&((state.day||1)+place+state.encounterCount)%4===0;
+  window.currentNpc=repeat?metCandidates[seed%metCandidates.length]:candidates[seed%candidates.length];window.convoStep=0;
+  const n=npcs[window.currentNpc],prior=state.encounterHistory[window.currentNpc]?.count||0;
+  const h=recordEncounter(window.currentNpc,m.place);
+  const reunion=prior>0?'<p class="event"><b>'+n.name.split(" ")[0]+':</b> “Hey! We ran into each other again.”</p>':'';
+  const platonicHint=isPlatonicCandidate(window.currentNpc)?'<p class="small">The conversation feels easy and friendly.</p>':'';
+  A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><div class="name">'+n.name+', '+n.age+'</div><div class="small">'+n.job+'</div></div><div class="card">'+reunion+platonicHint+'<p class="event">'+(prior>0?'You recognize each other from before.':m.intro)+'</p><p><b>'+n.name.split(" ")[0]+':</b> “'+m.open+'”</p><button class="option" onclick="talk()">💬 Talk</button><button class="option" onclick="day()">👋 Keep enjoying your outing</button></div>';
  }catch(e){A.innerHTML='<div class="card"><h2>⚠️ Outing error</h2><p>'+String(e.message||e)+'</p><button class="primary" onclick="day()">Go home</button></div>'}
 }
 function talk(){window.convoStep=0;conversation()}
@@ -618,7 +647,14 @@ function conversation(){
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
 function chooseConversation(next){window.convoStep=next;conversation()}
 function askContactChoice(){let n=npcs[window.currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>You:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
-function contactYes(){let n=npcs[window.currentNpc];state.met=true;if(!Array.isArray(state.contacts))state.contacts=[];if(!state.contacts.includes(window.currentNpc))state.contacts.push(window.currentNpc);A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>📱 連絡先を交換しました</h2><p><b>${n.name}</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`}
+function contactYes(){
+ let i=Number(window.currentNpc),n=npcs[i];state.met=true;if(!Array.isArray(state.contacts))state.contacts=[];if(!state.contacts.includes(i))state.contacts.push(i);
+ ensureEncounterSocial();const h=state.encounterHistory[i]||{count:1};
+ const friendship=isPlatonicCandidate(i)&&(h.count>=1);
+ if(friendship&&!state.friends.includes(i))state.friends.push(i);
+ saveGame();
+ A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h2>📱 Contact Added</h2><p><b>'+n.name+'</b> is now in your contacts.</p>'+(friendship?'<p>💙 You two clicked in a platonic way. <b>Friend</b> is now shown in Contacts.</p>':'')+'<button class="primary" onclick="day()">Continue</button></div>';
+}
 function relationshipLabel(i){
  i=Number(i);ensureSocialState();
  if(state.officialPartners&&state.officialPartners[i])return state.officialPartners[i];
