@@ -452,9 +452,12 @@ function topicMenu(i){
  let offset=0;
  const buttons=chatCategories.map((c)=>{
    const start=offset; offset+=c.topics.length;
-   return `<button type="button" class="option" onclick="sendCategoryTopic(${start},${c.topics.length})">${c.icon} ${c.name}</button>`;
+   return `<button type="button" class="option topicCategoryBtn" data-start="${start}" data-count="${c.topics.length}">${c.icon} ${c.name}</button>`;
  }).join("");
- A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${buttons}</div><button type="button" class="secondary" onclick="messageMenu(window.activeTopicPerson)">← 戻る</button>`;
+ A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${buttons}</div><button type="button" class="secondary" id="messageTopicBack">← 戻る</button>`;
+ const btns=A.querySelectorAll(".topicCategoryBtn");
+ btns.forEach(b=>{b.onclick=function(){sendCategoryTopic(Number(b.dataset.start),Number(b.dataset.count));};});
+ const back=A.querySelector("#messageTopicBack");if(back)back.onclick=function(){messageMenu(window.activeTopicPerson);};
 }
 function sendCategoryTopic(start,count){
  const i=Number(window.activeTopicPerson);
@@ -526,12 +529,6 @@ function bootGame(){
  window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.sendCategoryTopic=sendCategoryTopic; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
-document.addEventListener("click",function(e){
- const cat=e.target.closest&&e.target.closest("[data-topic-category]");
- if(cat){e.preventDefault();topicList(Number(cat.getAttribute("data-topic-person")),Number(cat.getAttribute("data-topic-category")));return}
- const msg=e.target.closest&&e.target.closest("[data-message-topic]");
- if(msg){e.preventDefault();casualMessage(Number(msg.getAttribute("data-message-person")),Number(msg.getAttribute("data-message-topic")));return}
-});
 document.addEventListener("click",function(e){
  const shop=e.target.closest&&e.target.closest("[data-shop]");
  if(shop){e.preventDefault();buyItem(Number(shop.getAttribute("data-shop")));return}
