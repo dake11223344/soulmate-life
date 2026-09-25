@@ -507,27 +507,47 @@ function showPlayerMessageChoices(i,topicIndex){
 function continueChat(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
  const v=chatVariant(i,topicIndex);
- const followups=[
-  ["それっていつ頃から？","一番好きなのは何？","誰かと一緒に楽しむ派？"],
-  ["それいいね。きっかけは何だったの？","最近もよくする？","今度おすすめ教えて。"],
-  ["そうなんだ。逆に好きなものは？","じゃあ普段は何してることが多い？","意外（笑）もう少し聞きたい。"],
-  ["僕はけっこう好きだよ。","話してたらもっと聞きたくなった（笑）","今度会った時にもこの話しよう。"]
- ];
- const lines=followups[choiceIndex]||followups[0];
- const seed=((state.day||1)*13+i*17+topicIndex*7+((state.chatCount&&state.chatCount[i])||0));
- const npcLine=lines[Math.abs(seed)%lines.length];
- const opts=["そうなんだ！","それわかる。","へえ、もっと聞きたい。","今度その話しよう！"];
- let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+npcLine+'</p><p class="small">返信する</p>';
- opts.forEach(function(x,k){html+='<button class="option" onclick="finishChat('+i+','+topicIndex+','+k+')">'+x+'</button>';});
+ const followByTopic={
+  "犬派猫派":[
+   {npc:"犬いいよね。飼ったことある？",choices:["あるよ！","ないけど飼ってみたい。","今は飼ってないよ。","猫も好きだよ。"]},
+   {npc:"猫のどんなところが好き？",choices:["自由なところ。","甘えてくるところ。","見てるだけで癒される。","犬も好きだけどね。"]},
+   {npc:"どっちもかわいいよね。もし飼うならどっち？",choices:["犬かな！","猫かな！","両方（笑）","まだ決められない。"]},
+   {npc:"選べないよね（笑）僕も迷う。",choices:["ほんとそれ（笑）","でも犬かな。","でも猫かな。","動物ならだいたい好き。"]}
+  ],
+  "映画":[
+   {npc:"どんなジャンルが一番好き？",choices:["コメディ！","ホラーかな。","恋愛もの。","アクションが好き。"]},
+   {npc:"家で観るなら何系を選ぶことが多い？",choices:["コメディ。","ドラマ系。","ドキュメンタリー。","その日の気分かな。"]},
+   {npc:"映画館で観るなら大画面が映える作品がいいよね。最近何か観た？",choices:["最近観たよ。","まだ観てない。","観たい作品がある。","おすすめ探してる。"]},
+   {npc:"おすすめなら、好み聞いて選びたい（笑）どんな感じが好き？",choices:["笑えるやつ。","泣けるやつ。","ハラハラするやつ。","考えさせられるやつ。"]}
+  ],
+  "音楽":[
+   {npc:"最近よく聴くアーティストいる？",choices:["いるよ！","曲単位で聴くことが多い。","昔の曲をよく聴く。","おすすめ探してる。"]},
+   {npc:"落ち着いた曲って夜に合うよね。どんな時に聴く？",choices:["寝る前。","運転中。","仕事中。","家でのんびりするとき。"]},
+   {npc:"音楽なしで過ごす日もあるよね。普段は何して気分転換する？",choices:["映画観る。","散歩する。","ゲームする。","何もしない（笑）"]},
+   {npc:"じゃあ今度おすすめ交換しようよ。",choices:["いいね！","ぜひ。","楽しそう。","それやろう！"]}
+  ]
+ };
+ let data=(followByTopic[v.topic]||[])[choiceIndex];
+ if(!data){
+   const generic=[
+    {npc:"それ、もう少し聞きたい。どんなところが好き？",choices:["雰囲気かな。","一緒に楽しめるところ。","気分転換になるところ。","うまく説明できないけど好き（笑）"]},
+    {npc:"なるほど。普段もそういう感じ？",choices:["うん、けっこう。","その時によるかな。","最近そうなった。","自分でもよく分からない（笑）"]},
+    {npc:"そうなんだ。逆に苦手なのはある？",choices:["あるよ。","あんまりないかな。","考えたことなかった。","それは秘密（笑）"]},
+    {npc:"僕の話も聞く？",choices:["聞きたい！","もちろん。","うん、教えて。","気になる（笑）"]}
+   ];data=generic[choiceIndex]||generic[0];
+ }
+ state.pendingFollow={person:i,topicIndex:topicIndex,npc:data.npc,choices:data.choices};saveGame();
+ let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+data.npc+'</p><p class="small">返信する</p>';
+ data.choices.forEach(function(x,k){html+='<button class="option" onclick="finishChat('+i+','+topicIndex+','+k+')">'+x+'</button>';});
  html+='</div>';A.innerHTML=html;
 }
 function finishChat(i,topicIndex,k){
- const n=npcs[Number(i)];if(!n)return;
- const mine=["そうなんだ！","それわかる。","へえ、もっと聞きたい。","今度その話しよう！"][Number(k)]||"また話そう！";
- const end=["うん、また話そう！","話せてよかった。","またメッセージするね。","今度続き話そう（笑）"];
- const reply=end[(Number(i)+Number(topicIndex)+Number(k)+(state.day||1))%end.length];
- A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>あなた:</b> '+mine+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><p class="small">会話が自然に終わった。</p><button class="primary" onclick="messageMenu('+i+')">💬 別の話題でメッセージ</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
- saveGame();
+ i=Number(i);k=Number(k);const n=npcs[i];if(!n)return;
+ const p=state.pendingFollow||{};const choices=p.choices||["そうなんだ！"];const mine=choices[k]||choices[0];
+ const acknowledgements=["そうなんだ。話してくれてありがとう。","なるほど、ちょっとわかった気がする。","いいね。またその話しよう。","なんかこういう話できるのいいね。"];
+ const reply=acknowledgements[(i+Number(topicIndex)+k+(state.day||1))%acknowledgements.length];
+ state.pendingFollow=null;saveGame();
+ A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>あなた:</b> '+mine+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><p class="small">会話がひと区切りついた。</p><button class="primary" onclick="messageMenu('+i+')">💬 別の話題でメッセージ</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 function sendPlayerReply(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
