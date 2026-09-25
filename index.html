@@ -62,7 +62,21 @@ function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 Year 1<
 function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>`}
 function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option" onclick="cafe()">🌳 Park <span class="small">1 hour · Free</span></button><button class="option" onclick="cafe()">🛍️ Shopping <span class="small">1–2 hours</span></button><button class="option" onclick="cafe()">📚 Library / Study <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← Back</button>`}
 function cafe(){state.money-=8;let n=npcs[0];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにCafeへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “Hey, do you come here often?”</p><button class="option" onclick="talk()">💬 Talk to him</button><button class="option" onclick="number()">📱 Ask for his number</button><button class="option" onclick="state.screen='day';render()">👋 Smile and leave</button></div>`}
-function talk(){A.innerHTML=`<div class="card"><h2>☕ Conversation</h2><p>Noahは落ち着いていて話しやすい。仕事や休日の過ごし方について少し話した。</p><p class="small">Notebook updated: Noahについて少し分かった。</p><button class="primary" onclick="number()">連絡先を聞く</button><button class="secondary" onclick="state.screen='day';render()">今日は帰る</button></div>`}
+function talk(){
+ A.innerHTML=`<h2>☕ Conversation</h2><div class="card"><div id="chat"><p><b>Noah:</b> Hey, do you come here often?</p></div><div class="row"><input id="chatInput" placeholder="メッセージを入力…" autocomplete="off"><button class="primary" style="width:auto" onclick="sendChat()">➤</button></div><button class="secondary" onclick="number()">📱 連絡先を聞く</button><button class="secondary" onclick="state.screen=\'day\';render()">今日は帰る</button></div>`;
+ const input=document.querySelector("#chatInput"); if(input) input.addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});
+}
+function sendChat(){
+ const input=document.querySelector("#chatInput"); const chat=document.querySelector("#chat"); if(!input||!chat)return; const msg=input.value.trim(); if(!msg)return; chat.insertAdjacentHTML("beforeend","<p><b>You:</b> "+escapeHtml(msg)+"</p>"); input.value="";
+ const m=msg.toLowerCase(); let reply="That’s interesting. Tell me more about that.";
+ if(m.includes("work")||m.includes("仕事")) reply="I’m a physical therapist. I like helping people, even though some days are pretty busy. What about you?";
+ else if(m.includes("weekend")||m.includes("休日")) reply="I like a quiet morning, coffee, and sometimes getting outside. What’s your ideal weekend?";
+ else if(m.includes("family")||m.includes("家族")||m.includes("子ども")) reply="Family is important to me. I think I’d like a family of my own someday.";
+ else if(m.includes("hi")||m.includes("hello")||m.includes("こんにちは")) reply="Hey! I’m glad you decided to talk to me. How’s your day going?";
+ else if(m.includes("name")||m.includes("名前")) reply="I’m Noah. Noah Bennett. Nice to officially meet you.";
+ setTimeout(()=>{chat.insertAdjacentHTML("beforeend","<p><b>Noah:</b> "+reply+"</p>"); chat.lastElementChild.scrollIntoView({behavior:"smooth"});},350);
+}
+function escapeHtml(s){return s.replace(/[&<>"\']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;"}[ch]))}
 function number(){state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>Contact Added 📱</h2><p><b>Noah Bennett</b> がContactsに追加された。</p><p class="small">Soulmateかどうかは表示されません。</p><button class="primary" onclick="state.screen='day';render()">Continue</button></div>`}
 function phone(){
  A.innerHTML=`<h2>📱 Phone</h2><div class="card"><h3>Contacts</h3><p class="small">Contacts screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
