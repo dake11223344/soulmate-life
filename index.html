@@ -200,12 +200,6 @@ function refresh(){
  A.innerHTML=`<div class="card"><h2>🛁 リフレッシュした</h2><p>ゆっくり休んで少し気持ちが軽くなった。</p><p class="small">⚡ +15　🧠 ストレス -20</p><button class="primary" onclick="day()">続ける</button></div>`;
 }
 window.currentNpc=0;window.convoStep=0;
-window.meetings=[
- {place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。君はコーヒー好き？",qs:["今日は仕事帰り？","休みの日は何してる？","最近いいところ行った？"]},
- {place:"🌳 公園",cost:0,intro:"落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。ここよく来る？",qs:["外で過ごすの好き？","どんな仕事してる？","おすすめの場所ある？"]},
- {place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？",qs:["買い物は決めてから来る？","休みの日も出かける？","このあとまだ買い物する？"]},
- {place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段も本読む？","どんな仕事してる？","静かな場所好き？"]}
-];
 function goOut(){
  if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><p>ストレスが高く、今は休息が必要です。</p><button class="primary" onclick="day()">家で休む</button></div>';return}
  A.innerHTML=`<h2>どこへ行く？</h2><div class="card">
@@ -216,20 +210,26 @@ function goOut(){
  <button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`;
 }
 function cafe(){meetAt(0)}
+function getMeeting(i){
+ return [
+  {place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。君はコーヒー好き？",qs:["今日は仕事帰り？","休みの日は何してる？","最近いいところ行った？"]},
+  {place:"🌳 公園",cost:0,intro:"落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。ここよく来る？",qs:["外で過ごすの好き？","どんな仕事してる？","おすすめの場所ある？"]},
+  {place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？",qs:["買い物は決めてから来る？","休みの日も出かける？","このあとまだ買い物する？"]},
+  {place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段も本読む？","どんな仕事してる？","静かな場所好き？"]}
+ ][Number(i)];
+}
 function meetAt(i){
  try{
   window.currentNpc=Number(i);window.convoStep=0;
-  const m=window.meetings[window.currentNpc],n=npcs[window.currentNpc];
+  const m=getMeeting(window.currentNpc),n=npcs[window.currentNpc];
   if(!m||!n)throw new Error("出会いデータが見つかりません");
   if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">← 戻る</button></div>';return}
   state.money-=m.cost;
   A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`;
- }catch(e){
-  A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家に戻る</button></div>`;
- }
+ }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家に戻る</button></div>`}
 }
 function talk(){window.convoStep=0;conversation()}
-function conversation(){let n=npcs[window.currentNpc],m=window.meetings[window.currentNpc],name=n.name.split(" ")[0],text=window.convoStep===0?m.open:window.convoStep<=3?m.qs[window.convoStep-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
+function conversation(){let n=npcs[window.currentNpc],m=getMeeting(window.currentNpc),name=n.name.split(" ")[0],text=window.convoStep===0?m.open:window.convoStep<=3?m.qs[window.convoStep-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
 let choices=[
 [["うん、けっこう好き","たまにかな","そうでもないかな"],["うん、よく来る","たまに来る","今日はたまたま"],["うん、初めて買う","前にも買ったことある","まだ迷ってる"],["うん、面白そう","まだ読んでないけど気になってる","別の本を探してる"]],
 [["うん、働いてるよ","今日は休みだよ","仕事じゃなくて用事で来た"],["好きだよ","たまに散歩する","どちらかというと家が好き"],["ある程度決めてくる","見ながら決める","今日は見るだけ"],["よく読むよ","たまに読む","あまり読まない"]],
@@ -259,7 +259,7 @@ function nav(){return `<div class="nav"><button class="ghost" onclick="render()"
 function render(){var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
 function bootGame(){
  if(!A)return;
- window.goOut=goOut; window.meetAt=meetAt; window.talk=talk; window.day=day; window.endDay=endDay;
+ window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
  window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.relationships=relationships;
  render();
