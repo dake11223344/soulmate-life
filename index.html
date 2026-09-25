@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{}};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -793,11 +793,46 @@ function replyIncoming(i,k){
 function ignoreIncoming(i){
  i=Number(i);ensureIncoming();const m=state.incomingMessages[i];if(m)m.read=true;state.incomingHandledDay=state.day||1;saveGame();day();
 }
+function ensureDatingStory(){
+ if(!state.dateCounts||typeof state.dateCounts!=="object")state.dateCounts={};
+ if(!state.relationshipReveals||typeof state.relationshipReveals!=="object")state.relationshipReveals={};
+}
+const unavailableOutcomes=[
+ {id:"married",title:"💍 The Truth Comes Out",text:"Something has felt off for a while. Then you discover the truth: they are already married. You were never told, and you realize you were unknowingly the other person."},
+ {id:"cheating",title:"💔 Someone Else",text:"Small inconsistencies finally add up. You find out they have been seeing someone else behind your back."},
+ {id:"move",title:"✈️ Moving Away",text:"They tell you they are moving far away. When you talk about going together, they make it clear they do not want to build that future with you."},
+ {id:"values",title:"🧩 Something Doesn't Fit",text:"As the relationship gets serious, you discover that one of your core values is fundamentally different. Neither of you can honestly compromise on it."},
+ {id:"commitment",title:"🚪 No Future Together",text:"They finally admit that they do not want the kind of committed future you want. Continuing would only postpone the breakup."},
+ {id:"breakup",title:"💬 A Difficult Conversation",text:"They tell you their feelings have changed and they want to end the relationship. There was no obvious warning at the beginning."},
+ {id:"secret",title:"🕵️ A Hidden Life",text:"Details that never quite made sense finally connect. They have been hiding a major part of their life from you, and the trust between you is gone."},
+ {id:"legal",title:"⚖️ Serious Trouble",text:"You learn that they are facing serious legal trouble and may be going to jail. They had deliberately kept it from you while you were dating."}
+];
+function unavailableStoryFor(i){
+ const seed=(Number(i)*17+((state.relationshipDestiny&&state.relationshipDestiny.soulmate)||0)*11)%unavailableOutcomes.length;
+ return unavailableOutcomes[seed];
+}
+function revealUnavailableEnding(i){
+ ensureDatingStory();i=Number(i);const n=npcs[i],story=unavailableStoryFor(i);
+ state.relationshipReveals[i]={type:story.id,day:state.day||1,dates:state.dateCounts[i]||0};
+ addAffinity(i,-100);
+ state.scheduledDates=(state.scheduledDates||[]).filter(x=>Number(x.npc)!==i);
+ saveGame();
+ A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h2>'+story.title+'</h2><p>'+story.text+'</p><p><b>Your relationship with '+n.name.split(" ")[0]+' ends here.</b></p><p class="small">It took time for the truth to come out. There was no way to know this on the first few dates.</p><button class="primary" onclick="day()">Continue</button></div>';
+}
 function dateScene(i){
- if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">Back</button></div>';return}
+ i=Number(i);ensureDatingStory();ensureRelationshipDestiny();
+ if(state.relationshipReveals[i]){A.innerHTML='<div class="card"><h2>This relationship has ended.</h2><p>You cannot continue dating this person.</p><button class="primary" onclick="day()">Back</button></div>';return}
+ if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 Too tired for another date</h2><p>You do not have enough time or energy for another date today.</p><button class="primary" onclick="day()">Back</button></div>';return}
  state.dailyActions=(state.dailyActions||0)+2;
- const n=npcs[i];addAffinity(i,10);state.stress=Math.max(0,(state.stress||0)-12);state.energy=Math.max(0,(state.energy||0)-15);
- A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>💕 ${n.name}とデート</h2><p>カフェでゆっくり話して、一緒に街を歩いた。前より少し自然に話せるようになった。</p><p class="small">💗 +10　🧠 ストレス -12　⚡ -15</p><button class="primary" onclick="day()">デートを終える</button></div>`;
+ state.dateCounts[i]=(state.dateCounts[i]||0)+1;
+ const count=state.dateCounts[i],type=hiddenRelationshipType(i),n=npcs[i];
+ if(type==="unavailable"){
+  const revealAt=10+((i*7+((state.relationshipDestiny&&state.relationshipDestiny.soulmate)||0))%6);
+  if(count>=revealAt)return revealUnavailableEnding(i);
+ }
+ addAffinity(i,10);state.stress=Math.max(0,(state.stress||0)-12);state.energy=Math.max(0,(state.energy||0)-15);saveGame();
+ const subtle=(type==="unavailable"&&count>=7)?'<p class="small">There was a small moment that felt a little odd, but nothing you could clearly explain yet.</p>':'';
+ A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h2>💕 Date with '+n.name.split(" ")[0]+'</h2><p>You spent time together, talked, and got to know each other a little better. Everything seems normal so far.</p>'+subtle+'<p class="small">Date #'+count+' · 💗 +10 · 🧠 Stress -12 · ⚡ -15</p><button class="primary" onclick="day()">End Date</button></div>';
 }
 function relationships(){
  A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
