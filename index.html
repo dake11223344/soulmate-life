@@ -37,7 +37,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 <body><main id="app"><div class="card"><h2>Soulmate 生活</h2><p>ゲームを読み込んでいます…</p></div></main><script>
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,day:1,time:"7:00 AM",met:false,
-look:{hair:0,color:0,face:0,eye:0,skin:0},partnerLook:{hair:0,face:0}};
+look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
 const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
 const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
 const questions=[
@@ -70,11 +70,28 @@ function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>co
 function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューゲーム</button></div></div>`}
 function avatarArt(gender,hairIndex,faceIndex,hairColor){let hc=hairColor||colors[state.look.color]||"#3b271e";let skin=["#f4d0b5","#e9b28f","#c98b68","#8d5b45"][state.look.skin||0];let eyeStyle=faceIndex===1?"transform:scaleX(1.25)":faceIndex===2?"transform:scaleY(.65)":faceIndex===3?"transform:rotate(-8deg)":"";return '<div class="avatarArt" style="--hair:'+hc+';--skin:'+skin+'"><div class="hair"></div><div class="neck"></div><div class="head"></div><div class="fringe"></div><div class="eyes" style="'+eyeStyle+'"><i class="eye"></i><i class="eye"></i></div><i class="nose"></i><i class="mouth"></i><div class="body"></div></div>'}
 function faceArt(i){return avatarArt(state.gender,state.look.hair,i)}
-function create(){let hairs=state.gender==="male"?["👨🏻","👨🏻‍🦱","👨🏻‍🦰","👨🏻‍🦳","🧑🏻‍🦲","🧑🏻"]:["👩🏻","👩🏻‍🦱","👩🏻‍🦰","👩🏻‍🦳","🧑🏻‍🦱","👩🏻‍🦲"];let faces=["round","oval","soft","sharp","heart","long"];A.innerHTML=`<h2>主人公を作る</h2>
-<div class="card"><label>名前</label><input id="nm" value="${state.name}" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">${Array.from({length:14},(_,i)=>`<option ${state.age==22+i?"selected":""}>${22+i}</option>`).join("")}</select></div>
-<div class="card"><h3>あなたの性別</h3><div class="grid"><button class="option ${state.gender==="female"?"selected":""}" onclick="state.gender='female';create()">女性</button><button class="option ${state.gender==="male"?"selected":""}" onclick="state.gender='male';create()">男性</button></div><h3>恋愛対象</h3><div class="grid"><button class="option ${state.target==="female"?"selected":""}" onclick="state.target='female';create()">女性</button><button class="option ${state.target==="male"?"selected":""}" onclick="state.target='male';create()">男性</button></div></div>
-<div class="card"><h3>あなたの見た目</h3>${avatarArt(state.gender,state.look.hair,state.look.face)}<h3>髪型</h3><div class="grid">${hairs.map((x,i)=>`<button class="face ${state.look.hair===i?"selected":""}" onclick="state.look.hair=${i};create()"><span style="font-size:13px">髪型 ${i+1}</span></button>`).join("")}</div><h3>顔</h3><div class="grid">${faces.map((x,i)=>`<button class="face ${state.look.face===i?"selected":""}" onclick="state.look.face=${i};create()">${faceArt(i)}</button>`).join("")}</div></div>
-<button class="primary" onclick="state.name=document.querySelector('#nm').value||'Mika';state.age=+document.querySelector('#age').value;state.screen='quiz';render()">次へ：性格・価値観診断</button>`}
+function create(){
+ const faceNames=["丸型","卵型","面長","ベース型","逆三角形","ハート型","ひし形"];
+ const hairNames=["ストレート","レイヤー","ロング","ミディアム","ボブ","ショート","ポニーテール","お団子"];
+ const eyeNames=["丸目","やや丸目","切れ長","タレ目","つり目","奥二重","二重"];
+ const browNames=["ストレート","アーチ","平行","上がり","下がり","太め","細め"];
+ const noseNames=["小さめ","丸め","細め","高め","低め","鷲鼻","やや上向き"];
+ const mouthNames=["薄め","普通","ふっくら","大きめ","上向き","M字"];
+ const sw=(arr,key)=>arr.map((x,i)=>`<button class="option ${state.look[key]===i?"selected":""}" style="text-align:center;padding:10px 5px" onclick="state.look.${key}=${i};create()">${x}</button>`).join("");
+ A.innerHTML=`<h2>主人公を作る</h2>
+ <div class="card"><label>名前</label><input id="nm" value="${state.name}" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">${Array.from({length:14},(_,i)=>`<option ${state.age==22+i?"selected":""}>${22+i}</option>`).join("")}</select></div>
+ <div class="card"><h3>あなたの性別</h3><div class="row"><button class="option ${state.gender==="female"?"selected":""}" onclick="state.gender='female';create()">女性</button><button class="option ${state.gender==="male"?"selected":""}" onclick="state.gender='male';create()">男性</button></div><h3>恋愛対象</h3><div class="row"><button class="option ${state.target==="female"?"selected":""}" onclick="state.target='female';create()">女性</button><button class="option ${state.target==="male"?"selected":""}" onclick="state.target='male';create()">男性</button></div></div>
+ <div class="card"><h3>あなたの見た目</h3>${avatarArt(state.gender,state.look.hair,state.look.face)}
+ <h3>顔の輪郭</h3><div class="grid">${sw(faceNames,"face")}</div>
+ <h3>肌の色</h3><div class="grid">${["#f7d9c4","#efc3a5","#dda57e","#bf805e","#925c43","#613b2d"].map((x,i)=>`<button class="swatch ${state.look.skin===i?"selected":""}" style="background:${x}" onclick="state.look.skin=${i};create()"></button>`).join("")}</div>
+ <h3>髪型</h3><div class="grid">${sw(hairNames,"hair")}</div>
+ <h3>髪の色</h3><div class="grid">${colors.slice(0,10).map((x,i)=>`<button class="swatch ${state.look.color===i?"selected":""}" style="background:${x}" onclick="state.look.color=${i};create()"></button>`).join("")}</div>
+ <h3>目の形</h3><div class="grid">${sw(eyeNames,"eye")}</div>
+ <h3>眉の形</h3><div class="grid">${sw(browNames,"brow")}</div>
+ <h3>鼻の形</h3><div class="grid">${sw(noseNames,"nose")}</div>
+ <h3>口の形</h3><div class="grid">${sw(mouthNames,"mouth")}</div></div>
+ <button class="primary" onclick="state.name=document.querySelector('#nm').value||'Mika';state.age=+document.querySelector('#age').value;state.screen='quiz';render()">次へ：性格・価値観診断</button>`}
+}
 function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="day";return render()} A.innerHTML=`<div class="small">質問 ${state.q+1} / ${questions.length}</div><div class="card"><h2>${q[0]}</h2>${q[1].map((o,i)=>`<button class="option" onclick="answer(${i})">${o[0]}</button>`).join("")}</div>`}
 function selectFace(i){state.look.face=i;render()}
 function selectEye(i){state.look.eye=i;render()}
