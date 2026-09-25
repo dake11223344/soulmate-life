@@ -305,7 +305,7 @@ function useHours(h){
  if(state.periodHours<h){
   if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
   else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM";state.periodHours=4}
-  else return false;
+  else {state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;}
  }
  state.periodHours-=h;
  if(state.periodHours<=0){
