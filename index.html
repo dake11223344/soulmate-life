@@ -160,8 +160,19 @@ function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="da
 function selectFace(i){state.look.face=i;render()}
 function selectEye(i){state.look.eye=i;render()}
 function answer(i){let [k,d]=questions[state.q][1][i][1];state.score[k]=Math.max(0,Math.min(100,state.score[k]+d));state.q++;render()}
-function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">Mon 7:00 AM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>1日目 — 自宅</h2><p class="event">新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。</p><button class="primary" onclick="work()">💼 仕事へ行く</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button></div>${nav()}`}
-function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>`}
+function day(){
+ const d=state.day||1;
+ const weekday=d===1?"Mon":"Tue";
+ const intro=d===1
+  ?"新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。"
+  :"2日目の朝。昨日の出来事を思い出しながら、新しい一日が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。";
+ A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">${weekday} 7:00 AM</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>${d}日目 — 自宅</h2><p class="event">${intro}</p><button class="primary" onclick="work()">💼 仕事へ行く</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button>${d===1?'<button class="secondary" onclick="endDay()">🌙 今日を終える</button>':''}</div>${nav()}`;
+}
+function endDay(){
+ if((state.day||1)>=2){A.innerHTML='<div class="card"><h2>2日目終了 🌙</h2><p>ここまでが現在遊べる範囲です。</p><button class="primary" onclick="state.screen=\'day\';render()">2日目に戻る</button></div>';return}
+ state.day=2; state.energy=100; state.time="7:00 AM"; state.screen="day"; render();
+}
+function work(){state.money+=168;state.energy=Math.max(0,state.energy-20);const d=state.day||1;A.innerHTML=`<div class="statbar"><span class="pill">${d===1?"Mon":"Tue"} 5:00 PM</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>68　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`}
 let currentNpc=0,convoStep=0;
 const meetings=[
 {place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。僕はいつもラテ頼むんだけど、君はコーヒー好き？",qs:["そうなんだ。僕、今日は仕事帰りなんだ。君も仕事してる？","僕は理学療法士をしてるよ。仕事じゃない日は何してることが多い？","僕は休みの日、散歩したり新しい店を探すのが好き。最近どこかいいところ行った？"]},
