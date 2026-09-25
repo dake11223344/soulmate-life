@@ -473,17 +473,39 @@ function sendChatTopic(i,topicIndex){
  if(!useHours(2)){A.innerHTML='<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>';return;}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
  const today=state.day||1;if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0;}
- state.chatCount[i]=(state.chatCount[i]||0)+1;const count=state.chatCount[i];
- const v=chatVariant(i,topicIndex);let gain=0,reaction='';
- if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction=count<=3?'メッセージが好きみたい。会話を楽しんでいる。':'今日はたくさん話せたみたい。';}
- else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
- else{gain=count<=2?2:0;reaction=count<=2?'自然に会話が続いた。':'今日は十分話したみたい。';}
- addAffinity(i,gain);
- const yours=['私はけっこう好きかも。','最近ちょうど気になってた。','それについて話したかった！','私はこういうの、わりと大事だと思う。','うーん、私は少し違うかな。','それ面白いね。私はどうだろう。','わかる！私も似た感じ。','へえ、もっと聞きたい。'];
- const you=yours[(v.id+count)%yours.length];
+ state.chatCount[i]=(state.chatCount[i]||0)+1;
+ const v=chatVariant(i,topicIndex);
+ state.pendingChat={person:i,topicIndex:topicIndex,variant:v};
  saveGame();
- A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(' ')[0]+':</b> '+v.opener+' 「'+v.topic+'」ってどう思う？</p><p><b>あなた:</b> '+you+'</p><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><div class="event">'+messageReplyTiming(i)+'<br>'+reaction+'</div><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ showPlayerMessageChoices(i,topicIndex);
 }
+function showPlayerMessageChoices(i,topicIndex){
+ const n=npcs[i],v=chatVariant(i,topicIndex);
+ const choices=[
+  '私はけっこう好きかも。',
+  '最近ちょうど気になってた！',
+  '私は少し違うかな。',
+  'それについてもっと聞きたい。'
+ ];
+ let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた → '+n.name.split(' ')[0]+':</b> 「'+v.topic+'」の話なんだけど…</p><p class="small">送るメッセージを選んでください</p>';
+ choices.forEach(function(c,idx){html+='<button class="option" onclick="sendPlayerReply('+i+','+topicIndex+','+idx+')">'+c+'</button>';});
+ html+='<button class="secondary" onclick="openTopicCategory('+i+','+v.ci+')">← 戻る</button></div>';
+ A.innerHTML=html;
+}
+function sendPlayerReply(i,topicIndex,choiceIndex){
+ i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
+ const v=chatVariant(i,topicIndex);
+ const choices=['私はけっこう好きかも。','最近ちょうど気になってた！','私は少し違うかな。','それについてもっと聞きたい。'];
+ const you=choices[choiceIndex]||choices[0];
+ const count=(state.chatCount&&state.chatCount[i])||1;
+ let gain=0,reaction='';
+ if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction='メッセージを楽しんでいるみたい。';}
+ else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
+ else{gain=count<=2?2:0;reaction='自然に会話が続いた。';}
+ addAffinity(i,gain);state.pendingChat=null;saveGame();
+ A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+you+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+}
+window.showPlayerMessageChoices=showPlayerMessageChoices;window.sendPlayerReply=sendPlayerReply;
 function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
 window.messageMenu=messageMenu;window.randomMessage=randomMessage;window.topicMenu=topicMenu;window.openTopicCategory=openTopicCategory;window.sendChatTopic=sendChatTopic;window.casualMessage=casualMessage;
 function morningMessage(){
