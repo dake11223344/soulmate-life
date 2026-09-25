@@ -413,7 +413,12 @@ function chatVariant(i,topicIndex){
 }
 function messageMenu(i){
  const n=npcs[i];
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><button class="option" onclick="topicMenu(${i})">💬 話題を選んで話す</button><button class="option" onclick="casualMessage(${i},-1)">🎲 おまかせで話す</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+ A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><button class="option" onclick="topicMenu(${i})">💬 話題を選んで話す</button><button class="option" onclick="randomMessage(${i})">🎲 おまかせで話す</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+}
+function randomMessage(i){
+ const list=allChatTopics();
+ const seed=(state.day||1)*97+i*43+(state.chatCount&&state.chatCount[i]||0)*31+(state.period==="afternoon"?11:state.period==="night"?23:5);
+ casualMessage(i,seed%list.length);
 }
 function topicMenu(i){
  A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${chatCategories.map((c,ci)=>`<button class="option" onclick="topicList(${i},${ci})">${c.icon} ${c.name}</button>`).join("")}</div><button class="secondary" onclick="messageMenu(${i})">← 戻る</button>`;
@@ -480,7 +485,7 @@ function bootGame(){
  if(!A)return;
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.topicMenu=topicMenu; window.topicList=topicList; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.topicList=topicList; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
