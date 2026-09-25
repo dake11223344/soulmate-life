@@ -62,19 +62,19 @@ function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目
 function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>`}
 function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option" onclick="cafe()">🌳 Park <span class="small">1 hour · Free</span></button><button class="option" onclick="cafe()">🛍️ ショッピング <span class="small">1–2 hours</span></button><button class="option" onclick="cafe()">📚 図書館 / 勉強 <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
 function cafe(){state.money-=8;let n=npcs[0];A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにカフェへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “こんにちは。ここにはよく来るの？”</p><button class="option" onclick="talk()">💬 話しかける</button><button class="option" onclick="number()">📱 連絡先を聞く</button><button class="option" onclick="state.screen='day';render()">👋 笑顔で別れる</button></div>`}
-let convoStep=0;
-function talk(){convoStep=0;conversation();}
+let convoStep=0,convoRound=0;
+function talk(){convoStep=0;convoRound=0;conversation();}
 function conversation(){
  let html=`<h2>☕ Noahとの会話</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto">`;
  if(convoStep===0) html+=`<p><b>Noah:</b> こんにちは。ここにはよく来るの？</p>`;
  else if(convoStep===1) html+=`<p><b>Noah:</b> そうなんだ。今日は何しに来たの？</p>`;
  else if(convoStep===2) html+=`<p><b>Noah:</b> なるほど。僕は仕事の休憩で寄ることが多いんだ。普段この辺に住んでるの？</p>`;
- else html+=`<p><b>Noah:</b> 話しやすくてよかった。そういえば、名前聞いてもいい？</p>`;
+ else if(convoStep===3) html+=`<p><b>Noah:</b> 話しやすくてよかった。そういえば、名前聞いてもいい？</p>`; else if(convoStep===4) html+=`<p><b>Noah:</b> ${state.name||"あなた"}っていうんだ。僕はNoah。今日はこのあと何か予定ある？</p>`; else html+=`<p><b>Noah:</b> そっか。僕もそろそろ戻らないと。また話せたらいいね。</p>`;
  html+=`</div><div id="choices">`;
  if(convoStep===0) html+=choice("よく来るよ",1)+choice("たまに来る",1)+choice("今日が初めて",1);
  else if(convoStep===1) html+=choice("ちょっと休憩しに来た",2)+choice("友達と待ち合わせ",2)+choice("近くに用事があって",2)+choice("なんとなく寄ってみた",2);
  else if(convoStep===2) html+=choice("うん、この辺だよ",3)+choice("少し離れたところ",3)+choice("最近引っ越してきた",3);
- else html+=choice("名前を教える",1)+`<button class="secondary" onclick="askContactChoice()">📱 連絡先について話す</button>`;
+ else if(convoStep===3) html+=choice("名前を教える",4)+choice("まだ内緒",4); else if(convoStep===4) html+=choice("もう少しここにいる",5)+choice("そろそろ帰る",5)+choice("このあと用事がある",5); else html+=`<button class="secondary" onclick="askContactChoice()">もう少し話す</button>`;
  html+=`<button class="secondary" onclick="day()">今日は帰る</button></div></div>`; A.innerHTML=html;
 }
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`;}
