@@ -547,40 +547,41 @@ function goOut(){
 }
 function getMeeting(i){
  const p=outingPlaces[Number(i)];if(!p)return null;
+ const key=String(p.name).replace(/^[^\s]+\s*/,"");
  const conv={
- "☕ カフェ":["この店のCoffee、飲んだことある？",["朝はCoffee派？","カフェってよく来る？","おすすめの店ある？"]],
- "🚶 朝の散歩":["朝に歩くと気持ちいいね。よく散歩する？",["朝型？夜型？","この辺よく歩く？","運動は好き？"]],
- "📚 図書館":["そのBooks、面白そうだね。何を探してるの？",["普段どんなBooks読む？","静かな場所好き？","最近読んでよかったBooksある？"]],
- "🛍️ ショッピング":["それ買おうか迷ってる？",["買い物は計画する派？","Fashionとか見るの好き？","今日は何を探してる？"]],
- "🥐 ベーカリー":["ここ、焼きたてのパンが人気らしいよ。",["甘いパンと惣菜パンどっち派？","朝ごはんちゃんと食べる？","お気に入りのパン屋ある？"]],
- "🐕 ドッグパーク":["犬好き？見てるだけでも楽しいよね。",["Pets飼ってる？","犬派？猫派？","休みの日も外に出る？"]],
- "🌿 ファーマーズマーケット":["何かいいもの見つけた？",["Do you cook?","地元のお店 — do you like it?","野菜とか選ぶの得意？"]],
- "🏋️ ジム":["よくここでトレーニングしてる？",["どんな運動が好き？","週に何回くらい運動する？","運動のあとのご褒美ってある？"]],
- "🧘 ヨガクラス":["今日のクラス、思ったよりきつかったね。",["ヨガ長いの？","リラックスするとき何する？","運動は一人派？一緒にする派？"]],
- "🥾 ハイキング":["このコース初めて？",["山とか自然好き？","もっと難しいコースも行く？","旅行でもアウトドアする？"]],
- "🎪 お祭り":["思ったより人多いね。何から見る？",["屋台なら何食べる？","お祭りよく行く？","人混み平気？"]],
- "🏛️ 美術館":["この作品、なんか気になるね。",["美術館よく来る？","どんなアートが好き？","一人で見る派？誰かと見る派？"]],
- "🎨 アートクラス":["それ上手だね。こういうのよくやる？",["絵を描くの好き？","他に作るHobbiesある？","完成したら飾る？"]],
- "🍳 Cooking教室":["It smells really good in here. Do you cook often?",["What do you like to cook?","Do you cook at home much?","Do you enjoy cooking for other people?"]],
- "🎮 Gamesショップ":["何か探してるGamesある？",["普段Gamesする？","一人用と対戦どっち好き？","最近ハマったGamesある？"]],
- "🎳 ボウリング":["スコアどれくらいいけそう？",["ボウリング得意？","負けず嫌い？","Friendsとよく遊びに行く？"]],
- "🏖️ 湖・ビーチ":["今日は外にいるだけで気持ちいいね。",["泳ぐの好き？","海と山ならどっち？","夏は外で遊ぶ派？"]],
- "🚲 サイクリング":["結構いいルートだね。よく自転車乗る？",["長距離も走る？","運動好き？","行ってみたい場所ある？"]],
- "🌱 ガーデンセンター":["この植物かわいいね。育てたことある？",["家に植物ある？","庭いじり好き？","花と観葉植物どっちが好き？"]],
- "🧋 ティーショップ":["何頼むか決めた？",["甘い飲み物好き？","いつも同じもの頼む？","Coffeeとお茶ならどっち？"]],
- "🍸 バー":["ここ初めて？雰囲気いいね。",["バーってよく来る？","静かなバーと賑やかな店どっち好き？","Work帰りに飲むことある？"]],
- "💃 クラブ":["この曲いいね。踊るの好き？",["クラブよく来る？","どんなMusic聴く？","夜更かし得意？"]],
- "🎬 ひとりMovies":["このMovies観に来たの？僕も気になってた。",["Movies館によく来る？","どんなジャンル好き？","一人Moviesって平気？"]],
- "🎤 ライブハウス":["このバンド知ってる？",["ライブよく行く？","どんなMusic好き？","好きなアーティストいる？"]],
- "🎵 カラオケ":["何歌うか決めた？",["カラオケ得意？","よく歌う曲ある？","みんなで歌うの好き？"]],
- "🍜 ラーメン店":["それ美味しそう。ここ初めて？",["ラーメン何味が好き？","辛いもの平気？","夜に食べたくなるものある？"]],
- "🌃 夜景スポット":["ここ、夜景きれいだね。",["こういう静かな場所好き？","夜に出かけること多い？","お気に入りの景色ある？"]],
- "🎲 ボードGamesカフェ":["何かやったことあるGamesある？",["ボードGames好き？","協力系と対戦系どっち派？","負けたら悔しい？"]],
- "🧠 トリビアナイト":["この問題わかる？意外と難しいね。",["クイズ得意？","得意ジャンルある？","チーム戦好き？"]],
- "🍽️ レストラン":["何頼むか迷うね。おすすめある？",["外食よくする？","好きなCookingは？","新しい店試すの好き？"]]
+ "カフェ":["Have you tried the coffee here before?",["Are you more of a coffee or tea person?","Do you come to cafés often?","What's your usual order?"]],
+ "朝の散歩":["It's really nice out this morning.",["Are you usually a morning person?","Do you walk around here often?","What do you usually do to stay active?"]],
+ "図書館":["That looks interesting. What are you reading?",["What kind of books do you like?","Do you prefer quiet places like this?","Read anything good lately?"]],
+ "ショッピング":["I've been wandering around forever trying to decide what to get.",["Do you plan what you're buying or just browse?","What kind of stores do you usually like?","Did you come here looking for anything specific?"]],
+ "ベーカリー":["Everything smells way too good in here.",["Sweet or savory pastries?","Do you usually eat breakfast?","Do you have a favorite bakery?"]],
+ "ドッグパーク":["That dog is adorable.",["Do you have any pets?","Are you more of a dog person or a cat person?","Do you come here often?"]],
+ "ファーマーズマーケット":["There are so many good things here today.",["Do you cook much?","Do you like trying local food?","What would you pick up here?"]],
+ "ジム":["That workout was rough today.",["What kind of workouts do you like?","How often do you come here?","What keeps you motivated?"]],
+ "ヨガクラス":["That class was harder than I expected.",["Have you been doing yoga long?","What do you do when you need to relax?","Do you prefer working out alone or with people?"]],
+ "ハイキング":["This trail is pretty nice.",["Do you hike often?","Are you into outdoorsy stuff?","What's somewhere you'd love to travel?"]],
+ "お祭り":["There's a lot going on here.",["What food would you try first?","Do you like festivals?","Are you okay with big crowds?"]],
+ "美術館":["I keep coming back to this piece.",["Do you visit museums often?","What kind of art do you like?","Do you prefer museums alone or with someone?"]],
+ "アートクラス":["Yours is coming out really well.",["Do you make art often?","Any other creative hobbies?","Would you actually hang your work at home?"]],
+ "Cooking教室":["It smells really good in here.",["What do you like to cook?","Do you cook at home much?","Do you enjoy cooking for other people?"]],
+ "Gamesショップ":["I always end up looking around longer than I planned.",["What kind of games do you play?","Single-player or multiplayer?","Played anything good lately?"]],
+ "ボウリング":["I am definitely going to embarrass myself with this score.",["Are you good at bowling?","Are you competitive?","Do you come here with friends much?"]],
+ "湖・ビーチ":["This is a pretty good way to spend the day.",["Do you like swimming?","Beach or mountains?","What do you usually do in summer?"]],
+ "サイクリング":["This is a great route.",["Do you ride often?","Do you like longer rides?","Where would you love to bike someday?"]],
+ "ガーデンセンター":["I keep wanting to take half these plants home.",["Do you have plants at home?","Are you into gardening?","Flowers or houseplants?"]],
+ "ティーショップ":["I still haven't decided what to order.",["Do you like sweet drinks?","Do you usually order the same thing?","Coffee or tea?"]],
+ "バー":["This place has a nice vibe.",["Do you come to bars often?","Quiet bar or somewhere lively?","What do you usually do after work?"]],
+ "クラブ":["This song is actually really good.",["Do you go dancing much?","What kind of music are you into?","Are you a night owl?"]],
+ "ひとりMovies":["I've been wanting to see this movie.",["Do you go to the movies often?","What kind of movies do you like?","Are you okay going to a movie alone?"]],
+ "ライブハウス":["They're really good live.",["Do you go to concerts much?","What kind of music do you like?","Who's an artist you'd love to see live?"]],
+ "カラオケ":["I'm still trying to decide what to sing.",["Do you like karaoke?","What's your go-to song?","Do you like singing with a group?"]],
+ "ラーメン店":["That looks really good.",["What's your favorite kind of ramen?","Do you like spicy food?","What's your favorite late-night food?"]],
+ "夜景スポット":["The view is really nice from here.",["Do you like quiet places like this?","Do you go out at night much?","What's the best view you've ever seen?"]],
+ "ボードGamesカフェ":["There are way too many games to choose from.",["Do you like board games?","Co-op or competitive?","Are you a sore loser?"]],
+ "トリビアナイト":["That question was harder than it looked.",["Are you good at trivia?","What's your best trivia category?","Do you like team games?"]],
+ "レストラン":["Everything on the menu looks good.",["Do you eat out much?","What's your favorite kind of food?","Do you like trying new restaurants?"]]
  };
- const c=conv[p.name]||["ここ、よく来る？",["今日は一人？","こういう場所好き？","休みの日は何してる？"]];
- return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:`${p.name}で過ごしていると、近くにいた人と自然に話すきっかけができた。`,open:c[0],qs:c[1]};
+ const c=conv[key]||["Have you been here before?",["What brought you here today?","Do you like places like this?","What do you usually do on your days off?"]];
+ return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:"You happen to be nearby and a casual conversation starts naturally.",open:c[0],qs:c[1]};
 }
 function soloOutingResult(m){
  const moments=[
@@ -621,32 +622,42 @@ function meetAt(placeIndex){
 function talk(){window.convoStep=0;conversation()}
 function answersFor(q,step){
  const x=String(q||"").toLowerCase();
- if(/cook|cooking|料理/.test(x))return ["Yeah, I cook pretty often.","Sometimes. Mostly simple things.","Not much, but I'd like to learn."];
- if(/coffee|コーヒー/.test(x))return ["Yeah, I drink coffee pretty often.","Sometimes, but not every day.","I'm more of a tea person."];
- if(/walk|散歩/.test(x))return ["Yeah, I go for walks pretty often.","Sometimes, when the weather is nice.","Not very often, honestly."];
- if(/book|本|read/.test(x))return ["I like novels.","I read a little bit of everything.","I'm just browsing today."];
- if(/buy|shopping|買/.test(x))return ["I usually know what I want.","I like looking around first.","I'm just browsing today."];
- if(/workout|training|gym|運動|トレーニング/.test(x))return ["I work out pretty regularly.","A couple of times a week.","I'm just getting into it."];
- if(/movie|映画/.test(x))return ["I watch movies pretty often.","Mostly at home, honestly.","I love going to the theater."];
- if(/music|song|band|音楽|曲/.test(x))return ["I listen to music all the time.","Mostly when I'm driving or relaxing.","It depends on my mood."];
- if(/dog|cat|pet|犬|猫|ペット/.test(x))return ["I'm definitely a dog person.","Probably cats.","Honestly, I like both."];
- if(/morning|night|朝型|夜型/.test(x))return ["I'm more of a morning person.","Definitely a night owl.","It really depends on the day."];
- if(/first time|初めて|course|コース/.test(x))return ["Yeah, it's my first time here.","I've been here before.","I've been wanting to try this place."];
- if(/often|usually|how many|よく|普段|週に何回/.test(x))return ["Pretty often.","Every once in a while.","Not very often."];
- if(/like|好き|enjoy/.test(x))return ["Yeah, I really like it.","It's okay—I enjoy it sometimes.","It's not really my thing."];
- return ["Yeah, I've been curious about this place.","I've been here a couple of times.","I just decided to check it out today."];
+ if(/coffee or tea/.test(x))return ["Definitely coffee.","I'm more of a tea person.","Honestly, I like both."];
+ if(/usual order/.test(x))return ["Usually something simple.","I always end up trying something new.","Whatever looks good that day."];
+ if(/sweet or savory/.test(x))return ["Sweet, definitely.","Savory for me.","Depends on my mood."];
+ if(/eat breakfast/.test(x))return ["Pretty much every day.","Only when I have time.","I'm terrible about breakfast."];
+ if(/favorite bakery/.test(x))return ["I have a couple I really like.","I'm still looking for a favorite.","Honestly, this place might be up there."];
+ if(/pets/.test(x))return ["Yeah, I have a pet.","Not right now, but I'd love one.","No, but I love animals."];
+ if(/dog person or a cat/.test(x))return ["Definitely dogs.","Probably cats.","I honestly like both."];
+ if(/cook/.test(x))return ["Yeah, I cook pretty often.","Sometimes—mostly simple things.","Not much, but I'd like to learn."];
+ if(/book|reading|read anything/.test(x))return ["I love novels.","I read a little bit of everything.","I haven't read much lately."];
+ if(/workout|active|yoga/.test(x))return ["I try to stay pretty active.","A couple times a week.","I'm trying to get back into it."];
+ if(/movie/.test(x))return ["I love movies.","Mostly comedies and dramas.","I usually watch them at home."];
+ if(/music|artist|concert/.test(x))return ["I listen to a little of everything.","I've been into live music lately.","It depends on my mood."];
+ if(/morning person/.test(x))return ["I'm definitely a morning person.","Not at all—I'm a night owl.","Somewhere in the middle."];
+ if(/often|how often|come here much|come here/.test(x))return ["Pretty often.","Every once in a while.","This is actually one of my first times."];
+ if(/prefer|like|into|favorite/.test(x))return ["Yeah, definitely.","Sometimes—it depends.","Not really, but I'm open to it."];
+ return ["Yeah, pretty much.","Sometimes, depending on the day.","Not usually, but today felt like a good day for it."];
 }
 function conversation(){
- let n=npcs[window.currentNpc],m=getMeeting(window.currentPlace==null?0:window.currentPlace),name=n.name.split(" ")[0];
- let step=window.convoStep||0,text=step===0?m.open:step<=3?m.qs[step-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;
- let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
+ const n=npcs[window.currentNpc],m=getMeeting(window.currentPlace==null?0:window.currentPlace),name=n.name.split(" ")[0],step=window.convoStep||0;
+ const prior=Math.max(0,(state.encounterHistory&&state.encounterHistory[window.currentNpc]?.count||1)-1);
+ if(prior>0&&step===0){
+  A.innerHTML='<h2>'+m.place+' · Talking with '+name+'</h2><div class="card"><p><b>'+name+':</b> Hey, good to see you again! Funny running into you here.</p><button class="option" onclick="chooseConversation(1)">I know! How have you been?</button><button class="option" onclick="chooseConversation(1)">Small world. What are you doing here today?</button><button class="secondary" onclick="day()">Keep enjoying the day</button></div>';return;
+ }
+ const text=step===0?m.open:step<=3?m.qs[step-1]:"By the way, I'm "+name+". I don't think I caught your name.";
+ let html='<h2>'+m.place+' · Talking with '+name+'</h2><div class="card"><p><b>'+name+':</b> '+text+'</p>';
  if(step<=3)answersFor(text,step).forEach(x=>html+=choice(x,step+1));
- else html+=`<button class="option" onclick="askContactChoice()">${state.name||"名前"}を教えて、もう少し話す</button>`;
- html+=`<button class="secondary" onclick="day()">今日は帰る</button></div>`;A.innerHTML=html;
+ else html+='<button class="option" onclick="askContactChoice()">Tell '+name+' your name and keep talking</button>';
+ html+='<button class="secondary" onclick="day()">Head home</button></div>';A.innerHTML=html;
 }
-function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
+function choice(label,next){return '<button class="option" onclick="chooseConversation('+next+')">'+label+'</button>'}
 function chooseConversation(next){window.convoStep=next;conversation()}
-function askContactChoice(){let n=npcs[window.currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>You:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
+function askContactChoice(){
+ const n=npcs[window.currentNpc],name=n.name.split(" ")[0],already=(state.contacts||[]).includes(Number(window.currentNpc));
+ if(already){A.innerHTML='<div class="card"><p><b>'+name+':</b> It was nice seeing you again. Text me sometime!</p><button class="primary" onclick="day()">See you later</button></div>';return}
+ A.innerHTML='<div class="card"><p><b>'+name+':</b> This was fun. Want to exchange numbers?</p><button class="primary" onclick="contactYes()">Exchange numbers</button><button class="secondary" onclick="day()">Maybe another time</button></div>';
+}
 function contactYes(){
  let i=Number(window.currentNpc),n=npcs[i];state.met=true;if(!Array.isArray(state.contacts))state.contacts=[];if(!state.contacts.includes(i))state.contacts.push(i);
  ensureEncounterSocial();const h=state.encounterHistory[i]||{count:1};
