@@ -463,6 +463,20 @@ function topicMenu(i){
  A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${chatCategories.map((c,ci)=>`<a class="option" style="display:block;text-decoration:none;color:#111" href="#msgcat-${ci}">${c.icon} ${c.name}</a>`).join("")}</div><button type="button" class="secondary" onclick="messageMenu(${i})">← 戻る</button>`;
 }
 window.topicMenu=topicMenu;window.sendTopicCategory=sendTopicCategory;window.topicRoute=topicRoute;
+function replyTiming(i){
+ const n=npcs[i];
+ if(!n)return "返信なし";
+ if(n.textStyle==="frequent")return "すぐに返信がきた。";
+ if(n.textStyle==="space")return "少し時間がたってから返信がきた。";
+ return "しばらくして返信がきた。";
+}
+function npcAvailable(i){
+ const n=npcs[i]; if(!n)return false;
+ const p=state.period||"morning";
+ if(n.schedule==="shift"||n.schedule==="flexible")return true;
+ if(n.schedule==="evening"||n.schedule==="afterwork"||n.schedule==="quietnight")return p==="night";
+ return true;
+}
 function casualMessage(i,topicIndex){
  if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
