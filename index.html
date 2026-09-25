@@ -25,7 +25,7 @@ button{border:0;border-radius:14px;padding:14px 16px;font-weight:750;font-size:1
 input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;font-size:16px;background:white}
 </style>
 </head>
-<body><main id="app"></main><script>
+<body><main id="app"><div class="card"><h2>Soulmate 生活</h2><p>ゲームを読み込んでいます…</p></div></main><script>
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,day:1,time:"7:00 AM",met:false,
 look:{hair:0,color:0,face:0,eye:0,skin:0},partnerLook:{hair:0,face:0}};
@@ -103,5 +103,6 @@ function relationships(){
  A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
 function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
-function render(){({title,create,quiz,day}[state.screen]||title)()} render();
+function render(){var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
+try{render()}catch(e){A.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${e.message}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`}
 </script></body></html>
