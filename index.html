@@ -202,14 +202,25 @@ function refresh(){
 function goOut(){
  if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><p>ストレスが高く、今は休息が必要です。</p><button class="primary" onclick="day()">家で休む</button></div>';return}
  A.innerHTML=`<h2>どこへ行く？</h2><div class="card">
- <button class="option" onclick="meetAt(0)">☕ カフェ <span class="small">1時間 · $8</span></button>
- <button class="option" onclick="meetAt(1)">🌳 公園 <span class="small">1時間 · 無料</span></button>
- <button class="option" onclick="meetAt(2)">🛍️ ショッピング <span class="small">1–2時間</span></button>
- <button class="option" onclick="meetAt(3)">📚 図書館 <span class="small">2時間 · 無料</span></button></div>
+ <button class="option" data-go-place="0" onclick="meetAt(0)">☕ カフェ <span class="small">1時間 · $8</span></button>
+ <button class="option" data-go-place="1" onclick="meetAt(1)">🌳 公園 <span class="small">1時間 · 無料</span></button>
+ <button class="option" data-go-place="2" onclick="meetAt(2)">🛍️ ショッピング <span class="small">1–2時間</span></button>
+ <button class="option" data-go-place="3" onclick="meetAt(3)">📚 図書館 <span class="small">2時間 · 無料</span></button></div>
  <button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`;
 }
 function cafe(){meetAt(0)}
-function meetAt(i){currentNpc=i;convoStep=0;let m=meetings[i],n=npcs[i];state.money-=m.cost;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`}
+function meetAt(i){
+ try{
+  currentNpc=Number(i);convoStep=0;
+  const m=meetings[currentNpc],n=npcs[currentNpc];
+  if(!m||!n)throw new Error("出会いデータが見つかりません");
+  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">← 戻る</button></div>';return}
+  state.money-=m.cost;
+  A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`;
+ }catch(e){
+  A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家に戻る</button></div>`;
+ }
+}
 function talk(){convoStep=0;conversation()}
 function conversation(){let n=npcs[currentNpc],m=meetings[currentNpc],name=n.name.split(" ")[0],text=convoStep===0?m.open:convoStep<=3?m.qs[convoStep-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
 let choices=[
@@ -246,5 +257,9 @@ function bootGame(){
  window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.relationships=relationships;
  render();
 }
+document.addEventListener("click",function(e){
+ const b=e.target.closest&&e.target.closest("[data-go-place]");
+ if(b){e.preventDefault();meetAt(Number(b.getAttribute("data-go-place")))}
+});
 try{bootGame()}catch(e){A=document.querySelector("#app");A.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${e.message}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`}
 </script></body></html>
