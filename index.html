@@ -449,14 +449,19 @@ function randomMessage(i){
 }
 function topicMenu(i){
  window.activeTopicPerson=Number(i);
- A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${chatCategories.map((c,ci)=>`<button type="button" class="option" onclick="topicList(window.activeTopicPerson,${ci})">${c.icon} ${c.name}</button>`).join("")}</div><button type="button" class="secondary" onclick="messageMenu(window.activeTopicPerson)">← 戻る</button>`;
+ let offset=0;
+ const buttons=chatCategories.map((c)=>{
+   const start=offset; offset+=c.topics.length;
+   return `<button type="button" class="option" onclick="sendCategoryTopic(${start},${c.topics.length})">${c.icon} ${c.name}</button>`;
+ }).join("");
+ A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${buttons}</div><button type="button" class="secondary" onclick="messageMenu(window.activeTopicPerson)">← 戻る</button>`;
 }
-function topicList(i,ci){
- window.activeTopicPerson=Number(i);window.activeTopicCategory=Number(ci);
- const c=chatCategories[ci],offset=chatCategories.slice(0,ci).reduce((n,x)=>n+x.topics.length,0);
- A.innerHTML=`<h2>${c.icon} ${c.name}</h2><div class="card">${c.topics.map((t,j)=>`<button type="button" class="option" onclick="casualMessage(window.activeTopicPerson,${offset+j})">${t}</button>`).join("")}</div><button type="button" class="secondary" onclick="topicMenu(window.activeTopicPerson)">← 話題へ</button>`;
+function sendCategoryTopic(start,count){
+ const i=Number(window.activeTopicPerson);
+ const seed=(state.day||1)*31+(state.chatCount&&state.chatCount[i]||0)*17+i*13;
+ casualMessage(i,Number(start)+(seed%Number(count)));
 }
-window.topicList=topicList;window.topicMenu=topicMenu;
+window.topicMenu=topicMenu;window.sendCategoryTopic=sendCategoryTopic;
 function casualMessage(i,topicIndex){
  if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
@@ -518,7 +523,7 @@ function bootGame(){
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.topicList=topicList; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.sendCategoryTopic=sendCategoryTopic; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
