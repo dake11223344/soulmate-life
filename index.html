@@ -448,11 +448,19 @@ function randomMessage(i){
  casualMessage(i,seed%list.length);
 }
 function topicMenu(i){
- A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${chatCategories.map((c,ci)=>`<button class="option" onclick="window.topicList(${i},${ci});return false;">${c.icon} ${c.name}</button>`).join("")}</div><button class="secondary" onclick="messageMenu(${i})">← 戻る</button>`;
+ A.innerHTML=`<h2>💬 何を話す？</h2><div class="card">${chatCategories.map((c,ci)=>`<a class="option" style="display:block;text-decoration:none;color:inherit" href="#topic-${i}-${ci}">${c.icon} ${c.name}</a>`).join("")}</div><a class="secondary" style="display:block;text-decoration:none" href="#messages-${i}">← 戻る</a>`;
 }
 function topicList(i,ci){
  const c=chatCategories[ci],offset=chatCategories.slice(0,ci).reduce((n,x)=>n+x.topics.length,0);
- A.innerHTML=`<h2>${c.icon} ${c.name}</h2><div class="card">${c.topics.map((t,j)=>`<button class="option" onclick="window.casualMessage(${i},${offset+j});return false;">${t}</button>`).join("")}</div><button class="secondary" onclick="topicMenu(${i})">← 話題へ</button>`;
+ A.innerHTML=`<h2>${c.icon} ${c.name}</h2><div class="card">${c.topics.map((t,j)=>`<a class="option" style="display:block;text-decoration:none;color:inherit" href="#chat-${i}-${offset+j}">${t}</a>`).join("")}</div><a class="secondary" style="display:block;text-decoration:none" href="#topics-${i}">← 話題へ</a>`;
+}
+function routeHash(){
+ const h=(location.hash||"").replace("#","");
+ let m;
+ if((m=h.match(/^topic-(\d+)-(\d+)$/))){topicList(Number(m[1]),Number(m[2]));return}
+ if((m=h.match(/^chat-(\d+)-(\d+)$/))){casualMessage(Number(m[1]),Number(m[2]));return}
+ if((m=h.match(/^topics-(\d+)$/))){topicMenu(Number(m[1]));return}
+ if((m=h.match(/^messages-(\d+)$/))){messageMenu(Number(m[1]));return}
 }
 function casualMessage(i,topicIndex){
  if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
@@ -512,7 +520,7 @@ function bootGame(){
  if(!A)return;
  loadGame();
  setInterval(saveGame,3000);
- window.addEventListener("beforeunload",saveGame);
+ window.addEventListener("beforeunload",saveGame); window.addEventListener("hashchange",routeHash);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
  window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.topicList=topicList; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
