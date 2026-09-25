@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -140,7 +140,36 @@ const npcs=[
 {name:"Tristan Perry",age:31,job:"Electrician",emoji:"👨🏻",traits:{family:85,career:70,social:70,contact:42,adventure:34},textStyle:"frequent",dateStyle:"balanced",schedule:"flexible"},
 {name:"Vincent Barnes",age:38,job:"Photographer",emoji:"👨🏾",traits:{family:31,career:93,social:23,contact:73,adventure:71},textStyle:"warm",dateStyle:"serious",schedule:"weekendday"}];
 function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
-function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
+function pickSoulmate(){
+ const ranked=npcs.map((n,i)=>({i:i,n:n,score:compatibility(n)})).filter(x=>!x.n.blocked).sort((a,b)=>b.score-a.score);
+ if(!ranked.length)return;
+ const soulmate=ranked[0];
+ const strong=ranked.slice(1,6);
+ const remaining=ranked.slice(6);
+ const seed=(state.name||"player").split("").reduce((a,ch)=>a+ch.charCodeAt(0),0)+(state.age||0)*17;
+ const rotated=remaining.length?remaining.slice(seed%remaining.length).concat(remaining.slice(0,seed%remaining.length)):[];
+ const risky=rotated.slice(0,10);
+ const unavailable=rotated.slice(10);
+ state.soulmate=soulmate.n.name;
+ state.relationshipDestiny={
+  soulmate:soulmate.i,
+  strong:strong.map(x=>x.i),
+  risky:risky.map(x=>x.i),
+  unavailable:unavailable.map(x=>x.i)
+ };
+ saveGame();
+}
+function ensureRelationshipDestiny(){
+ const d=state.relationshipDestiny;
+ if(!d||!Number.isInteger(d.soulmate)||!Array.isArray(d.strong)||d.strong.length!==5||!Array.isArray(d.risky)||d.risky.length!==10)pickSoulmate();
+}
+function hiddenRelationshipType(i){
+ ensureRelationshipDestiny();i=Number(i);const d=state.relationshipDestiny||{};
+ if(i===d.soulmate)return "soulmate";
+ if((d.strong||[]).includes(i))return "strong";
+ if((d.risky||[]).includes(i))return "risky";
+ return "unavailable";
+}
 function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、YouのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">GamesはSoulmateが誰か教えてくれません。会話、Values、生活の中からYou自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューGames</button></div></div>`}
 function creatorPortrait(){
  const L=state.look||{}, skin=["#f7d7c4","#edc2a8","#dca985","#c98e68","#a96f50","#7d4d38"][L.skin||0]||"#f7d7c4";
@@ -778,6 +807,7 @@ function render(){saveGame();var screens={title:title,create:create,quiz:quiz,da
 function bootGame(){
  if(!A)return;
  loadGame();
+ if(state.screen!=="title")ensureRelationshipDestiny();
  setInterval(saveGame,3000);
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
