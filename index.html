@@ -160,26 +160,31 @@ function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="da
 function selectFace(i){state.look.face=i;render()}
 function selectEye(i){state.look.eye=i;render()}
 function answer(i){let [k,d]=questions[state.q][1][i][1];state.score[k]=Math.max(0,Math.min(100,state.score[k]+d));state.q++;render()}
+function calendarInfo(){
+ const d=Math.max(1,Math.min(365,state.day||1));
+ const date=new Date(2026,0,d);
+ const weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+ const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ return {d,weekday:weekdays[date.getDay()],month:months[date.getMonth()],date:date.getDate(),weekend:[0,6].includes(date.getDay())};
+}
 function day(){
- const d=state.day||1;
- const weekday=d===1?"Mon":"Tue";
- const intro=d===1
-  ?"新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。"
-  :"2日目の朝。昨日の出来事を思い出しながら、新しい一日が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。";
- A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">${weekday} 7:00 AM</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>${d}日目 — 自宅</h2><p class="event">${intro}</p><button class="primary" onclick="work()">💼 仕事へ行く</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button>${d===1?'<button class="secondary" onclick="endDay()">🌙 今日を終える</button>':''}</div>${nav()}`;
+ const c=calendarInfo();
+ const intro=c.d===1?"新しい一年が始まった。":c.weekend?"休日の朝。今日は自由に過ごせる。":"新しい一日の始まり。今日は9:00から仕事。仕事の後は自由に過ごせる。";
+ A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday} 7:00 AM</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>${c.d}日目 — 自宅</h2><p class="event">${intro}</p>${c.weekend?"":'<button class="primary" onclick="work()">💼 仕事へ行く</button>'}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>${nav()}`;
 }
 function endDay(){
- if((state.day||1)>=2){A.innerHTML='<div class="card"><h2>2日目終了 🌙</h2><p>ここまでが現在遊べる範囲です。</p><button class="primary" onclick="state.screen=\'day\';render()">2日目に戻る</button></div>';return}
- state.day=2; state.energy=100; state.time="7:00 AM"; state.screen="day"; render();
+ if((state.day||1)>=365){
+  A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><p class="small">💵 $${state.money}　⚡ ${state.energy}</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;
+  return;
+ }
+ state.day=(state.day||1)+1; state.energy=100; state.time="7:00 AM"; state.screen="day"; render();
 }
-function work(){state.money+=168;state.energy=Math.max(0,state.energy-20);const d=state.day||1;A.innerHTML=`<div class="statbar"><span class="pill">${d===1?"Mon":"Tue"} 5:00 PM</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>68　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`}
-let currentNpc=0,convoStep=0;
-const meetings=[
-{place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。僕はいつもラテ頼むんだけど、君はコーヒー好き？",qs:["そうなんだ。僕、今日は仕事帰りなんだ。君も仕事してる？","僕は理学療法士をしてるよ。仕事じゃない日は何してることが多い？","僕は休みの日、散歩したり新しい店を探すのが好き。最近どこかいいところ行った？"]},
-{place:"🌳 公園",cost:0,intro:"ベンチの近くで落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。僕ここでよく散歩するんだけど、君もよく来る？",qs:["今日は天気いいよね。外で過ごすの好き？","僕は普段ソフトウェアの仕事してて座りっぱなしだから、休みは歩きたくなるんだ。君はどんな仕事してる？","この辺でおすすめの場所とかある？"]},
-{place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？君も初めて買う？",qs:["買い物って決めてから来るタイプ？それとも見ながら決める？","僕は仕事柄、人と話すこと多いんだけど、休みの日も結局出かけちゃうんだ。君は？","このあとまだ買い物するの？"]},
-{place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が、手に持っている本を見て声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段もよく本読む？","僕は数字ばっかり見る仕事だから、休みは全然違うもの読みたくなるんだ。君はどんな仕事してる？","静かな場所好き？それとも賑やかなところの方が好き？"]}
-];
+function work(){
+ const c=calendarInfo();
+ if(c.weekend){state.screen="day";return render();}
+ state.money+=168; state.energy=Math.max(0,state.energy-20);
+ A.innerHTML=`<div class="statbar"><span class="pill">${c.month} ${c.date} · ${c.weekday} 5:00 PM</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`;
+}
 function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="meetAt(0)">☕ カフェ <span class="small">1時間 · $8</span></button><button class="option" onclick="meetAt(1)">🌳 公園 <span class="small">1時間 · 無料</span></button><button class="option" onclick="meetAt(2)">🛍️ ショッピング <span class="small">1–2時間</span></button><button class="option" onclick="meetAt(3)">📚 図書館 <span class="small">2時間 · 無料</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
 function cafe(){meetAt(0)}
 function meetAt(i){currentNpc=i;convoStep=0;let m=meetings[i],n=npcs[i];state.money-=m.cost;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`}
