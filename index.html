@@ -1,72 +1,15 @@
 <!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#fff7fb"/>
-<title>Soulmate 生活</title>
-<style>
-:root{--pink:#f86f9b;--blue:#78b8e8;--ink:#26344b;--muted:#718096;--card:#fff;--bg:#fff7fb}
-*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(#fff7fb,#f4f8ff);color:var(--ink)}
-#app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 90px}
-.card{background:#fff;border:1px solid #f0e4ec;border-radius:22px;padding:18px;box-shadow:0 8px 24px #caa8b522;margin:12px 0}
-h1,h2,h3,p{margin-top:0}.logo{font-size:34px;font-weight:900;letter-spacing:-1px}.heart{color:var(--pink)}
-button{border:0;border-radius:14px;padding:14px 16px;font-weight:750;font-size:16px;cursor:pointer}
-.primary{background:var(--pink);color:#fff;width:100%}.secondary{background:#e9f4ff;color:#24577c;width:100%;margin-top:9px}.ghost{background:#f5f5f7;color:#465269}
-.row{display:flex;gap:9px}.row>*{flex:1}
-.statbar{display:flex;gap:8px;overflow:auto}.pill{white-space:nowrap;background:#fff;border:1px solid #eee;border-radius:999px;padding:8px 11px;font-size:13px}
-
-
-
-
-
-.avatarArt .eye{width:11px;height:7px;border-radius:50%;background:#352822;box-shadow:0 1px 0 #fff inset}
-
-
-
-.portrait{width:118px;height:118px;border-radius:20px;background:linear-gradient(135deg,#ffd9e6,#d7ebff);display:grid;place-items:center;font-size:52px;margin:auto}
-.option{display:block;width:100%;text-align:left;background:#fff;border:1px solid #e8e8ef;margin:8px 0}
-.option.selected,.face.selected,.swatch.selected{outline:3px solid #f6a1bd}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.swatch,.face{aspect-ratio:1;border-radius:14px;border:2px solid #fff;box-shadow:0 0 0 1px #ddd}.face{background:#f8eef3;display:grid;place-items:center;font-size:25px}
-.small{font-size:13px;color:var(--muted)}.event{line-height:1.55;font-size:17px}.name{font-weight:850;font-size:21px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#ffffffee;backdrop-filter:blur(10px);border-top:1px solid #eee;padding:8px;display:flex;justify-content:center;gap:6px}
-.nav button{font-size:12px;padding:9px;max-width:95px}
-input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;font-size:16px;background:white}
-.maker{max-width:720px;margin:auto}.makerPreview{height:300px;border-radius:28px;background:linear-gradient(145deg,#f8dfd5,#f9c8d9 48%,#dcecff);position:relative;overflow:hidden;margin-bottom:14px}.makerPreview .av{position:absolute;inset:0;display:grid;place-items:center}.makerTabs{display:flex;gap:6px;overflow-x:auto;padding:5px 1px 12px;scrollbar-width:none}.makerTabs button{white-space:nowrap;border:1px solid #eee;background:white;border-radius:13px;padding:10px 13px;font-weight:700}.makerTabs button.on{background:#ff3b83;color:white}.partGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.part{min-height:70px;border:1px solid #eee;background:#fff;border-radius:14px;padding:9px;font-size:14px}.part.on{outline:3px solid #ff4b8b;background:#fff5f9}.part .mini{font-size:24px;display:block;margin-bottom:4px}.colorDot{width:45px;height:45px;border-radius:13px;margin:auto}.stepPills{display:flex;justify-content:center;gap:7px;margin:8px}.stepPills i{width:9px;height:9px;border-radius:50%;background:#ddd}.stepPills i.on{background:#ff3b83}.characterStage{height:420px;border-radius:28px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 25%,#fff8f5 0,#f7d8d3 38%,#efbfc9 72%,#d8e5f5 100%);box-shadow:0 12px 34px #b56c8d25;margin:10px 0 16px}.characterStage:after{content:"";position:absolute;inset:auto 0 0;height:34%;background:linear-gradient(0deg,#fff8,transparent)}.characterPortrait{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center}.creatorNote{font-size:12px;color:#6d7180;text-align:center;margin-top:-7px;margin-bottom:10px}.featureTabs{display:flex;gap:7px;overflow:auto;padding:4px 2px 12px}.featureTabs button{min-width:max-content;border:1px solid #e8e8ec;background:#fff;border-radius:14px;padding:10px 14px;font-weight:700}.featureTabs button.on{background:#ff3d83;color:#fff;border-color:#ff3d83}.featureChoices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.featureChoice{border:1px solid #e7e7eb;background:#fff;border-radius:16px;padding:10px 5px;min-height:64px;font-size:13px}.featureChoice.on{outline:3px solid #ff4b8b;background:#fff5f9}.featureChoice .sample{display:block;height:29px;margin:0 auto 5px;width:54px;border-radius:18px;background:#f3d2c4}.featureChoice .hairSample{background:var(--c);border-radius:60% 60% 25% 25%}.featureChoice .eyeSample{height:15px;margin-top:7px;background:white;border:2px solid #795f58;position:relative}.featureChoice .eyeSample:after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:#50392e;left:20px;top:0}.featureChoice .browSample{height:9px;background:transparent;border-top:4px solid #604238}.featureChoice .noseSample{width:18px;height:27px;background:transparent;border-right:3px solid #bd8271;border-bottom:2px solid #bd8271}.featureChoice .mouthSample{width:34px;height:15px;background:transparent;border-bottom:4px solid #c96878}.featureChoice .faceSample{width:38px;height:42px;border:2px solid #c8907e;background:#f5d2bf}.creatorHeader{display:flex;align-items:center;gap:12px;margin-bottom:8px}.creatorHeader h2{margin:0}.creatorSteps{display:flex;gap:7px;margin-left:auto}.creatorSteps i{width:9px;height:9px;border-radius:50%;background:#ddd}.creatorSteps i.on{background:#ff3d83}
-.assetPortrait{position:relative;width:100%;height:100%;overflow:hidden}
-.assetLayer{position:absolute;width:100%;height:100%;left:0;top:0;object-fit:contain;pointer-events:none}
-.assetChoices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.assetChoice{border:1px solid #e7e7eb;background:#fff;border-radius:16px;padding:6px;height:92px;overflow:hidden}
-.assetChoice.on{outline:3px solid #ff4b8b;background:#fff5f9}
-.assetChoice img{width:100%;height:70px;object-fit:contain}
-.realFace,.rfHairBack,.rfNeck,.rfHead,.rfHairTop,.rfBrow,.rfEye,.rfNose,.rfMouth,</style>
-</head>
-<body><main id="app"></main><script>
-const A=document.querySelector("#app");
-const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
-look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
-const SAVE_KEY="soulmate-life-save-v1";
-function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
-function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
-const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
-const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
-const questions=[
-["初対面の人が多い場所では？",[["自分から話しかける",["social",12]],["話しかけられたら話す",["social",0]],["できれば静かに過ごす",["social",-12]]]],
-["急に予定が空いた休日は？",[["誰かを誘って出かける",["social",10]],["その日の気分で決める",["adventure",7]],["家でゆっくりする",["social",-8]]]],
-["旅行するとしたら？",[["予定を細かく決めたい",["adventure",-8]],["大体決めてあとは自由",["adventure",5]],["行き当たりばったりも楽しい",["adventure",15]]]],
-["恋人との連絡はどれくらいが心地いい？",[["毎日こまめに",["contact",18]],["1日に数回くらい",["contact",7]],["必要な時で十分",["contact",-18]]]],
-["返信がしばらく来なかったら？",[["少し不安になる",["contact",12]],["忙しいのかなと思う",["contact",0]],["あまり気にならない",["contact",-12]]]],
-["意見がぶつかった時は？",[["すぐ話し合いたい",["contact",10]],["少し時間を置いてから話す",["contact",0]],["できれば争いは避けたい",["contact",-7]]]],
-["将来、結婚については？",[["いつかしたい",["family",14]],["相手や状況次第",["family",3]],["特にこだわらない",["family",-10]]]],
-["将来、子どもについては？",[["ほしい",["family",18]],["まだ分からない",["family",0]],["ほしくない",["family",-20]]]],
-["家族との付き合いは？",[["かなり大切にしたい",["family",12]],["ほどよい距離がいい",["family",2]],["あまり重視しない",["family",-12]]]],
-["仕事について一番近いのは？",[["成長や昇進を重視したい",["career",16]],["生活とのバランスが大切",["career",2]],["仕事は生活のためと割り切る",["career",-12]]]],
-["仕事と恋愛の予定がぶつかったら？",[["できるだけ恋人との予定を優先",["career",-12]],["状況によって決める",["career",0]],["仕事を優先することが多い",["career",15]]]],
-["転職や引っ越しにつながる大きなチャンスが来たら？",[["積極的に挑戦する",["career",10]],["恋人と相談して決める",["family",6]],["今の安定を優先する",["adventure",-10]]]],
-["理想のデートに近いのは？",[["家で料理や映画",["adventure",-10]],["カフェや街歩き",["social",5]],["旅行やアウトドア",["adventure",15]]]],
-["新しいことを試すのは？",[["かなり好き",["adventure",15]],["興味があれば",["adventure",4]],["慣れたものの方が安心",["adventure",-14]]]],
-["恋人とはどんな関係が理想？",[["できるだけ一緒に過ごしたい",["contact",12]],["一緒の時間も自分の時間も大切",["contact",2]],["お互いかなり自由でいたい",["contact",-12]]]]
-];
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Soulmate Life</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#fff7fb;color:#26344b}#app{max-width:520px;margin:auto;padding:18px 14px 100px}
+.card{background:#fff;border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 5px 20px #d9c9d533}.btn,.option{display:block;width:100%;border:0;border-radius:16px;padding:16px;margin:10px 0;font-size:16px;text-align:left;background:#fff0f5;color:#26344b}.primary{background:#f86f9b;color:white;text-align:center}.secondary{background:#eef4fa;text-align:center}.nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:auto;background:white;padding:9px;display:flex;gap:5px;border-top:1px solid #eee}.nav button{flex:1;border:0;background:white;padding:10px 2px;font-size:12px}.badge{background:#f43f75;color:#fff;border-radius:999px;padding:2px 6px;font-size:12px}.small{font-size:13px;color:#718096}.portrait{font-size:54px;text-align:center}.event{background:#f7f4ff;padding:12px;border-radius:14px;margin:10px 0}
+</style></head><body><main id="app"></main><script>
+const A=document.getElementById("app");
+const DEFAULT={screen:"day",day:1,period:"morning",periodHours:4,time:"7:00 AM",money:1850,energy:100,stress:20,contacts:[],affinity:{},chatCount:{},chatCountDay:{},inbox:[],unread:{},messagePerson:null};
+let state=Object.assign({},DEFAULT);
+const KEY="soulmate-life-save-v2";
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&typeof x==="object")state=Object.assign({},DEFAULT,x)}catch(e){}}
 const npcs=[
 {name:"Noah Bennett",age:29,job:"Physical Therapist",emoji:"👨🏻",traits:{family:85,career:55,social:45,contact:68,adventure:55},textStyle:"warm",dateStyle:"serious",schedule:"evening"},
 {name:"Ethan Park",age:33,job:"Software Engineer",emoji:"👨🏻‍💻",traits:{family:78,career:72,social:30,contact:45,adventure:30},textStyle:"space",dateStyle:"serious",schedule:"quietnight",schedule:"afterwork"},
@@ -450,140 +393,34 @@ const chatCategories=[
  {name:"恋愛",icon:"💕",topics:["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]},
  {name:"ふざける",icon:"😂",topics:["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]}
 ];
-const chatOpeners=["今日はどうだった？","そういえば聞いてみたかったんだけど","ふと思ったんだけど","ねえ、ちょっと聞いていい？","この前から気になってたんだけど","急に思い出した（笑）","ところでさ","全然関係ないんだけど"];
-const chatReplies=["それ、けっこうわかる。僕も似たようなことあるよ。","へえ、そうなんだ。もう少し聞きたい。","それいいね。なんか君らしい気がする。","僕はちょっと違うかも。でもその考え方もわかる。","面白いね。今度会ったときにもその話しようよ。","それ初めて聞いた。意外かも。","いい質問だね。僕ならたぶんそうするかな。","なんか話してたら時間あっという間だね。"];
-function allChatTopics(){return chatCategories.flatMap((c,ci)=>c.topics.map((t,ti)=>({category:c.name,icon:c.icon,topic:t,ci,ti})))}
-function chatVariant(i,topicIndex){
- const list=allChatTopics(),d=state.day||1,a=affinity(i),seed=d*37+i*71+a*13+(state.dailyActions||0)*17;
- const x=list[topicIndex==null?seed%list.length:Number(topicIndex)%list.length];
- return {category:x.category,icon:x.icon,topic:x.topic,opener:chatOpeners[Math.floor(seed/3+x.ti)%chatOpeners.length],reply:chatReplies[Math.floor(seed/7+x.ci)%chatReplies.length],id:(seed+x.ci*83+x.ti*19)%2000+1};
-}
-function messageMenu(i){
- const n=npcs[i];
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><button class="option" onclick="topicMenu(${i})">💬 話題を選んで話す</button><button class="option" onclick="randomMessage(${i})">🎲 おまかせで話す</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
-}
-function randomMessage(i){
- const list=allChatTopics();
- const seed=(state.day||1)*97+i*43+(state.chatCount&&state.chatCount[i]||0)*31+(state.period==="afternoon"?11:state.period==="night"?23:5);
- casualMessage(i,seed%list.length);
-}
-function sendTopicCategory(ci){
- try{
-  const person=Number(state.messagePerson);
-  if(!Number.isInteger(person)||!npcs[person])throw new Error("相手の情報が見つかりません");
-  ci=Number(ci);
-  if(!chatCategories[ci])throw new Error("話題が見つかりません");
-  let start=0;
-  for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;
-  const count=chatCategories[ci].topics.length;
-  const seed=(state.day||1)*31+(state.chatCount&&state.chatCount[person]||0)*17+person*13;
-  casualMessage(person,start+(seed%count));
- }catch(e){
-  A.innerHTML='<div class="card"><h2>⚠️ メッセージエラー</h2><p>'+String(e.message||e)+'</p><button class="primary" onclick="phone()">連絡先へ戻る</button></div>';
- }
-}
-function topicMenu(i){
- state.messagePerson=Number(i);
- saveGame();
- A.innerHTML='<h2>💬 何を話す？</h2><div class="card">'+chatCategories.map((c,ci)=>'<button type="button" class="option" data-chat-category="'+ci+'">'+c.icon+' '+c.name+'</button>').join('')+'</div><button type="button" class="secondary" onclick="messageMenu('+Number(i)+')">← 戻る</button>';
-}
-function replyTiming(i){
- const n=npcs[i];
- if(!n)return "返信なし";
- if(n.textStyle==="frequent")return "すぐに返信がきた。";
- if(n.textStyle==="space")return "少し時間がたってから返信がきた。";
- return "しばらくして返信がきた。";
-}
-function npcAvailable(i){
- const n=npcs[i]; if(!n)return false;
- const p=state.period||"morning";
- if(n.schedule==="shift"||n.schedule==="flexible")return true;
- if(n.schedule==="evening"||n.schedule==="afterwork"||n.schedule==="quietnight")return p==="night";
- return true;
-}
-function casualMessage(i,topicIndex){
- if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
- if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
- const n=npcs[i],today=state.day||1;
- if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0}
- state.chatCount[i]=(state.chatCount[i]||0)+1;
- const count=state.chatCount[i];
- const v=chatVariant(i,Number(topicIndex)<0?null:topicIndex);let gain=0,reaction="",timing=replyTiming(i);
- if(n.textStyle==="frequent"){
-   gain=count<=3?4:0;
-   reaction=count<=3?`メッセージが好きみたい。今日${count}回目の会話も楽しそう。`:"たくさん話せて満足しているみたい。これ以上は今日は親密度は上がらない。";
- }else if(n.textStyle==="space"){
-   if(count>=3)gain=-2-(count-3);
-   else gain=count===1?2:0;
-   reaction=count>=3?`連絡が多すぎると感じているみたい。今日${count}回目なので少し距離を置きたそう。`:"返信はくるけど、頻繁なメッセージはあまり好きではなさそう。";
- }else{
-   gain=count<=2?2:0;
-   reaction=count<=2?"自然に会話が続いた。":"今日は十分話したみたい。親密度はこれ以上上がらない。";
- }
- addAffinity(i,gain);
- const followSeed=(state.day||1)*19+i*23+count*29;if(followSeed%(n.textStyle==="frequent"?3:n.textStyle==="warm"?5:9)===0)queueIncoming(i,"afterChat");
- saveGame();
- const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。","それ面白いね。私はどうだろう。","わかる！私も似た感じ。","へえ、もっと聞きたい。"][(v.id+count)%8];
- A.innerHTML=`<h2>${v.icon} ${v.topic}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="primary" onclick="messageMenu(${i})">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
-}
-function askDate(i){
- const n=npcs[i],a=affinity(i);
- let threshold=n.dateStyle==="casual"?8:n.dateStyle==="balanced"?25:42;
- const available=npcAvailable(i),accepted=a>=threshold&&available;
- if(accepted){addAffinity(i,5);A.innerHTML=`<div class="card"><h2>💕 デートの約束</h2><p><b>あなた:</b> 今度、二人で出かけない？</p><p><b>${n.name.split(" ")[0]}:</b> ${n.dateStyle==="casual"?"もちろん。楽しそう、行こう！":"いいね。行こう！"}</p><button class="primary" onclick="dateScene(${i})">デートへ</button><button class="secondary" onclick="messageMenu(${i})">あとで</button></div>`}
- else A.innerHTML=`<div class="card"><h2>💬 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> ${!available?"今日は予定が合わなさそう。また別の時間に誘って。":"ごめん、もう少しお互いを知ってからがいいかな。"}</p><button class="primary" onclick="messageMenu(${i})">戻る</button></div>`;
-}
-function incomingDate(i){
- const n=npcs[i];A.innerHTML=`<div class="card"><h2>📩 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> 今度${n.schedule==="weekendday"?"休日の昼":n.schedule==="flexible"?"時間あるとき":n.schedule==="shift"?"予定が合う日":"夜"}、時間ある？よかったら一緒に出かけない？</p><button class="primary" onclick="dateScene(${i})">💕 行く</button><button class="secondary" onclick="messageMenu(${i})">今回はやめておく</button></div>`;
-}
-function morningMessage(){
- const ids=Array.isArray(state.contacts)?state.contacts:[]; if(!ids.length)return "";
- const eligible=ids.filter(i=>affinity(i)>=12);
- if(!eligible.length)return "";
- const day=state.day||1, i=eligible[(day*7)%eligible.length],n=npcs[i];
- const chance=n.textStyle==="frequent"?2:n.textStyle==="warm"?4:6;
- if((day+i*3)%chance!==0)return "";
- addAffinity(i,2);
- return `<div class="card"><h3>📩 朝のメッセージ</h3><p><b>${n.name.split(" ")[0]}:</b> おはよう。今日は何してる？</p><button class="option" onclick="messageMenu(${i})">返信する</button></div>`;
-}
-function dateScene(i){
- if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">戻る</button></div>';return}
- state.dailyActions=(state.dailyActions||0)+2;
- const n=npcs[i];addAffinity(i,10);state.stress=Math.max(0,(state.stress||0)-12);state.energy=Math.max(0,(state.energy||0)-15);
- A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>💕 ${n.name}とデート</h2><p>カフェでゆっくり話して、一緒に街を歩いた。前より少し自然に話せるようになった。</p><p class="small">💗 +10　🧠 ストレス -12　⚡ -15</p><button class="primary" onclick="day()">デートを終える</button></div>`;
-}
-function relationships(){
- A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
-}
-function nav(){
- const u=unreadTotal();
- const badge=u?'<b style="background:#ff4b8b;color:white;border-radius:999px;padding:2px 6px">'+u+'</b>':'';
- return '<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ '+badge+'</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>';
-}
-function render(){saveGame();var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
-function bootGame(){
- if(!A)return;
- loadGame();
- setInterval(saveGame,3000);
- window.addEventListener("beforeunload",saveGame); window.addEventListener("hashchange",topicRoute);
- window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
- window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.sendTopicCategory=sendTopicCategory; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
- render(); setTimeout(topicRoute,0);
-}
-document.addEventListener("click",function(e){
- const chat=e.target.closest&&e.target.closest("[data-chat-category]");
- if(chat){e.preventDefault();e.stopPropagation();sendTopicCategory(Number(chat.getAttribute("data-chat-category")));return}
-});
-document.addEventListener("click",function(e){
- const shop=e.target.closest&&e.target.closest("[data-shop]");
- if(shop){e.preventDefault();buyItem(Number(shop.getAttribute("data-shop")));return}
- const back=e.target.closest&&e.target.closest("[data-shop-back]");
- if(back){e.preventDefault();day();return}
-});
-document.addEventListener("click",function(e){
- const b=e.target.closest&&e.target.closest("[data-go-place]");
- if(b){e.preventDefault();meetAt(Number(b.getAttribute("data-go-place")))}
-});
-try{bootGame()}catch(e){A=document.querySelector("#app");A.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${e.message}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`}
+const cats=[
+["☀️","日常",["今日あったこと","仕事","ランチ","帰り道","天気","眠い","最近忙しい？","今日の予定"]],
+["🎧","趣味",["音楽","映画","ドラマ","ゲーム","本","スポーツ","料理","写真"]],
+["🍜","好きなもの",["好きな食べ物","コーヒー","甘いもの","お酒","好きな店","服","旅行先","季節"]],
+["💭","もっと知りたい",["休日の過ごし方","子どもの頃","学生時代","友達","ペット","得意なこと","苦手なこと","最近ハマってること"]],
+["🌱","価値観",["仕事と生活","家族","お金の使い方","一人の時間","連絡頻度","将来","住みたい場所","人生で大切なこと"]],
+["💕","恋愛",["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]],
+["😂","ふざける",["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]]
+];
+function ensureContacts(){if(!state.contacts.length)state.contacts=[0,1,2,3,4,5].filter(i=>npcs[i])}
+function unreadTotal(){return Object.values(state.unread||{}).reduce((a,b)=>a+(Number(b)||0),0)}
+function nav(){const u=unreadTotal();return '<div class="nav"><button onclick="home()">🏠<br>生活</button><button onclick="phone()">📱'+(u?' <span class="badge">'+u+'</span>':'')+'<br>スマホ</button><button onclick="relationships()">❤️<br>人間関係</button></div>'}
+function status(){return '<div class="card"><b>Day '+state.day+'</b>　'+(state.period==="morning"?"🌅 朝":state.period==="afternoon"?"☀️ 昼":"🌙 夜")+'<br><span class="small">💵 $'+state.money+'　⚡ '+state.energy+'　🧠 '+state.stress+'</span></div>'}
+function home(){state.screen="day";save();A.innerHTML=status()+'<div class="card"><h2>今日をどう過ごす？</h2><button class="btn primary" onclick="work()">💼 仕事</button><button class="btn" onclick="nextPeriod()">⏩ 次の時間へ</button><button class="btn" onclick="phone()">📱 スマホ</button></div>'+nav()}
+function nextPeriod(){if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM"}else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM"}else{state.day++;state.period="morning";state.time="7:00 AM";state.energy=100;state.stress=Math.max(0,state.stress-5)}state.periodHours=4;maybeIncoming();save();home()}
+function work(){state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,state.stress+15);state.period="night";state.periodHours=4;maybeIncoming();save();home()}
+function phone(){ensureContacts();let list=state.contacts.map(i=>{const n=npcs[i],u=state.unread[i]||0;return '<button class="option" onclick="openContact('+i+')"><b>'+n.emoji+' '+n.name+'</b>'+(u?' <span class="badge" style="float:right">'+u+'</span>':'')+'<br><span class="small">'+n.age+'歳 · '+n.job+'</span></button>'}).join("");A.innerHTML='<h2>📱 メッセージ</h2><div class="card">'+list+'</div>'+nav()}
+function openContact(i){const n=npcs[i];state.unread[i]=0;(state.inbox||[]).forEach(m=>{if(m.person===i)m.read=true});save();const msgs=(state.inbox||[]).filter(m=>m.person===i).slice(-4).map(m=>'<div class="event"><b>'+n.name.split(" ")[0]+':</b> '+m.text+'</div>').join("");A.innerHTML='<div class="portrait">'+n.emoji+'</div><h2>'+n.name+'</h2><div class="card">'+msgs+'<button class="btn primary" onclick="messageMenu('+i+')">💬 メッセージ</button><button class="btn secondary" onclick="phone()">← 戻る</button></div>'+nav()}
+function messageMenu(i){state.messagePerson=i;save();A.innerHTML='<h2>💬 '+npcs[i].name+'</h2><div class="card"><button class="btn primary" onclick="topicMenu('+i+')">話題を選んで話す</button><button class="btn" onclick="sendRandom('+i+')">🎲 おまかせ</button><button class="btn secondary" onclick="openContact('+i+')">← 戻る</button></div>'+nav()}
+function topicMenu(i){state.messagePerson=i;save();A.innerHTML='<h2>何を話す？</h2><div class="card">'+cats.map((c,ci)=>'<button class="option" data-cat="'+ci+'">'+c[0]+' '+c[1]+'</button>').join("")+'</div><button class="btn secondary" onclick="messageMenu('+i+')">← 戻る</button>'+nav()}
+function sendCategory(ci){const i=Number(state.messagePerson),c=cats[ci];if(!npcs[i]||!c)return;const count=(state.chatCount[i]||0);const topic=c[2][((state.day*7+i*11+count*3)%c[2].length)];sendMessage(i,c[0],topic)}
+function sendRandom(i){const ci=(state.day+i+(state.chatCount[i]||0))%cats.length;state.messagePerson=i;sendCategory(ci)}
+function spendMessageTime(){state.periodHours=Number(state.periodHours||4)-2;if(state.periodHours<=0){if(state.period==="morning")state.period="afternoon";else if(state.period==="afternoon")state.period="night";else{state.day++;state.period="morning"}state.periodHours=4}}
+function sendMessage(i,icon,topic){const n=npcs[i];spendMessageTime();state.chatCount[i]=(state.chatCount[i]||0)+1;const k=state.chatCount[i];const replies=["それ、わかる。僕も気になってた。","へえ、もっと聞きたい。","いいね。今度会った時にも話そう。","僕は少し違うけど、その考え方も好きだよ。"];const yours=["私はけっこう好き。","最近ちょうど気になってた。","私はどうかなって考えてた。","それ面白いね！"];if(!state.affinity[i])state.affinity[i]=0;state.affinity[i]+=n.textStyle==="frequent"&&k<=3?4:n.textStyle==="space"&&k>=3?-2:2;if(((state.day*13+i*17+k*19)%(n.textStyle==="frequent"?3:n.textStyle==="space"?9:5))===0)queueIncoming(i);save();A.innerHTML='<h2>'+icon+' '+topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> 「'+topic+'」ってどう思う？</p><p><b>あなた:</b> '+yours[k%yours.length]+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+replies[(state.day+i+k)%replies.length]+'</p><button class="btn primary" onclick="messageMenu('+i+')">もう一度メッセージ</button><button class="btn secondary" onclick="openContact('+i+')">← 戻る</button></div>'+nav()}
+function queueIncoming(i){if(!npcs[i])return;const texts=["今なにしてる？","今日どうだった？","さっきの話、ちょっと気になってた。","ふと思い出してメッセージした（笑）","また話したくなった。"];state.inbox.push({person:i,text:texts[(state.day+i+state.inbox.length)%texts.length],read:false});state.unread[i]=(state.unread[i]||0)+1}
+function maybeIncoming(){ensureContacts();state.contacts.forEach(i=>{const n=npcs[i],a=state.affinity[i]||0;if(a<4)return;const d=n.textStyle==="frequent"?3:n.textStyle==="space"?10:6;if((state.day*11+i*7+(state.period==="night"?3:1))%d===0)queueIncoming(i)})}
+function relationships(){ensureContacts();A.innerHTML='<h2>❤️ 人間関係</h2><div class="card">'+state.contacts.map(i=>'<p>'+npcs[i].emoji+' '+npcs[i].name+'</p>').join("")+'</div>'+nav()}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if(b){e.preventDefault();sendCategory(Number(b.dataset.cat))}});
+function boot(){load();ensureContacts();home()}
+try{boot()}catch(e){A.innerHTML='<div class="card"><h2>起動エラー</h2><p>'+String(e.message||e)+'</p></div>'}
 </script></body></html>
