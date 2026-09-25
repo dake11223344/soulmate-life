@@ -70,34 +70,28 @@ function selectEye(i){state.look.eye=i;render()}
 function answer(i){let [k,d]=questions[state.q][1][i][1];state.score[k]=Math.max(0,Math.min(100,state.score[k]+d));state.q++;render()}
 function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">Mon 7:00 AM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>1日目 — 自宅</h2><p class="event">新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。</p><button class="primary" onclick="work()">💼 仕事へ行く</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button></div>${nav()}`}
 function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>`}
-function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option" onclick="cafe()">🌳 Park <span class="small">1 hour · Free</span></button><button class="option" onclick="cafe()">🛍️ ショッピング <span class="small">1–2 hours</span></button><button class="option" onclick="cafe()">📚 図書館 / 勉強 <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
-function cafe(){state.money-=8;let n=npcs[0];A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにカフェへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “こんにちは。ここにはよく来るの？”</p><button class="option" onclick="talk()">💬 話しかける</button><button class="option" onclick="number()">📱 連絡先を聞く</button><button class="option" onclick="state.screen='day';render()">👋 笑顔で別れる</button></div>`}
-let convoStep=0,convoRound=0;
-function talk(){convoStep=0;conversation();}
-function conversation(){
- let html=`<h2>☕ Noahとの会話</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto">`;
- if(convoStep===0) html+=`<p><b>Noah:</b> ここのコーヒーけっこう好きなんだ。僕はいつもラテ頼むんだけど、君はコーヒー好き？</p>`;
- else if(convoStep===1) html+=`<p><b>Noah:</b> そうなんだ。僕、今日は仕事帰りなんだ。君も仕事してる？</p>`;
- else if(convoStep===2) html+=`<p><b>Noah:</b> 僕は理学療法士をしてるよ。忙しい日もあるけど結構好きなんだ。仕事じゃない日は何してることが多い？</p>`;
- else if(convoStep===3) html+=`<p><b>Noah:</b> いいね。僕は休みの日、散歩したり新しい店を探したりするのが好き。最近どこかいいところ行った？</p>`;
- else if(convoStep===4) html+=`<p><b>Noah:</b> へえ、いいね。そういえばまだ名前聞いてなかった。僕はNoah。君は？</p>`;
- else html+=`<p><b>Noah:</b> ${state.name||"君"}っていうんだ。話せてよかった。なんか初対面って感じしないね。</p>`;
- html+=`</div><div id="choices">`;
- if(convoStep===0) html+=choice("好き。よく飲むよ",1)+choice("たまに飲むくらい",1)+choice("コーヒーより他の飲み物が好き",1);
- else if(convoStep===1) html+=choice("うん、働いてるよ",2)+choice("今は仕事してないよ",2)+choice("学生だよ",2);
- else if(convoStep===2) html+=choice("家でのんびりすることが多い",3)+choice("友達や家族と出かける",3)+choice("買い物やカフェに行く",3)+choice("趣味を楽しんでる",3);
- else if(convoStep===3) html+=choice("最近いいカフェを見つけた",4)+choice("公園や自然のあるところに行った",4)+choice("最近はあまり出かけてない",4)+choice("旅行に行った",4);
- else if(convoStep===4) html+=choice(state.name||"名前を教える",5)+choice("まだ内緒",5);
- else html+=`<button class="option" onclick="askContactChoice()">もう少し話す</button>`;
- html+=`<button class="secondary" onclick="day()">今日は帰る</button></div></div>`; A.innerHTML=html;
-}
-function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`;}
-function chooseConversation(next){convoStep=next;conversation();}
-function askContactChoice(){
- if(Math.random()<0.55){state.met=true;A.innerHTML=`<div class="card"><p><b>Noah:</b> よかったら、連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`;}
- else{A.innerHTML=`<div class="card"><p><b>あなた:</b> よかったら連絡先交換しない？</p><p><b>Noah:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`;}
-}
-function contactYes(){state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>📱 連絡先を交換しました</h2><p><b>Noah Bennett</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`;}
+let currentNpc=0,convoStep=0;
+const meetings=[
+{place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。僕はいつもラテ頼むんだけど、君はコーヒー好き？",qs:["そうなんだ。僕、今日は仕事帰りなんだ。君も仕事してる？","僕は理学療法士をしてるよ。仕事じゃない日は何してることが多い？","僕は休みの日、散歩したり新しい店を探すのが好き。最近どこかいいところ行った？"]},
+{place:"🌳 公園",cost:0,intro:"ベンチの近くで落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。僕ここでよく散歩するんだけど、君もよく来る？",qs:["今日は天気いいよね。外で過ごすの好き？","僕は普段ソフトウェアの仕事してて座りっぱなしだから、休みは歩きたくなるんだ。君はどんな仕事してる？","この辺でおすすめの場所とかある？"]},
+{place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？君も初めて買う？",qs:["買い物って決めてから来るタイプ？それとも見ながら決める？","僕は仕事柄、人と話すこと多いんだけど、休みの日も結局出かけちゃうんだ。君は？","このあとまだ買い物するの？"]},
+{place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が、手に持っている本を見て声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段もよく本読む？","僕は数字ばっかり見る仕事だから、休みは全然違うもの読みたくなるんだ。君はどんな仕事してる？","静かな場所好き？それとも賑やかなところの方が好き？"]}
+];
+function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="meetAt(0)">☕ カフェ <span class="small">1時間 · $8</span></button><button class="option" onclick="meetAt(1)">🌳 公園 <span class="small">1時間 · 無料</span></button><button class="option" onclick="meetAt(2)">🛍️ ショッピング <span class="small">1–2時間</span></button><button class="option" onclick="meetAt(3)">📚 図書館 <span class="small">2時間 · 無料</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
+function cafe(){meetAt(0)}
+function meetAt(i){currentNpc=i;convoStep=0;let m=meetings[i],n=npcs[i];state.money-=m.cost;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`}
+function talk(){convoStep=0;conversation()}
+function conversation(){let n=npcs[currentNpc],m=meetings[currentNpc],name=n.name.split(" ")[0],text=convoStep===0?m.open:convoStep<=3?m.qs[convoStep-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
+if(convoStep===0)html+=choice("うん、けっこう好き",1)+choice("たまにかな",1)+choice("そうでもないかな",1);
+else if(convoStep===1)html+=choice("うん、好きだよ",2)+choice("気分によるかな",2)+choice("どちらかというと家が好き",2);
+else if(convoStep===2)html+=choice("働いてるよ",3)+choice("今は仕事してないよ",3)+choice("学生だよ",3);
+else if(convoStep===3)html+=choice("あるよ",4)+choice("最近はあまりないかな",4)+choice("いろいろ探してるところ",4);
+else html+=`<button class="option" onclick="askContactChoice()">${state.name||"名前"}を教えて、もう少し話す</button>`;
+html+=`<button class="secondary" onclick="day()">今日は帰る</button></div>`;A.innerHTML=html}
+function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
+function chooseConversation(next){convoStep=next;conversation()}
+function askContactChoice(){let n=npcs[currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>あなた:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
+function contactYes(){let n=npcs[currentNpc];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>📱 連絡先を交換しました</h2><p><b>${n.name}</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`}
 function phone(){
  A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3><p class="small">連絡先 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
