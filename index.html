@@ -440,7 +440,7 @@ function chatVariant(i,topicIndex){
 }
 function messageMenu(i){
  i=Number(i); const n=npcs[i]; if(!n)return;
- A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card"><button class="option" onclick="topicMenu('+i+')">💬 話題を選んで話す</button><button class="option" onclick="randomMessage('+i+')">🎲 おまかせで話す</button><button class="option" onclick="askDate('+i+')">💕 デートに誘う</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card"><button class="option" onclick="topicMenu('+i+')">💬 話題を選んで話す</button><button class="option" onclick="randomMessage('+i+')">🎲 おまかせで話す</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 function randomMessage(i){
  i=Number(i); const list=allChatTopics(); if(!npcs[i]||!list.length)return;
@@ -536,7 +536,7 @@ function bootGame(){
  window.addEventListener("beforeunload",saveGame); window.addEventListener("hashchange",topicRoute);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render(); setTimeout(topicRoute,0);
 }
 document.addEventListener("click",function(e){
