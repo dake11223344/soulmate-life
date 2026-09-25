@@ -63,23 +63,23 @@ function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statb
 function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option" onclick="cafe()">🌳 Park <span class="small">1 hour · Free</span></button><button class="option" onclick="cafe()">🛍️ ショッピング <span class="small">1–2 hours</span></button><button class="option" onclick="cafe()">📚 図書館 / 勉強 <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
 function cafe(){state.money-=8;let n=npcs[0];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにカフェへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “こんにちは。ここにはよく来るの？”</p><button class="option" onclick="talk()">💬 話しかける</button><button class="option" onclick="number()">📱 連絡先を聞く</button><button class="option" onclick="state.screen='day';render()">👋 笑顔で別れる</button></div>`}
 function talk(){
- A.innerHTML=`<h2>☕ 会話</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto"><p><b>Noah:</b> こんにちは。ここにはよく来るの？</p></div><div class="row"><input id="chatInput" placeholder="メッセージを入力…" autocomplete="off"><button type="button" class="primary" style="width:auto" onclick="sendChat()">送信</button></div><button type="button" class="secondary" onclick="askNumber()">📱 連絡先を聞く</button><button type="button" class="secondary" onclick="day()">今日は帰る</button></div>`;
+ A.innerHTML=`<h2>☕ 会話</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto"><p><b>Noah:</b> こんにちは。ここにはよく来るの？</p></div><div class="row"><input id="chatInput" placeholder="メッセージを入力…" autocomplete="off"><button type="button" class="primary" style="width:auto" onclick="sendChat()">送信</button></div><button type="button" class="secondary" onclick="day()">今日は帰る</button></div>`;
 }
 function sendChat(){
- var input=document.getElementById("chatInput"); var chat=document.getElementById("chat"); if(!input||!chat)return; var msg=input.value.trim(); if(!msg)return;
+ var input=document.getElementById("chatInput"),chat=document.getElementById("chat"); if(!input||!chat)return; var msg=input.value.trim(); if(!msg)return;
  var mine=document.createElement("p"); mine.textContent="あなた: "+msg; chat.appendChild(mine); input.value="";
- var m=msg.toLowerCase(); var reply="そうなんだ。もう少し聞かせて。";
- if(m.indexOf("work")>=0||m.indexOf("仕事")>=0) reply="理学療法士をしてるんだ。人の役に立てる仕事が好き。あなたは？";
- else if(m.indexOf("weekend")>=0||m.indexOf("休日")>=0) reply="コーヒーを飲んだり、外に出かけたりするのが好き。理想の休日はどんな感じ？";
- else if(m.indexOf("family")>=0||m.indexOf("家族")>=0||m.indexOf("子ども")>=0) reply="家族は大切だと思ってる。いつか自分の家庭も持ちたいかな。";
- else if(m.indexOf("hi")>=0||m.indexOf("hello")>=0||m.indexOf("こんにちは")>=0) reply="話しかけてくれてうれしい。今日はどんな一日だった？";
- var his=document.createElement("p"); his.textContent="Noah: "+reply; chat.appendChild(his); chat.scrollTop=chat.scrollHeight;
+ var m=msg.toLowerCase(), reply="そうなんだ。もっと聞きたいな。";
+ var asksNumber=(m.indexOf("連絡先")>=0||m.indexOf("電話番号")>=0||m.indexOf("line")>=0||m.indexOf("number")>=0);
+ if(asksNumber){ if(Math.random()<0.72){reply="うん、いいよ。連絡先交換しよう。";state.met=true;}else{reply="ごめん、まだ会ったばかりだから、もう少し仲良くなってからでもいい？";} }
+ else if(m.indexOf("動物")>=0||m.indexOf("animal")>=0||m.indexOf("犬")>=0||m.indexOf("dog")>=0) reply="動物好きなんだ！僕も好きだよ。犬と猫だったらどっち派？";
+ else if(m.indexOf("仕事")>=0||m.indexOf("work")>=0) reply="理学療法士をしてるよ。人の役に立てるところが好き。あなたはどんな仕事をしてるの？";
+ else if(m.indexOf("元気")>=0||m.indexOf("how are you")>=0) reply="元気だよ。今日はちょっと忙しかったけど、ここでのんびりできてよかった。あなたは？";
+ else if(m.indexOf("休日")>=0||m.indexOf("weekend")>=0) reply="休日はコーヒーを飲んだり、外に出かけたりするのが好き。あなたは？";
+ else if(m.indexOf("家族")>=0||m.indexOf("family")>=0) reply="家族は大切にしたいと思ってる。いつか自分の家庭も持てたらいいな。";
+ else if(m==="hey"||m==="hi"||m.indexOf("こんにちは")>=0) reply="こんにちは。話しかけてくれてうれしい。今日はどんな一日だった？";
+ var his=document.createElement("p");his.textContent="Noah: "+reply;chat.appendChild(his);
+ if(state.met){var note=document.createElement("p");note.textContent="📱 Noahと連絡先を交換しました。";chat.appendChild(note);} chat.scrollTop=chat.scrollHeight;
 }
-function askNumber(){
- var chance=state.met?0.8:0.55; if(Math.random()>chance){A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>また今度</h2><p>Noah：「会えて楽しかった。でも、連絡先を交換するのはもう少し仲良くなってからがいいかな。」</p><button class="primary" onclick="day()">続ける</button></div>`;return;}
- state.met=true; A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>連絡先を交換しました 📱</h2><p><b>Noah Bennett</b> が連絡先に追加された。</p><button class="primary" onclick="day()">続ける</button></div>`;
-}
-function number(){askNumber()}
 function phone(){
  A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3><p class="small">連絡先 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
