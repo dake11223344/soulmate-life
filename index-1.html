@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#fff7fb"/>
+<title>Soulmate Life</title>
+<style>
+:root{--pink:#f86f9b;--blue:#78b8e8;--ink:#26344b;--muted:#718096;--card:#fff;--bg:#fff7fb}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(#fff7fb,#f4f8ff);color:var(--ink)}
+#app{max-width:520px;margin:auto;min-height:100vh;padding:18px 16px 90px}
+.card{background:#fff;border:1px solid #f0e4ec;border-radius:22px;padding:18px;box-shadow:0 8px 24px #caa8b522;margin:12px 0}
+h1,h2,h3,p{margin-top:0}.logo{font-size:34px;font-weight:900;letter-spacing:-1px}.heart{color:var(--pink)}
+button{border:0;border-radius:14px;padding:14px 16px;font-weight:750;font-size:16px;cursor:pointer}
+.primary{background:var(--pink);color:#fff;width:100%}.secondary{background:#e9f4ff;color:#24577c;width:100%;margin-top:9px}.ghost{background:#f5f5f7;color:#465269}
+.row{display:flex;gap:9px}.row>*{flex:1}
+.statbar{display:flex;gap:8px;overflow:auto}.pill{white-space:nowrap;background:#fff;border:1px solid #eee;border-radius:999px;padding:8px 11px;font-size:13px}
+.portrait{width:118px;height:118px;border-radius:20px;background:linear-gradient(135deg,#ffd9e6,#d7ebff);display:grid;place-items:center;font-size:52px;margin:auto}
+.option{display:block;width:100%;text-align:left;background:#fff;border:1px solid #e8e8ef;margin:8px 0}
+.option.selected{outline:3px solid #f6a1bd}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.swatch,.face{aspect-ratio:1;border-radius:14px;border:2px solid #fff;box-shadow:0 0 0 1px #ddd}.face{background:#f8eef3;display:grid;place-items:center;font-size:25px}
+.small{font-size:13px;color:var(--muted)}.event{line-height:1.55;font-size:17px}.name{font-weight:850;font-size:21px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#ffffffee;backdrop-filter:blur(10px);border-top:1px solid #eee;padding:8px;display:flex;justify-content:center;gap:6px}
+.nav button{font-size:12px;padding:9px;max-width:95px}
+input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;font-size:16px;background:white}
+</style>
+</head>
+<body><main id="app"></main><script>
+const A=document.querySelector("#app");
+const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,day:1,time:"7:00 AM",met:false,
+look:{hair:0,color:0,face:0,eye:0,skin:0}};
+const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
+const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
+const questions=[
+["休日はどっちが近い？",[["家でゆっくり",["social",-12]],["友達と出かける",["social",12]],["自然や小旅行",["adventure",14]]]],
+["将来、子どもについては？",[["ほしい",["family",18]],["まだ分からない",["family",0]],["ほしくない",["family",-20]]]],
+["恋人との連絡は？",[["毎日たくさん",["contact",18]],["ほどほど",["contact",3]],["必要な時だけ",["contact",-18]]]],
+["仕事と恋愛がぶつかったら？",[["恋愛を優先しがち",["career",-12]],["バランスを取りたい",["career",0]],["キャリアを優先",["career",15]]]],
+["理想の週末デートは？",[["家で映画",["adventure",-8]],["Cafeと街歩き",["social",5]],["ハイキング",["adventure",15]]]]
+];
+const npcs=[
+{name:"Noah Bennett",age:29,job:"Physical Therapist",emoji:"👨🏻",traits:{family:85,career:55,social:45,contact:68,adventure:55}},
+{name:"Ethan Park",age:33,job:"Software Engineer",emoji:"👨🏻‍💻",traits:{family:78,career:72,social:30,contact:45,adventure:30}},
+{name:"Liam Carter",age:30,job:"Real Estate Agent",emoji:"🧑🏽",traits:{family:35,career:72,social:92,contact:80,adventure:78},blocked:true},
+{name:"Lucas Reed",age:28,job:"Carpenter",emoji:"👨🏽",traits:{family:82,career:50,social:67,contact:60,adventure:70}},
+{name:"Henry Walsh",age:31,job:"Accountant",emoji:"🧔🏻",traits:{family:80,career:62,social:25,contact:48,adventure:20}},
+{name:"Caleb Wright",age:30,job:"Nurse",emoji:"👨🏾‍⚕️",traits:{family:84,career:64,social:60,contact:70,adventure:48}}
+];
+function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
+function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
+function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">Life ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">NEW GAME</button></div></div>`}
+function create(){A.innerHTML=`<h2>主人公を作る</h2><div class="card"><label>名前</label><input id="nm" value="${state.name}" placeholder="Your name"><br><br><label>年齢</label><select id="age">${Array.from({length:14},(_,i)=>`<option ${state.age==22+i?"selected":""}>${22+i}</option>`).join("")}</select></div>
+<div class="card"><h3>髪型</h3><div class="grid">${hair.map((x,i)=>`<button class="face ${state.look.hair==i?"selected":""}" onclick="state.look.hair=${i};render()">💇‍♀️<span class="small">${i+1}</span></button>`).join("")}</div></div>
+<div class="card"><h3>髪色</h3><div class="grid">${colors.map((x,i)=>`<button class="swatch ${state.look.color==i?"selected":""}" style="background:${x}" onclick="state.look.color=${i};render()"></button>`).join("")}</div></div>
+<div class="card"><h3>輪郭</h3><div class="grid">${["丸","卵型","面長","ベース","逆三角","ハート","Soft","Sharp"].map((x,i)=>`<button class="face" onclick="state.look.face=${i}">${x}</button>`).join("")}</div><h3>目</h3><div class="grid">${["丸目","切れ長","たれ目","つり目","大きめ","小さめ","一重","奥二重","二重","アーモンド","Soft","Sharp"].map((x,i)=>`<button class="face" onclick="state.look.eye=${i}">👁️<span class="small">${x}</span></button>`).join("")}</div></div>
+<button class="primary" onclick="state.name=document.querySelector('#nm').value||'Mika';state.age=+document.querySelector('#age').value;state.screen='quiz';render()">次へ：性格・価値観診断</button>`}
+function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="day";return render()} A.innerHTML=`<div class="small">QUESTION ${state.q+1} / ${questions.length}</div><div class="card"><h2>${q[0]}</h2>${q[1].map((o,i)=>`<button class="option" onclick="answer(${i})">${o[0]}</button>`).join("")}</div>`}
+function answer(i){let [k,d]=questions[state.q][1][i][1];state.score[k]=Math.max(0,Math.min(100,state.score[k]+d));state.q++;render()}
+function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 Year 1</span><span class="pill">Mon 7:00 AM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>Day 1 — Your Apartment</h2><p class="event">新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。</p><button class="primary" onclick="work()">💼 Go to Work</button><button class="secondary" onclick="goOut()">🗺️ Go Out</button></div>${nav()}`}
+function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>`}
+function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option">🌳 Park <span class="small">1 hour · Free</span></button><button class="option">🛍️ Shopping <span class="small">1–2 hours</span></button><button class="option">📚 Library / Study <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← Back</button>`}
+function cafe(){state.money-=8;let n=npcs[0];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにCafeへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “Hey, do you come here often?”</p><button class="option" onclick="talk()">💬 Talk to him</button><button class="option" onclick="number()">📱 Ask for his number</button><button class="option" onclick="state.screen='day';render()">👋 Smile and leave</button></div>`}
+function talk(){A.innerHTML=`<div class="card"><h2>☕ Conversation</h2><p>Noahは落ち着いていて話しやすい。仕事や休日の過ごし方について少し話した。</p><p class="small">Notebook updated: Noahについて少し分かった。</p><button class="primary" onclick="number()">連絡先を聞く</button><button class="secondary" onclick="state.screen='day';render()">今日は帰る</button></div>`}
+function number(){A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>Contact Added 📱</h2><p><b>Noah Bennett</b> がContactsに追加された。</p><p class="small">Soulmateかどうかは表示されません。</p><button class="primary" onclick="state.screen='day';render()">Continue</button></div>`}
+function nav(){return `<div class="nav"><button class="ghost">🏠 Life</button><button class="ghost">❤️ Relationships</button><button class="ghost">📱 Phone</button><button class="ghost" onclick="goOut()">🗺️ Go Out</button></div>`}
+function render(){({title,create,quiz,day}[state.screen]||title)()} render();
+</script></body></html>
