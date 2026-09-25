@@ -43,7 +43,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 </head>
 <body><main id="app"></main><script>
 const A=document.querySelector("#app");
-const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
+const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
 const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
 const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
@@ -234,7 +234,7 @@ function moodCheck(){
  return (state.lowMoodUntil||0)>=(state.day||1);
 }
 function periodLabel(){return state.period==="morning"?"🌅 朝":state.period==="afternoon"?"☀️ 昼":"🌙 夜"}
-function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()}</span><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday}</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ストレス ${state.stress||0}%</span><span class="pill">🕒 行動 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
+function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()} · 残り${state.periodHours==null?4:state.periodHours}h</span><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday}</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ストレス ${state.stress||0}%</span><span class="pill">🕒 行動 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
 function day(){
  const c=calendarInfo(),low=moodCheck(),worked=state.workedDay===c.d;
  if(!state.period)state.period="morning";
@@ -244,18 +244,18 @@ function day(){
  A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 仕事へ行く（夜まで）</button>':''}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
 }
 function nextPeriod(){
- if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM"}
- else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM"}
+ if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
+ else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM";state.periodHours=4}
  else return endDay();
  day();
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;return}
- state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.screen="day";render();
+ state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";render();
 }
 function work(){
  const c=calendarInfo(); if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
- state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);state.period="night";state.time="6:00 PM";moodCheck();
+ state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();
  A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 仕事が終わった — 夜</h2><p>朝から働いて、昼の時間帯は仕事で過ぎました。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 寝る</button></div>`;
 }
 function shopItems(){return [
@@ -279,40 +279,84 @@ function buyItem(i){
  }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">戻る</button></div>`}
 }
 function refresh(){
+ if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
  state.energy=Math.min(100,state.energy+15);state.stress=Math.max(0,(state.stress||0)-20);
  A.innerHTML=`<div class="card"><h2>🛁 リフレッシュした</h2><p>ゆっくり休んで少し気持ちが軽くなった。</p><p class="small">⚡ +15　🧠 ストレス -20</p><button class="primary" onclick="day()">続ける</button></div>`;
 }
 window.shopping=shopping;window.buyItem=buyItem;window.refresh=refresh;
 window.currentNpc=0;window.convoStep=0;
-function goOut(){
- if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><p>ストレスが高く、今は休息が必要です。</p><button class="primary" onclick="day()">家で休む</button></div>';return}
- A.innerHTML=`<h2>どこへ行く？</h2><div class="card">
- <button class="option" data-go-place="0" onclick="meetAt(0)">☕ カフェ <span class="small">1時間 · $8</span></button>
- <button class="option" data-go-place="1" onclick="meetAt(1)">🌳 公園 <span class="small">1時間 · 無料</span></button>
- <button class="option" data-go-place="2" onclick="meetAt(2)">🛍️ ショッピング <span class="small">1–2時間</span></button>
- <button class="option" data-go-place="3" onclick="meetAt(3)">📚 図書館 <span class="small">2時間 · 無料</span></button></div>
- <button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`;
+const outingPlaces=[
+{name:"☕ カフェ",icon:"☕",periods:["morning","afternoon"],cost:8,hours:2,tags:["social","coffee","calm"]},
+{name:"🚶 朝の散歩",icon:"🚶",periods:["morning"],cost:0,hours:2,tags:["outdoor","calm","fitness"]},
+{name:"📚 図書館",icon:"📚",periods:["morning","afternoon"],cost:0,hours:2,tags:["quiet","books","geek"]},
+{name:"🛍️ ショッピング",icon:"🛍️",periods:["morning","afternoon"],cost:15,hours:2,tags:["social","fashion"]},
+{name:"🥐 ベーカリー",icon:"🥐",periods:["morning"],cost:7,hours:2,tags:["food","calm"]},
+{name:"🐕 ドッグパーク",icon:"🐕",periods:["morning","afternoon"],cost:0,hours:2,tags:["pets","outdoor"]},
+{name:"🌿 ファーマーズマーケット",icon:"🌿",periods:["morning"],cost:12,hours:2,tags:["food","outdoor","social"]},
+{name:"🏋️ ジム",icon:"🏋️",periods:["morning","afternoon","night"],cost:10,hours:2,tags:["fitness"]},
+{name:"🧘 ヨガクラス",icon:"🧘",periods:["afternoon"],cost:18,hours:2,tags:["fitness","calm"]},
+{name:"🥾 ハイキング",icon:"🥾",periods:["afternoon"],cost:5,hours:4,tags:["outdoor","adventure","fitness"]},
+{name:"🎪 お祭り",icon:"🎪",periods:["afternoon","night"],cost:20,hours:4,tags:["social","adventure"]},
+{name:"🏛️ 美術館",icon:"🏛️",periods:["afternoon"],cost:18,hours:2,tags:["art","quiet"]},
+{name:"🎨 アートクラス",icon:"🎨",periods:["afternoon"],cost:25,hours:2,tags:["art","creative"]},
+{name:"🍳 料理教室",icon:"🍳",periods:["afternoon"],cost:30,hours:2,tags:["food","social"]},
+{name:"🎮 ゲームショップ",icon:"🎮",periods:["afternoon"],cost:10,hours:2,tags:["geek","games"]},
+{name:"🎳 ボウリング",icon:"🎳",periods:["afternoon","night"],cost:18,hours:2,tags:["social","games"]},
+{name:"🏖️ 湖・ビーチ",icon:"🏖️",periods:["afternoon"],cost:5,hours:4,tags:["outdoor","adventure"]},
+{name:"🚲 サイクリング",icon:"🚲",periods:["afternoon"],cost:5,hours:2,tags:["fitness","outdoor"]},
+{name:"🌱 ガーデンセンター",icon:"🌱",periods:["morning","afternoon"],cost:8,hours:2,tags:["calm","outdoor"]},
+{name:"🧋 ティーショップ",icon:"🧋",periods:["afternoon"],cost:8,hours:2,tags:["social","food"]},
+{name:"🍸 バー",icon:"🍸",periods:["night"],cost:22,hours:2,tags:["nightlife","social"]},
+{name:"💃 クラブ",icon:"💃",periods:["night"],cost:30,hours:4,tags:["nightlife","social","adventure"]},
+{name:"🎬 ひとり映画",icon:"🎬",periods:["night"],cost:16,hours:2,tags:["movies","quiet"]},
+{name:"🎤 ライブハウス",icon:"🎤",periods:["night"],cost:28,hours:4,tags:["music","nightlife"]},
+{name:"🎵 カラオケ",icon:"🎵",periods:["night"],cost:20,hours:2,tags:["music","social"]},
+{name:"🍜 ラーメン店",icon:"🍜",periods:["night"],cost:16,hours:2,tags:["food","casual"]},
+{name:"🌃 夜景スポット",icon:"🌃",periods:["night"],cost:0,hours:2,tags:["calm","romantic"]},
+{name:"🎲 ボードゲームカフェ",icon:"🎲",periods:["afternoon","night"],cost:15,hours:2,tags:["geek","games","social"]},
+{name:"🧠 トリビアナイト",icon:"🧠",periods:["night"],cost:12,hours:2,tags:["geek","social"]},
+{name:"🍽️ レストラン",icon:"🍽️",periods:["night"],cost:28,hours:2,tags:["food","social"]}
+];
+function npcInterests(n,i){
+ const t=n.traits||{},tags=[];
+ if(t.adventure>=60)tags.push("outdoor","adventure","fitness");
+ if(t.social>=65)tags.push("social","nightlife","music");
+ if(t.social<=40)tags.push("quiet","books","geek","movies");
+ if(t.career>=65)tags.push("coffee","fitness");
+ if(t.family>=65)tags.push("food","pets","calm");
+ if((i%5)===0)tags.push("art","creative");
+ if((i%7)===0)tags.push("games","geek");
+ return [...new Set(tags)];
 }
-function cafe(){meetAt(0)}
+function useHours(h){
+ state.periodHours=state.periodHours==null?4:state.periodHours;
+ if(state.periodHours<h)return false;
+ state.periodHours-=h;
+ if(state.periodHours<=0){
+  if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
+  else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM";state.periodHours=4}
+ }
+ return true;
+}
+function goOut(){
+ if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><button class="primary" onclick="day()">家で休む</button></div>';return}
+ const p=state.period||"morning",list=outingPlaces.map((x,i)=>({x,i})).filter(o=>o.x.periods.includes(p));
+ A.innerHTML=`<h2>🗺️ ${periodLabel()} — どこへ行く？</h2><p class="small">残り ${state.periodHours==null?4:state.periodHours}時間</p><div class="card">${list.map(o=>`<button class="option" onclick="meetAt(${o.i})">${o.x.icon} ${o.x.name.replace(o.x.icon+" ","")} <span class="small">${o.x.hours}時間 · ${o.x.cost?"$"+o.x.cost:"無料"}</span></button>`).join("")}</div><button class="secondary" onclick="day()">← 戻る</button>`;
+}
 function getMeeting(i){
- return [
-  {place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。君はコーヒー好き？",qs:["今日は仕事帰り？","休みの日は何してる？","最近いいところ行った？"]},
-  {place:"🌳 公園",cost:0,intro:"落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。ここよく来る？",qs:["外で過ごすの好き？","どんな仕事してる？","おすすめの場所ある？"]},
-  {place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？",qs:["買い物は決めてから来る？","休みの日も出かける？","このあとまだ買い物する？"]},
-  {place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段も本読む？","どんな仕事してる？","静かな場所好き？"]}
- ][Number(i)];
+ const p=outingPlaces[Number(i)];if(!p)return null;
+ return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:`${p.name}で過ごしていると、近くにいた人と自然に目が合った。`,open:`ここ、よく来る？`,qs:["今日は一人で来たの？","こういう場所好き？","休みの日は何してる？"]};
 }
 function meetAt(placeIndex){
  try{
-  const place=Number(placeIndex),m=getMeeting(place);
-  if(!m)throw new Error("出会いデータが見つかりません");
-  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">← 戻る</button></div>';return}
+  const place=Number(placeIndex),m=getMeeting(place);if(!m)throw new Error("出会いデータが見つかりません");
+  if((state.periodHours==null?4:state.periodHours)<m.hours){A.innerHTML='<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="goOut()">戻る</button></div>';return}
+  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">戻る</button></div>';return}
   state.encounterCount=(state.encounterCount||0)+1;
-  const candidates=npcs.map((n,idx)=>idx).filter(idx=>!npcs[idx].blocked);
-  const seed=(state.day||1)*11+place*7+(state.encounterCount||0)*5+(state.period==="afternoon"?3:state.period==="night"?6:0);
-  window.currentNpc=candidates[seed%candidates.length];window.currentPlace=place;window.convoStep=0;
-  const n=npcs[window.currentNpc];
-  state.money-=m.cost;
+  let candidates=npcs.map((n,idx)=>idx).filter(idx=>!npcs[idx].blocked&&npcInterests(npcs[idx],idx).some(t=>m.tags.includes(t)));
+  if(!candidates.length)candidates=npcs.map((n,idx)=>idx).filter(idx=>!n.blocked);
+  const seed=(state.day||1)*11+place*7+state.encounterCount*5;window.currentNpc=candidates[seed%candidates.length];window.currentPlace=place;window.convoStep=0;
+  const n=npcs[window.currentNpc];state.money-=m.cost;useHours(m.hours);
   A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`;
  }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家に戻る</button></div>`}
 }
@@ -371,6 +415,7 @@ function topicList(i,ci){
  A.innerHTML=`<h2>${c.icon} ${c.name}</h2><div class="card">${c.topics.map((t,j)=>`<button class="option" onclick="casualMessage(${i},${offset+j})">${t}</button>`).join("")}</div><button class="secondary" onclick="topicMenu(${i})">← 話題へ</button>`;
 }
 function casualMessage(i,topicIndex){
+ if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
  const n=npcs[i],today=state.day||1;
  if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0}
