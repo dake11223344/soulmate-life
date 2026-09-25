@@ -43,7 +43,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 </head>
 <body><main id="app"></main><script>
 const A=document.querySelector("#app");
-const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,day:1,time:"7:00 AM",met:false,
+const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,day:1,time:"7:00 AM",met:false,contacts:[],
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
 const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
 const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
@@ -218,9 +218,15 @@ html+=`<button class="secondary" onclick="day()">今日は帰る</button></div>`
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
 function chooseConversation(next){convoStep=next;conversation()}
 function askContactChoice(){let n=npcs[currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>あなた:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
-function contactYes(){let n=npcs[currentNpc];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>📱 連絡先を交換しました</h2><p><b>${n.name}</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`}
+function contactYes(){let n=npcs[currentNpc];state.met=true;if(!Array.isArray(state.contacts))state.contacts=[];if(!state.contacts.includes(currentNpc))state.contacts.push(currentNpc);A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>📱 連絡先を交換しました</h2><p><b>${n.name}</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`}
 function phone(){
- A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3><p class="small">連絡先 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
+ const ids=Array.isArray(state.contacts)?state.contacts:[];
+ const list=ids.length?ids.map(i=>{const n=npcs[i];return `<button class="option" onclick="openContact(${i})"><span style="font-size:28px;margin-right:10px">${n.emoji}</span><b>${n.name}</b><br><span class="small">${n.age}歳 · ${n.job}</span></button>`}).join(""):'<p class="small">まだ連絡先を交換した人はいません。</p>';
+ A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3>${list}</div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>${nav()}`;
+}
+function openContact(i){
+ const n=npcs[i];
+ A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><button class="primary" onclick="A.innerHTML='<div class=&quot;card&quot;><h2>💬 メッセージ</h2><p>メッセージ機能はこれから追加します。</p><button class=&quot;secondary&quot; onclick=&quot;phone()&quot;>← 連絡先へ</button></div>'">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
 }
 function relationships(){
  A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
@@ -231,7 +237,7 @@ function bootGame(){
  if(!A)return;
  window.goOut=goOut; window.meetAt=meetAt; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.relationships=relationships;
+ window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.relationships=relationships;
  render();
 }
 try{bootGame()}catch(e){A=document.querySelector("#app");A.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${e.message}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`}
