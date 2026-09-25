@@ -507,47 +507,52 @@ function showPlayerMessageChoices(i,topicIndex){
 function continueChat(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
  const v=chatVariant(i,topicIndex);
- const followByTopic={
-  "犬派猫派":[
-   {npc:"犬いいよね。飼ったことある？",choices:["あるよ！","ないけど飼ってみたい。","今は飼ってないよ。","猫も好きだよ。"]},
-   {npc:"猫のどんなところが好き？",choices:["自由なところ。","甘えてくるところ。","見てるだけで癒される。","犬も好きだけどね。"]},
-   {npc:"どっちもかわいいよね。もし飼うならどっち？",choices:["犬かな！","猫かな！","両方（笑）","まだ決められない。"]},
-   {npc:"選べないよね（笑）僕も迷う。",choices:["ほんとそれ（笑）","でも犬かな。","でも猫かな。","動物ならだいたい好き。"]}
-  ],
-  "映画":[
-   {npc:"どんなジャンルが一番好き？",choices:["コメディ！","ホラーかな。","恋愛もの。","アクションが好き。"]},
-   {npc:"家で観るなら何系を選ぶことが多い？",choices:["コメディ。","ドラマ系。","ドキュメンタリー。","その日の気分かな。"]},
-   {npc:"映画館で観るなら大画面が映える作品がいいよね。最近何か観た？",choices:["最近観たよ。","まだ観てない。","観たい作品がある。","おすすめ探してる。"]},
-   {npc:"おすすめなら、好み聞いて選びたい（笑）どんな感じが好き？",choices:["笑えるやつ。","泣けるやつ。","ハラハラするやつ。","考えさせられるやつ。"]}
-  ],
-  "音楽":[
-   {npc:"最近よく聴くアーティストいる？",choices:["いるよ！","曲単位で聴くことが多い。","昔の曲をよく聴く。","おすすめ探してる。"]},
-   {npc:"落ち着いた曲って夜に合うよね。どんな時に聴く？",choices:["寝る前。","運転中。","仕事中。","家でのんびりするとき。"]},
-   {npc:"音楽なしで過ごす日もあるよね。普段は何して気分転換する？",choices:["映画観る。","散歩する。","ゲームする。","何もしない（笑）"]},
-   {npc:"じゃあ今度おすすめ交換しようよ。",choices:["いいね！","ぜひ。","楽しそう。","それやろう！"]}
-  ]
- };
- let data=(followByTopic[v.topic]||[])[choiceIndex];
- if(!data){
-   const generic=[
-    {npc:"それ、もう少し聞きたい。どんなところが好き？",choices:["雰囲気かな。","一緒に楽しめるところ。","気分転換になるところ。","うまく説明できないけど好き（笑）"]},
-    {npc:"なるほど。普段もそういう感じ？",choices:["うん、けっこう。","その時によるかな。","最近そうなった。","自分でもよく分からない（笑）"]},
-    {npc:"そうなんだ。逆に苦手なのはある？",choices:["あるよ。","あんまりないかな。","考えたことなかった。","それは秘密（笑）"]},
-    {npc:"僕の話も聞く？",choices:["聞きたい！","もちろん。","うん、教えて。","気になる（笑）"]}
-   ];data=generic[choiceIndex]||generic[0];
+ const follow={
+ "今日あったこと":[
+  ["それはよかった。何が一番印象に残った？",["仕事のことかな。","ちょっと嬉しいことがあった。","特に何もない平和な日（笑）","いろいろありすぎた（笑）"]],
+  ["まあまあな日ってあるよね。今日は忙しかった？",["けっこう忙しかった。","普通くらい。","むしろ暇だった。","疲れたけど大丈夫。"]],
+  ["おつかれさま。何か疲れることあった？",["仕事が忙しかった。","ちょっと寝不足。","人付き合いで疲れた。","理由はないけど疲れた（笑）"]],
+  ["僕はまあまあだったよ。そっちは何してた？",["仕事してたよ。","のんびりしてた。","ちょっと出かけてた。","いろいろしてた（笑）"]]
+ ],
+ "映画":[
+  ["どんなジャンルが一番好き？",["コメディ！","ホラーかな。","恋愛もの。","アクションが好き。"]],
+  ["家で観るなら何系を選ぶことが多い？",["コメディ。","ドラマ系。","ドキュメンタリー。","その日の気分かな。"]],
+  ["最近映画館で何か観た？",["観たよ！","まだ観てない。","観たい作品がある。","最近は家で観てる。"]],
+  ["じゃあ好み聞いておすすめ考える（笑）どんな感じがいい？",["笑えるやつ。","泣けるやつ。","ハラハラするやつ。","考えさせられるやつ。"]]
+ ],
+ "音楽":[
+  ["最近よく聴くアーティストいる？",["いるよ！","曲単位で聴くことが多い。","昔の曲をよく聴く。","おすすめ探してる。"]],
+  ["落ち着いた曲いいよね。どんな時に聴く？",["寝る前。","運転中。","仕事中。","家でのんびりするとき。"]],
+  ["普段は何して気分転換する？",["映画観る。","散歩する。","ゲームする。","何もしない（笑）"]],
+  ["じゃあ今度おすすめ交換しようよ。",["いいね！","ぜひ。","楽しそう。","それやろう！"]]
+ ],
+ "犬派猫派":[
+  ["犬いいよね。飼ったことある？",["あるよ！","ないけど飼ってみたい。","今は飼ってないよ。","猫も好きだよ。"]],
+  ["猫のどんなところが好き？",["自由なところ。","甘えてくるところ。","見てるだけで癒される。","犬も好きだけどね。"]],
+  ["どっちもかわいいよね。もし飼うならどっち？",["犬かな！","猫かな！","両方（笑）","まだ決められない。"]],
+  ["選べないよね（笑）",["ほんとそれ（笑）","でも犬かな。","でも猫かな。","動物ならだいたい好き。"]]
+ ]};
+ let row=follow[v.topic]&&follow[v.topic][choiceIndex];
+ if(!row){
+   const neutral=[
+    ["なるほど。"+v.topic+"について、もう少し聞いてもいい？",["もちろん。","いいよ。","うん、聞いて。","どうぞ（笑）"]],
+    ["そうなんだ。"+v.topic+"は普段どれくらい意識する？",["けっこう意識する。","たまにかな。","あまり意識しない。","その時による。"]],
+    ["なるほど。"+v.topic+"については人によって違うよね。",["そうだね。","たしかに。","それはあるね。","うん、面白いよね。"]],
+    ["僕はそんな感じかな。"+v.topic+"の話できてよかった。",["私も。","また話そう。","もっと聞きたい。","うん、楽しかった。"]]
+   ];row=neutral[choiceIndex]||neutral[0];
  }
- state.pendingFollow={person:i,topicIndex:topicIndex,npc:data.npc,choices:data.choices};saveGame();
- let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+data.npc+'</p><p class="small">返信する</p>';
- data.choices.forEach(function(x,k){html+='<button class="option" onclick="finishChat('+i+','+topicIndex+','+k+')">'+x+'</button>';});
+ state.pendingFollow={person:i,topicIndex:topicIndex,npc:row[0],choices:row[1]};saveGame();
+ let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+row[0]+'</p><p class="small">返信する</p>';
+ row[1].forEach(function(x,k){html+='<button class="option" onclick="finishChat('+i+','+topicIndex+','+k+')">'+x+'</button>';});
  html+='</div>';A.innerHTML=html;
 }
 function finishChat(i,topicIndex,k){
  i=Number(i);k=Number(k);const n=npcs[i];if(!n)return;
- const p=state.pendingFollow||{};const choices=p.choices||["そうなんだ！"];const mine=choices[k]||choices[0];
- const acknowledgements=["そうなんだ。話してくれてありがとう。","なるほど、ちょっとわかった気がする。","いいね。またその話しよう。","なんかこういう話できるのいいね。"];
- const reply=acknowledgements[(i+Number(topicIndex)+k+(state.day||1))%acknowledgements.length];
+ const p=state.pendingFollow||{};const mine=(p.choices&&p.choices[k])||"うん。";
+ const ends=["うん、また話そう。","話せてよかった。","ありがとう。なんか少し君のこと知れた気がする。","また今度ゆっくり話そう。"];
+ const reply=ends[(i+Number(topicIndex)+k+(state.day||1))%ends.length];
  state.pendingFollow=null;saveGame();
- A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>あなた:</b> '+mine+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><p class="small">会話がひと区切りついた。</p><button class="primary" onclick="messageMenu('+i+')">💬 別の話題でメッセージ</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>あなた:</b> '+mine+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><button class="primary" onclick="messageMenu('+i+')">💬 別の話題でメッセージ</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 function sendPlayerReply(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
