@@ -43,7 +43,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 </head>
 <body><main id="app"></main><script>
 const A=document.querySelector("#app");
-const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],affinity:{},lastChatDay:{},
+const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
 const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
 const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
@@ -170,7 +170,7 @@ function moodCheck(){
  if(state.stress>=90 && (state.lowMoodUntil||0)<(state.day||1)) state.lowMoodUntil=(state.day||1)+3;
  return (state.lowMoodUntil||0)>=(state.day||1);
 }
-function statusBar(c){return `<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday}</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ストレス ${state.stress||0}%</span></div>`}
+function statusBar(c){return `<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday}</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ストレス ${state.stress||0}%</span><span class="pill">🕒 行動 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
 function day(){
  const c=calendarInfo(),low=moodCheck(),worked=state.workedDay===c.d;
  let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。あと${Math.max(1,(state.lowMoodUntil||c.d)-c.d+1)}日ほど、デートや外出をする気力がありません。休息を優先しましょう。</p></div>`:"";
@@ -179,7 +179,7 @@ function day(){
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;return}
- state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.time="7:00 AM";state.screen="day";render();
+ state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.time="7:00 AM";state.screen="day";render();
 }
 function work(){
  const c=calendarInfo(); if(c.weekend||state.workedDay===c.d)return day(); if(moodCheck())return day();
@@ -260,6 +260,10 @@ function messageMenu(i){
  A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">親密度 💗 ${a}/100</p><button class="option" onclick="casualMessage(${i})">💬 何でもない話をする</button>${invite}<button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
 }
 function casualMessage(i){
+ if(!state.lastChatDay)state.lastChatDay={};
+ if(state.lastChatDay[i]===(state.day||1)){A.innerHTML='<div class="card"><h2>💬 今日はもう話した</h2><p>同じ相手への何でもないメッセージは1日1回までです。</p><button class="primary" onclick="messageMenu('+i+')">戻る</button></div>';return}
+ if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日できる行動を使い切りました。明日に進みましょう。</p><button class="primary" onclick="day()">戻る</button></div>';return}
+ state.lastChatDay[i]=(state.day||1);state.dailyActions=(state.dailyActions||0)+1;
  const n=npcs[i],before=affinity(i);addAffinity(i,4);
  const replies=["今日はまあまあだったよ。そっちは？","ちょうど休憩してたところ。メッセージありがとう。","それわかる。今度会ったときもっと話そう。"];
  const reply=replies[((state.day||1)+i)%replies.length];
@@ -277,6 +281,8 @@ function incomingDate(i){
  const n=npcs[i];A.innerHTML=`<div class="card"><h2>📩 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> 今度時間ある？よかったら一緒に出かけない？</p><button class="primary" onclick="dateScene(${i})">💕 行く</button><button class="secondary" onclick="messageMenu(${i})">今回はやめておく</button></div>`;
 }
 function dateScene(i){
+ if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">戻る</button></div>';return}
+ state.dailyActions=(state.dailyActions||0)+2;
  const n=npcs[i];addAffinity(i,10);state.stress=Math.max(0,(state.stress||0)-12);state.energy=Math.max(0,(state.energy||0)-15);
  A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>💕 ${n.name}とデート</h2><p>カフェでゆっくり話して、一緒に街を歩いた。前より少し自然に話せるようになった。</p><p class="small">💗 +10　🧠 ストレス -12　⚡ -15</p><button class="primary" onclick="day()">デートを終える</button></div>`;
 }
