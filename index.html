@@ -250,11 +250,11 @@ function nextPeriod(){
  if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
  else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM";state.periodHours=4}
  else return endDay();
- day();
+ maybeIncomingMessages();saveGame();day();
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;return}
- state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";render();
+ state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";maybeIncomingMessages();render();
 }
 function work(){
  const c=calendarInfo(); if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
@@ -410,16 +410,36 @@ function choice(label,next){return `<button class="option" onclick="chooseConver
 function chooseConversation(next){window.convoStep=next;conversation()}
 function askContactChoice(){let n=npcs[window.currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>あなた:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
 function contactYes(){let n=npcs[window.currentNpc];state.met=true;if(!Array.isArray(state.contacts))state.contacts=[];if(!state.contacts.includes(window.currentNpc))state.contacts.push(window.currentNpc);A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>📱 連絡先を交換しました</h2><p><b>${n.name}</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`}
+function ensureInbox(){if(!Array.isArray(state.inbox))state.inbox=[];if(!state.unreadByPerson)state.unreadByPerson={};}
+function unreadTotal(){ensureInbox();return Object.values(state.unreadByPerson).reduce((a,b)=>a+(Number(b)||0),0)}
+function queueIncoming(i,reason){
+ ensureInbox(); const n=npcs[i];if(!n)return;
+ const lines=["今なにしてる？","さっき話してたこと、ちょっと気になってた。","今日どうだった？","ふと思い出してメッセージした（笑）","また話したくなった。"];
+ const msg=lines[((state.day||1)*7+i*11+(state.chatCount&&state.chatCount[i]||0))%lines.length];
+ state.inbox.push({person:i,text:msg,day:state.day||1,period:state.period||"morning",read:false});
+ state.unreadByPerson[i]=(state.unreadByPerson[i]||0)+1;
+}
+function maybeIncomingMessages(){
+ ensureInbox();const ids=Array.isArray(state.contacts)?state.contacts:[];
+ ids.forEach(i=>{const n=npcs[i];if(!n)return;const a=affinity(i);if(a<8)return;
+   const base=n.textStyle==="frequent"?3:n.textStyle==="warm"?6:10;
+   const seed=(state.day||1)*17+i*13+(state.period==="afternoon"?5:state.period==="night"?9:1)+(state.chatCount&&state.chatCount[i]||0)*7;
+   if(seed%base===0)queueIncoming(i,"auto");
+ });
+}
+function markPersonRead(i){ensureInbox();state.inbox.forEach(m=>{if(m.person===i)m.read=true});state.unreadByPerson[i]=0;saveGame();}
 function phone(){
+ ensureInbox();
  const ids=Array.isArray(state.contacts)?state.contacts:[];
- const list=ids.length?ids.map(i=>{const n=npcs[i];return `<button class="option" onclick="openContact(${i})"><span style="font-size:28px;margin-right:10px">${n.emoji}</span><b>${n.name}</b><br><span class="small">${n.age}歳 · ${n.job}</span></button>`}).join(""):'<p class="small">まだ連絡先を交換した人はいません。</p>';
- A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3>${list}</div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>${nav()}`;
+ const list=ids.length?ids.map(i=>{const n=npcs[i],u=Number(state.unreadByPerson[i]||0);return `<button class="option" onclick="openContact(${i})"><span style="font-size:28px;margin-right:10px">${n.emoji}</span><b>${n.name}</b>${u?` <span style="float:right;background:#ff4b8b;color:white;border-radius:999px;min-width:26px;padding:3px 8px;text-align:center">${u}</span>`:""}<br><span class="small">${n.age}歳 · ${n.job}</span></button>`}).join(""):'<p class="small">まだ連絡先を交換した人はいません。</p>';
+ A.innerHTML=`<h2>📱 スマホ ${unreadTotal()?`<span style="font-size:16px;background:#ff4b8b;color:white;border-radius:999px;padding:4px 9px">${unreadTotal()}</span>`:""}</h2><div class="card"><h3>メッセージ</h3>${list}</div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>${nav()}`;
 }
 function affinity(i){if(!state.affinity)state.affinity={};return state.affinity[i]||0}
 function addAffinity(i,n){if(!state.affinity)state.affinity={};state.affinity[i]=Math.max(0,Math.min(100,affinity(i)+n))}
 function openContact(i){
- const n=npcs[i],a=affinity(i);
- A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
+ ensureInbox();const n=npcs[i];markPersonRead(i);
+ const msgs=state.inbox.filter(m=>m.person===i).slice(-3).map(m=>`<div class="event" style="text-align:left"><b>${n.name.split(" ")[0]}:</b> ${m.text}</div>`).join("");
+ A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p>${msgs}<button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
 }
 const chatCategories=[
  {name:"日常",icon:"☀️",topics:["今日あったこと","仕事","ランチ","帰り道","天気","眠い","最近忙しい？","今日の予定"]},
@@ -501,6 +521,8 @@ function casualMessage(i,topicIndex){
    reaction=count<=2?"自然に会話が続いた。":"今日は十分話したみたい。親密度はこれ以上上がらない。";
  }
  addAffinity(i,gain);
+ const followSeed=(state.day||1)*19+i*23+count*29;if(followSeed%(n.textStyle==="frequent"?3:n.textStyle==="warm"?5:9)===0)queueIncoming(i,"afterChat");
+ saveGame();
  const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。","それ面白いね。私はどうだろう。","わかる！私も似た感じ。","へえ、もっと聞きたい。"][(v.id+count)%8];
  A.innerHTML=`<h2>${v.icon} ${v.topic}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="primary" onclick="messageMenu(${i})">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
 }
@@ -533,7 +555,7 @@ function dateScene(i){
 function relationships(){
  A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
-function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
+function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ${unreadTotal()?` <b style="background:#ff4b8b;color:white;border-radius:999px;padding:2px 6px">${unreadTotal()}</b>`:""}</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
 function render(){saveGame();var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
 function bootGame(){
  if(!A)return;
