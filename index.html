@@ -44,7 +44,8 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 <body><main id="app"></main><script>
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
-look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
+look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -244,7 +245,7 @@ function day(){
  let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。しばらく休息を優先しましょう。</p></div>`:"";
  const isMorning=state.period==="morning",isAfternoon=state.period==="afternoon",isNight=state.period==="night";
  const intro=isMorning?(c.weekend?"休日の朝。今日は自由に過ごせる。":"朝。今日をどう過ごそう？"):isAfternoon?"昼になった。まだ時間がある。":"夜になった。今日の残りをどう過ごそう？";
- A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 Workへ行く（夜まで）</button>':''}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
+ A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?(state.school?'<button class="primary" onclick="attendSchool()">🎓 Go to School</button>':'<button class="primary" onclick="work()">💼 Go to Work</button>'):''}<button class="option" onclick="careerMenu()">💼 Career & School</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
 }
 function nextPeriod(){
  if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
@@ -263,10 +264,59 @@ function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>Year 1 Complete 🎉</h2><p>You made it through 365 days.</p><button class="primary" onclick="state.screen='day';render()">Back to Day 365</button></div>`;return}
  state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";saveGame();showNewDay();
 }
+const careerJobs=[
+ {id:"retail",name:"Retail Associate",education:"High School",pay:144,stress:14,energy:16},
+ {id:"admin",name:"Administrative Assistant",education:"High School",pay:168,stress:16,energy:18},
+ {id:"medical",name:"Medical Office Assistant",education:"Associate",pay:200,stress:17,energy:18},
+ {id:"buyer",name:"Buyer Assistant",education:"Bachelor",pay:232,stress:19,energy:20},
+ {id:"analyst",name:"Business Analyst",education:"Bachelor",pay:280,stress:20,energy:20},
+ {id:"nurse",name:"Registered Nurse",education:"Nursing",pay:320,stress:24,energy:25}
+];
+const schools=[
+ {id:"associate",name:"Associate Degree",from:["High School"],result:"Associate",days:45,tuition:1800},
+ {id:"bachelor",name:"Bachelor's Degree",from:["High School","Associate"],result:"Bachelor",days:90,tuition:4200},
+ {id:"nursing",name:"Nursing Program",from:["High School","Associate","Bachelor"],result:"Nursing",days:75,tuition:5200}
+];
+function initCareer(){
+ if(!state.education){const opts=["High School","Associate","Bachelor"];state.education=opts[(state.day||1)%opts.length];}
+ if(!state.career){const available=careerJobs.filter(j=>educationAllows(j.education));state.career=(available[available.length-1]||careerJobs[0]).id;}
+}
+function educationAllows(req){
+ const rank={"High School":0,"Associate":1,"Bachelor":2,"Nursing":2};
+ if(req==="Nursing")return state.education==="Nursing";
+ return (rank[state.education]||0)>=(rank[req]||0);
+}
+function currentCareer(){initCareer();return careerJobs.find(j=>j.id===state.career)||careerJobs[0]}
+function careerMenu(){
+ initCareer();const job=currentCareer(),school=state.school&&schools.find(x=>x.id===state.school);
+ let html='<h2>💼 Career & School</h2><div class="card"><p><b>Education:</b> '+state.education+'</p><p><b>Current job:</b> '+(school?'On hold while in school':job.name)+'</p>';
+ if(school)html+='<p><b>School:</b> '+school.name+'</p><p>Progress: '+state.schoolDays+' / '+school.days+' school days</p><button class="primary" onclick="attendSchool()">🎓 Attend school today</button><button class="secondary" onclick="quitSchool()">Leave school</button>';
+ else html+='<button class="primary" onclick="jobMarket()">🔎 Choose a job</button><button class="option" onclick="schoolMenu()">🎓 Go back to school</button>';
+ html+='<button class="secondary" onclick="day()">← Back</button></div>';A.innerHTML=html;
+}
+function jobMarket(){
+ initCareer();let html='<h2>🔎 Job Market</h2><div class="card"><p class="small">Jobs unlock based on your education.</p>';
+ careerJobs.forEach(j=>{const ok=educationAllows(j.education);html+='<button class="option" '+(ok?'onclick="chooseJob(\''+j.id+'\')"':'disabled')+'>'+j.name+' · $'+j.pay+'/day<br><span class="small">'+(ok?'Requires '+j.education:'🔒 Requires '+j.education)+'</span></button>'});
+ html+='</div><button class="secondary" onclick="careerMenu()">← Back</button>';A.innerHTML=html;
+}
+function chooseJob(id){const j=careerJobs.find(x=>x.id===id);if(!j||!educationAllows(j.education))return;state.career=id;saveGame();careerMenu()}
+function schoolMenu(){
+ initCareer();let html='<h2>🎓 School</h2><div class="card"><p>Going to school pauses your full-time job. School uses weekdays and you will not receive your normal work pay.</p>';
+ schools.filter(x=>x.from.includes(state.education)).forEach(x=>html+='<button class="option" onclick="startSchool(\''+x.id+'\')">'+x.name+'<br><span class="small">$'+x.tuition+' tuition · '+x.days+' school days</span></button>');
+ html+='</div><button class="secondary" onclick="careerMenu()">← Back</button>';A.innerHTML=html;
+}
+function startSchool(id){const x=schools.find(a=>a.id===id);if(!x||!x.from.includes(state.education))return;if(state.money<x.tuition){A.innerHTML='<div class="card"><h2>Not enough money</h2><p>You need $'+x.tuition+' for tuition.</p><button class="primary" onclick="schoolMenu()">Back</button></div>';return}state.money-=x.tuition;state.school=id;state.schoolDays=0;saveGame();careerMenu()}
+function attendSchool(){
+ const c=calendarInfo(),x=schools.find(a=>a.id===state.school);if(!x)return careerMenu();if(c.weekend||state.period!=="morning")return day();
+ state.schoolDays++;state.energy=Math.max(0,state.energy-18);state.stress=Math.min(100,(state.stress||0)+12);state.period="night";state.time="6:00 PM";state.periodHours=4;
+ if(state.schoolDays>=x.days){state.education=x.result;state.school=null;state.schoolDays=0;saveGame();A.innerHTML='<div class="card"><h2>🎓 Graduation!</h2><p>You completed '+x.name+'. New careers are now available.</p><button class="primary" onclick="jobMarket()">See unlocked jobs</button></div>';return}
+ saveGame();A.innerHTML=statusBar(c)+'<div class="card"><h2>🎓 School day complete</h2><p>'+x.name+' · '+state.schoolDays+'/'+x.days+' days</p><p class="small">⚡ -18 · 🧠 Stress +12</p><button class="primary" onclick="day()">Continue</button></div>';
+}
+function quitSchool(){state.school=null;state.schoolDays=0;saveGame();careerMenu()}
 function work(){
- const c=calendarInfo(); if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
- state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();
- A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 Workが終わった — 夜</h2><p>朝から働いて、昼の時間帯はWorkで過ぎました。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">Work帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 寝る</button></div>`;
+ initCareer();const c=calendarInfo(); if(state.school)return careerMenu();if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
+ const job=currentCareer();state.workedDay=c.d;state.money+=job.pay;state.energy=Math.max(0,state.energy-job.energy);state.stress=Math.min(100,(state.stress||0)+job.stress);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();saveGame();
+ A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 ${job.name} — Shift Complete</h2><p>You worked through the morning and afternoon.</p><p class="small">+${job.pay} · ⚡ -${job.energy} · 🧠 Stress +${job.stress}</p><button class="primary" onclick="goOut()">Go out after work</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Refresh</button><button class="secondary" onclick="day()">Go home</button><button class="secondary" onclick="endDay()">🌙 Sleep</button></div>`;
 }
 function shopItems(){return [
  ["☕ 好きなドリンク",6,6],["🍰 スイーツ",8,8],["🕯️ キャンドル",15,12],
@@ -646,7 +696,7 @@ function bootGame(){
  setInterval(saveGame,3000);
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
- window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
+ window.work=work; window.careerMenu=careerMenu; window.jobMarket=jobMarket; window.chooseJob=chooseJob; window.schoolMenu=schoolMenu; window.startSchool=startSchool; window.attendSchool=attendSchool; window.quitSchool=quitSchool; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
  window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
