@@ -371,18 +371,26 @@ function topicList(i,ci){
  A.innerHTML=`<h2>${c.icon} ${c.name}</h2><div class="card">${c.topics.map((t,j)=>`<button class="option" onclick="casualMessage(${i},${offset+j})">${t}</button>`).join("")}</div><button class="secondary" onclick="topicMenu(${i})">← 話題へ</button>`;
 }
 function casualMessage(i,topicIndex){
- if(!state.lastChatDay)state.lastChatDay={};if(!state.chatStreak)state.chatStreak={};
- if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日できる行動を使い切りました。</p><button class="primary" onclick="day()">戻る</button></div>';return}
- const n=npcs[i],today=state.day||1,last=state.lastChatDay[i]||0;
- if(last===today){A.innerHTML='<div class="card"><h2>💬 今日はもう話した</h2><p>また明日にしよう。</p><button class="primary" onclick="messageMenu('+i+')">戻る</button></div>';return}
- const consecutive=last===today-1;state.chatStreak[i]=consecutive?(state.chatStreak[i]||1)+1:1;state.lastChatDay[i]=today;state.dailyActions=(state.dailyActions||0)+1;
- const v=chatVariant(i,Number(topicIndex)<0?null:topicIndex);let gain=2+(v.id%4),reaction="",timing=replyTiming(i);
- if(n.textStyle==="space"&&state.chatStreak[i]>=3){gain=-3;reaction="毎日メッセージが続いて、少し返信がそっけなくなった。";}
- else if(n.textStyle==="frequent"){gain+=2;reaction="連絡を取り合うのが好きみたい。返信も楽しそう。";}
- else reaction="自然に会話が続いた。";
+ if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
+ const n=npcs[i],today=state.day||1;
+ if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0}
+ state.chatCount[i]=(state.chatCount[i]||0)+1;
+ const count=state.chatCount[i];
+ const v=chatVariant(i,Number(topicIndex)<0?null:topicIndex);let gain=0,reaction="",timing=replyTiming(i);
+ if(n.textStyle==="frequent"){
+   gain=count<=3?4:0;
+   reaction=count<=3?`メッセージが好きみたい。今日${count}回目の会話も楽しそう。`:"たくさん話せて満足しているみたい。これ以上は今日は親密度は上がらない。";
+ }else if(n.textStyle==="space"){
+   if(count>=3)gain=-2-(count-3);
+   else gain=count===1?2:0;
+   reaction=count>=3?`連絡が多すぎると感じているみたい。今日${count}回目なので少し距離を置きたそう。`:"返信はくるけど、頻繁なメッセージはあまり好きではなさそう。";
+ }else{
+   gain=count<=2?2:0;
+   reaction=count<=2?"自然に会話が続いた。":"今日は十分話したみたい。親密度はこれ以上上がらない。";
+ }
  addAffinity(i,gain);
- const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。","それ面白いね。私はどうだろう。","わかる！私も似た感じ。","へえ、もっと聞きたい。"][v.id%8];
- A.innerHTML=`<h2>${v.icon} ${v.topic}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
+ const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。","それ面白いね。私はどうだろう。","わかる！私も似た感じ。","へえ、もっと聞きたい。"][(v.id+count)%8];
+ A.innerHTML=`<h2>${v.icon} ${v.topic}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="primary" onclick="messageMenu(${i})">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
 }
 function askDate(i){
  const n=npcs[i],a=affinity(i);
