@@ -447,40 +447,15 @@ function randomMessage(i){
  const seed=(state.day||1)*97+i*43+(state.chatCount&&state.chatCount[i]||0)*31+(state.period==="afternoon"?11:state.period==="night"?23:5);
  casualMessage(i,seed%list.length);
 }
-function sendTopicCategory(ci){
- try{
-  const person=Number(state.messagePerson);
-  if(!Number.isInteger(person)||!npcs[person])throw new Error("相手の情報が見つかりません");
-  ci=Number(ci);
-  if(!chatCategories[ci])throw new Error("話題が見つかりません");
-  let start=0;
-  for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;
-  const count=chatCategories[ci].topics.length;
-  const seed=(state.day||1)*31+(state.chatCount&&state.chatCount[person]||0)*17+person*13;
-  casualMessage(person,start+(seed%count));
- }catch(e){
-  A.innerHTML='<div class="card"><h2>⚠️ メッセージエラー</h2><p>'+String(e.message||e)+'</p><button class="primary" onclick="phone()">連絡先へ戻る</button></div>';
- }
-}
+function startSelectedTopic(){const sel=document.getElementById("topicSelect");if(!sel)return;const ci=Number(sel.value),person=Number(window.activeTopicPerson);let start=0;for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;const count=chatCategories[ci].topics.length;casualMessage(person,start+(((state.day||1)*31+person*13)%count));}
+window.startSelectedTopic=startSelectedTopic;
 function topicMenu(i){
- state.messagePerson=Number(i);
- saveGame();
- A.innerHTML='<h2>💬 何を話す？</h2><div class="card">'+chatCategories.map((c,ci)=>'<button type="button" class="option" data-chat-category="'+ci+'">'+c.icon+' '+c.name+'</button>').join('')+'</div><button type="button" class="secondary" onclick="messageMenu('+Number(i)+')">← 戻る</button>';
+ window.activeTopicPerson=Number(i);
+ A.innerHTML=`<h2>💬 何を話す？</h2><div class="card"><label class="small">話題カテゴリー</label><select id="topicSelect" onchange="startSelectedTopic()" style="width:100%;padding:18px;margin:12px 0 18px;border:1px solid #ddd;border-radius:18px;font-size:18px;background:white">${chatCategories.map((c,ci)=>`<option value="${ci}">${c.icon} ${c.name}</option>`).join("")}</select><button type="button" class="primary" id="topicSendBtn">この話題でメッセージする</button></div><button type="button" class="secondary" id="messageTopicBack">← 戻る</button>`;
+ document.getElementById("topicSendBtn").onclick=startSelectedTopic;
+ document.getElementById("messageTopicBack").onclick=function(){messageMenu(Number(window.activeTopicPerson));};
 }
-function replyTiming(i){
- const n=npcs[i];
- if(!n)return "返信なし";
- if(n.textStyle==="frequent")return "すぐに返信がきた。";
- if(n.textStyle==="space")return "少し時間がたってから返信がきた。";
- return "しばらくして返信がきた。";
-}
-function npcAvailable(i){
- const n=npcs[i]; if(!n)return false;
- const p=state.period||"morning";
- if(n.schedule==="shift"||n.schedule==="flexible")return true;
- if(n.schedule==="evening"||n.schedule==="afterwork"||n.schedule==="quietnight")return p==="night";
- return true;
-}
+window.topicMenu=topicMenu;
 function casualMessage(i,topicIndex){
  if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
@@ -539,16 +514,12 @@ function bootGame(){
  if(!A)return;
  loadGame();
  setInterval(saveGame,3000);
- window.addEventListener("beforeunload",saveGame); window.addEventListener("hashchange",topicRoute);
+ window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.sendTopicCategory=sendTopicCategory; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
- render(); setTimeout(topicRoute,0);
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
+ render();
 }
-document.addEventListener("click",function(e){
- const chat=e.target.closest&&e.target.closest("[data-chat-category]");
- if(chat){e.preventDefault();e.stopPropagation();sendTopicCategory(Number(chat.getAttribute("data-chat-category")));return}
-});
 document.addEventListener("click",function(e){
  const shop=e.target.closest&&e.target.closest("[data-shop]");
  if(shop){e.preventDefault();buyItem(Number(shop.getAttribute("data-shop")));return}
