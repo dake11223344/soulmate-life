@@ -266,39 +266,39 @@ function endDay(){
 }
 const careerJobs=[
  {id:"retail",track:"retail",name:"Retail Associate",education:"High School",pay:144,stress:14,energy:16},
- {id:"retail_mgr",track:"retail",name:"Retail Manager",education:"High School",pay:224,stress:20,energy:20,years:3},
+ {id:"retail_mgr",track:"retail",name:"Retail Manager",education:"High School",pay:224,stress:20,energy:20,months:5},
  {id:"admin",track:"admin",name:"Administrative Assistant",education:"High School",pay:168,stress:16,energy:18},
- {id:"office_mgr",track:"admin",name:"Office Manager",education:"High School",pay:232,stress:20,energy:20,years:4},
+ {id:"office_mgr",track:"admin",name:"Office Manager",education:"High School",pay:232,stress:20,energy:20,months:5},
  {id:"warehouse",track:"warehouse",name:"Warehouse Coordinator",education:"High School",pay:184,stress:18,energy:22},
- {id:"warehouse_mgr",track:"warehouse",name:"Warehouse Manager",education:"High School",pay:264,stress:23,energy:23,years:5},
+ {id:"warehouse_mgr",track:"warehouse",name:"Warehouse Manager",education:"High School",pay:264,stress:23,energy:23,months:5},
  {id:"medical",track:"medical",name:"Medical Office Assistant",education:"Associate",pay:200,stress:17,energy:18},
- {id:"medical_sr",track:"medical",name:"Senior Medical Office Specialist",education:"Associate",pay:256,stress:19,energy:19,years:5},
+ {id:"medical_sr",track:"medical",name:"Senior Medical Office Specialist",education:"Associate",pay:256,stress:19,energy:19,months:5},
  {id:"tech",track:"tech",name:"IT Support Specialist",education:"Associate",pay:216,stress:19,energy:18},
- {id:"tech_sr",track:"tech",name:"Senior IT Support Specialist",education:"Associate",pay:288,stress:22,energy:20,years:5},
+ {id:"tech_sr",track:"tech",name:"Senior IT Support Specialist",education:"Associate",pay:288,stress:22,energy:20,months:5},
  {id:"logistics",track:"logistics",name:"Logistics Coordinator",education:"Associate",pay:216,stress:20,energy:19},
- {id:"logistics_sr",track:"logistics",name:"Senior Logistics Specialist",education:"Associate",pay:296,stress:23,energy:21,years:5},
+ {id:"logistics_sr",track:"logistics",name:"Senior Logistics Specialist",education:"Associate",pay:296,stress:23,energy:21,months:5},
  {id:"buyer",track:"buyer",name:"Buyer Assistant",education:"Bachelor",pay:232,stress:19,energy:20},
- {id:"buyer_sr",track:"buyer",name:"Senior Buyer",education:"Bachelor",pay:328,stress:24,energy:21,years:5},
+ {id:"buyer_sr",track:"buyer",name:"Senior Buyer",education:"Bachelor",pay:328,stress:24,energy:21,months:5},
  {id:"analyst",track:"analyst",name:"Business Analyst",education:"Bachelor",pay:280,stress:20,energy:20},
- {id:"analyst_sr",track:"analyst",name:"Senior Business Analyst",education:"Bachelor",pay:368,stress:24,energy:21,years:5},
+ {id:"analyst_sr",track:"analyst",name:"Senior Business Analyst",education:"Bachelor",pay:368,stress:24,energy:21,months:5},
  {id:"planner",track:"planner",name:"Supply Planner",education:"Bachelor",pay:272,stress:22,energy:20},
- {id:"planner_sr",track:"planner",name:"Senior Supply Planner",education:"Bachelor",pay:360,stress:25,energy:21,years:5},
+ {id:"planner_sr",track:"planner",name:"Senior Supply Planner",education:"Bachelor",pay:360,stress:25,energy:21,months:5},
  {id:"nurse",track:"nurse",name:"Registered Nurse",education:"Nursing",pay:320,stress:24,energy:25},
- {id:"nurse_sr",track:"nurse",name:"Senior Registered Nurse",education:"Nursing",pay:400,stress:27,energy:26,years:5}
+ {id:"nurse_sr",track:"nurse",name:"Senior Registered Nurse",education:"Nursing",pay:400,stress:27,energy:26,months:5}
 ,
  {id:"police",track:"police",name:"Police Officer",education:"High School",pay:248,stress:25,energy:25},
- {id:"detective",track:"police",name:"Detective",education:"High School",pay:328,stress:27,energy:24,years:5},
+ {id:"detective",track:"police",name:"Detective",education:"High School",pay:328,stress:27,energy:24,months:5},
  {id:"teacher",track:"teacher",name:"Teacher",education:"Bachelor",pay:240,stress:21,energy:22},
- {id:"teacher_sr",track:"teacher",name:"Senior Teacher",education:"Bachelor",pay:296,stress:22,energy:22,years:5},
+ {id:"teacher_sr",track:"teacher",name:"Senior Teacher",education:"Bachelor",pay:296,stress:22,energy:22,months:5},
  {id:"mechanic",track:"mechanic",name:"Auto Mechanic",education:"High School",pay:224,stress:18,energy:24},
- {id:"master_mechanic",track:"mechanic",name:"Master Auto Technician",education:"High School",pay:304,stress:20,energy:24,years:5},
+ {id:"master_mechanic",track:"mechanic",name:"Master Auto Technician",education:"High School",pay:304,stress:20,energy:24,months:5},
  {id:"engineer",track:"engineer",name:"Automotive Engineer",education:"Bachelor",pay:336,stress:22,energy:20},
- {id:"engineer_sr",track:"engineer",name:"Senior Automotive Engineer",education:"Bachelor",pay:432,stress:25,energy:21,years:5},
+ {id:"engineer_sr",track:"engineer",name:"Senior Automotive Engineer",education:"Bachelor",pay:432,stress:25,energy:21,months:5},
  {id:"lawyer",track:"law",name:"Lawyer",education:"Law",pay:440,stress:28,energy:22},
- {id:"senior_lawyer",track:"law",name:"Senior Attorney",education:"Law",pay:560,stress:30,energy:23,years:5},
- {id:"judge",track:"law",name:"Judge",education:"Law",pay:600,stress:27,energy:20,years:10},
+ {id:"senior_lawyer",track:"law",name:"Senior Attorney",education:"Law",pay:560,stress:30,energy:23,months:5},
+ {id:"judge",track:"law",name:"Judge",education:"Law",pay:600,stress:27,energy:20,months:10},
  {id:"doctor",track:"medicine",name:"Doctor",education:"Medical",pay:640,stress:30,energy:27},
- {id:"senior_doctor",track:"medicine",name:"Senior Physician",education:"Medical",pay:760,stress:31,energy:27,years:5}
+ {id:"senior_doctor",track:"medicine",name:"Senior Physician",education:"Medical",pay:760,stress:31,energy:27,months:5}
 ];
 const schools=[
  {id:"associate",name:"Associate Degree",from:["High School"],result:"Associate",days:45,tuition:1800},
@@ -319,8 +319,8 @@ function educationAllows(req){
 }
 function currentCareer(){initCareer();return careerJobs.find(j=>j.id===state.career)||careerJobs[0]}
 function ensureCareerExperience(){if(!state.careerExperience)state.careerExperience={}}
-function careerYears(track){ensureCareerExperience();return Math.floor((state.careerExperience[track]||0)/260)}
-function jobUnlocked(j){if(!educationAllows(j.education))return false;return !j.years||careerYears(j.track)>=j.years}
+function careerMonths(track){ensureCareerExperience();return Math.floor((state.careerExperience[track]||0)/22)}
+function jobUnlocked(j){if(!educationAllows(j.education))return false;return !j.months||careerMonths(j.track)>=j.months}
 function careerMenu(){
  initCareer();const job=currentCareer(),school=state.school&&schools.find(x=>x.id===state.school);
  let html='<h2>💼 Career & School</h2><div class="card"><p><b>Education:</b> '+state.education+'</p><p><b>Current job:</b> '+(school?'On hold while in school':job.name)+'</p>';
@@ -330,13 +330,12 @@ function careerMenu(){
 }
 function jobMarket(){
  initCareer();ensureCareerExperience();
- let html='<h2>🔎 Job Market</h2><div class="card"><p class="small">All careers are always shown. Locked careers stay visible so you can see what you need.</p>';
+ let html='<h2>🔎 Job Market</h2><div class="card"><p class="small">General entry-level careers are available based on education. Promotions are earned by staying in the same career.</p>';
  careerJobs.forEach(function(j){
-  const ok=jobUnlocked(j),yrs=careerYears(j.track);
+  const ok=jobUnlocked(j),mos=careerMonths(j.track);
   let req='Requires '+j.education;
-  if(j.years)req+=' · '+j.years+' years experience ('+Math.min(yrs,j.years)+'/'+j.years+')';
-  const action=ok ? 'onclick="chooseJob(&quot;'+j.id+'&quot;)"' : 'disabled';
-  html+='<button class="option" '+action+'>'+j.name+' · $'+j.pay+'/day<br><span class="small">'+(ok?'✅ ':'🔒 ')+req+'</span></button>';
+  if(j.months)req+=' · promotion after '+j.months+' months in this career ('+Math.min(mos,j.months)+'/'+j.months+')';
+  html+='<button class="option" '+(ok?('onclick="chooseJob(&quot;'+j.id+'&quot;)"'):'disabled')+'>'+j.name+' · $'+j.pay+'/day<br><span class="small">'+(ok?'✅ ':'🔒 ')+req+'</span></button>';
  });
  html+='</div><button class="secondary" onclick="careerMenu()">← Back</button>';
  A.innerHTML=html;
