@@ -361,16 +361,21 @@ function meetAt(placeIndex){
  }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家に戻る</button></div>`}
 }
 function talk(){window.convoStep=0;conversation()}
-function conversation(){let n=npcs[window.currentNpc],m=getMeeting(window.currentPlace==null?0:window.currentPlace),name=n.name.split(" ")[0],text=window.convoStep===0?m.open:window.convoStep<=3?m.qs[window.convoStep-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
-let choices=[
-[["うん、けっこう好き","たまにかな","そうでもないかな"],["うん、よく来る","たまに来る","今日はたまたま"],["うん、初めて買う","前にも買ったことある","まだ迷ってる"],["うん、面白そう","まだ読んでないけど気になってる","別の本を探してる"]],
-[["うん、働いてるよ","今日は休みだよ","仕事じゃなくて用事で来た"],["好きだよ","たまに散歩する","どちらかというと家が好き"],["ある程度決めてくる","見ながら決める","今日は見るだけ"],["よく読むよ","たまに読む","あまり読まない"]],
-[["家でのんびりする","友達や家族と出かける","趣味を楽しむ"],["働いてるよ","今は仕事してない","学生だよ"],["家でゆっくりする","友達と出かける","趣味を楽しむ"],["働いてるよ","今は仕事してない","学生だよ"]],
-[["あるよ","最近はあまりない","いろいろ探してる"],["あるよ","まだあまり詳しくない","最近探してる"],["うん、もう少し見る","そろそろ帰る","まだ決めてない"],["静かな方が好き","どっちも好き","賑やかな方が好き"]]
-];
-if(window.convoStep<=3){let arr=choices[window.convoStep][window.currentNpc]||choices[window.convoStep][0];arr.forEach(x=>html+=choice(x,window.convoStep+1));}
-else html+=`<button class="option" onclick="askContactChoice()">${state.name||"名前"}を教えて、もう少し話す</button>`;
-html+=`<button class="secondary" onclick="day()">今日は帰る</button></div>`;A.innerHTML=html}
+function conversation(){
+ let n=npcs[window.currentNpc],m=getMeeting(window.currentPlace==null?0:window.currentPlace),name=n.name.split(" ")[0];
+ let step=window.convoStep||0,text=step===0?m.open:step<=3?m.qs[step-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;
+ let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
+ const q=text;
+ let arr;
+ if(step===0) arr=["うん、こういう場所好き","たまに来るよ","今日はたまたま"];
+ else if(/一人/.test(q)) arr=["うん、一人で来たよ","友達と来ることもあるよ","今日は気分転換で来た"];
+ else if(/こういう場所好き/.test(q)) arr=["好きだよ","たまになら好き","普段は違うところに行くかな"];
+ else if(/休みの日/.test(q)) arr=["家でのんびりする","友達や家族と出かける","趣味を楽しむ"];
+ else arr=["うん、そうだね","たまにかな","どうだろう、まだわからない"];
+ if(step<=3)arr.forEach(x=>html+=choice(x,step+1));
+ else html+=`<button class="option" onclick="askContactChoice()">${state.name||"名前"}を教えて、もう少し話す</button>`;
+ html+=`<button class="secondary" onclick="day()">今日は帰る</button></div>`;A.innerHTML=html;
+}
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
 function chooseConversation(next){window.convoStep=next;conversation()}
 function askContactChoice(){let n=npcs[window.currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>あなた:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
