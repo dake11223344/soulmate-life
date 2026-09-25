@@ -555,7 +555,11 @@ function dateScene(i){
 function relationships(){
  A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
-function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ${unreadTotal()?` <b style="background:#ff4b8b;color:white;border-radius:999px;padding:2px 6px">${unreadTotal()}</b>`:""}</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
+function nav(){
+ const u=unreadTotal();
+ const badge=u?'<b style="background:#ff4b8b;color:white;border-radius:999px;padding:2px 6px">'+u+'</b>':'';
+ return '<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ '+badge+'</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>';
+}
 function render(){saveGame();var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
 function bootGame(){
  if(!A)return;
