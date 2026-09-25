@@ -431,7 +431,7 @@ const chatCategories=[
  {name:"ふざける",icon:"😂",topics:["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]}
 ];
 const playerMessageStarts=[
- "そういえば、{topic}ってどう？","ちょっと聞きたいんだけど、{topic}は好き？","今日ふと{topic}のこと考えてた。","{topic}について話したくなった（笑）","ねえ、{topic}ってどんな感じ？","急なんだけど、{topic}について聞いてもいい？"
+ "{topic}って好き？","そういえば、{topic}ってどう？","{topic}について聞きたいんだけど、どう思う？","最近{topic}がちょっと気になってる。","{topic}の話しない？","急なんだけど、{topic}って興味ある？"
 ];
 const playerMessageChoices=[
  ["私はけっこう好き！","最近ちょうど気になってる。","私はあまり詳しくないかも。","あなたはどう？"],
@@ -510,13 +510,14 @@ function sendPlayerReply(i,topicIndex,choiceIndex){
  const v=chatVariant(i,topicIndex);
  const choices=v.choices;
  const you=choices[choiceIndex]||choices[0];
+ const playerText=you;
  const count=(state.chatCount&&state.chatCount[i])||1;
  let gain=0,reaction='';
  if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction='メッセージを楽しんでいるみたい。';}
  else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
  else{gain=count<=2?2:0;reaction='自然に会話が続いた。';}
  addAffinity(i,gain);state.pendingChat=null;saveGame();
- A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+v.opener+'<br>'+you+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+playerText+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 window.showPlayerMessageChoices=showPlayerMessageChoices;window.sendPlayerReply=sendPlayerReply;
 function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
