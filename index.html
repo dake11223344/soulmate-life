@@ -76,7 +76,7 @@ function sendChat(){
  else if(m.includes("name")||m.includes("名前")) reply="I’m Noah. Noah Bennett. Nice to officially meet you.";
  setTimeout(()=>{chat.insertAdjacentHTML("beforeend","<p><b>Noah:</b> "+reply+"</p>"); chat.lastElementChild.scrollIntoView({behavior:"smooth"});},350);
 }
-function escapeHtml(s){return s.replace(/[&<>"\']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;"}[ch]))}
+function escapeHtml(s){let d=document.createElement("div");d.textContent=s;return d.innerHTML}
 function number(){state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>Contact Added 📱</h2><p><b>Noah Bennett</b> がContactsに追加された。</p><p class="small">Soulmateかどうかは表示されません。</p><button class="primary" onclick="state.screen='day';render()">Continue</button></div>`}
 function phone(){
  A.innerHTML=`<h2>📱 Phone</h2><div class="card"><h3>Contacts</h3><p class="small">Contacts screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
