@@ -82,10 +82,13 @@ function cafe(){meetAt(0)}
 function meetAt(i){currentNpc=i;convoStep=0;let m=meetings[i],n=npcs[i];state.money-=m.cost;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`}
 function talk(){convoStep=0;conversation()}
 function conversation(){let n=npcs[currentNpc],m=meetings[currentNpc],name=n.name.split(" ")[0],text=convoStep===0?m.open:convoStep<=3?m.qs[convoStep-1]:`そういえば、まだ名前聞いてなかった。僕は${name}。君は？`;let html=`<h2>${m.place} · ${name}との会話</h2><div class="card"><p><b>${name}:</b> ${text}</p>`;
-if(convoStep===0)html+=choice("うん、けっこう好き",1)+choice("たまにかな",1)+choice("そうでもないかな",1);
-else if(convoStep===1)html+=choice("うん、好きだよ",2)+choice("気分によるかな",2)+choice("どちらかというと家が好き",2);
-else if(convoStep===2)html+=choice("働いてるよ",3)+choice("今は仕事してないよ",3)+choice("学生だよ",3);
-else if(convoStep===3)html+=choice("あるよ",4)+choice("最近はあまりないかな",4)+choice("いろいろ探してるところ",4);
+let choices=[
+[["うん、けっこう好き","たまにかな","そうでもないかな"],["うん、よく来る","たまに来る","今日はたまたま"],["うん、初めて買う","前にも買ったことある","まだ迷ってる"],["うん、面白そう","まだ読んでないけど気になってる","別の本を探してる"]],
+[["うん、働いてるよ","今日は休みだよ","仕事じゃなくて用事で来た"],["好きだよ","たまに散歩する","どちらかというと家が好き"],["ある程度決めてくる","見ながら決める","今日は見るだけ"],["よく読むよ","たまに読む","あまり読まない"]],
+[["家でのんびりする","友達や家族と出かける","趣味を楽しむ"],["働いてるよ","今は仕事してない","学生だよ"],["家でゆっくりする","友達と出かける","趣味を楽しむ"],["働いてるよ","今は仕事してない","学生だよ"]],
+[["あるよ","最近はあまりない","いろいろ探してる"],["あるよ","まだあまり詳しくない","最近探してる"],["うん、もう少し見る","そろそろ帰る","まだ決めてない"],["静かな方が好き","どっちも好き","賑やかな方が好き"]]
+];
+if(convoStep<=3){let arr=choices[convoStep][currentNpc]||choices[convoStep][0];arr.forEach(x=>html+=choice(x,convoStep+1));}
 else html+=`<button class="option" onclick="askContactChoice()">${state.name||"名前"}を教えて、もう少し話す</button>`;
 html+=`<button class="secondary" onclick="day()">今日は帰る</button></div>`;A.innerHTML=html}
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
