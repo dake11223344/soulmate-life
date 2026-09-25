@@ -67,14 +67,14 @@ function talk(){convoStep=0;conversation();}
 function conversation(){
  let html=`<h2>☕ Noahとの会話</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto">`;
  if(convoStep===0) html+=`<p><b>Noah:</b> こんにちは。ここにはよく来るの？</p>`;
- else if(convoStep===1) html+=`<p><b>Noah:</b> そうなんだ。休日は普段なにしてる？</p>`;
- else if(convoStep===2) html+=`<p><b>Noah:</b> いいね。僕は外に出るのも好きだけど、家でのんびりする日も好きだよ。恋人とはどんな休日を過ごしたい？</p>`;
- else html+=`<p><b>Noah:</b> 話せてよかった。もう少し話してみたいな。</p>`;
+ else if(convoStep===1) html+=`<p><b>Noah:</b> そうなんだ。今日は何しに来たの？</p>`;
+ else if(convoStep===2) html+=`<p><b>Noah:</b> なるほど。僕は仕事の休憩で寄ることが多いんだ。普段この辺に住んでるの？</p>`;
+ else html+=`<p><b>Noah:</b> 話しやすくてよかった。そういえば、名前聞いてもいい？</p>`;
  html+=`</div><div id="choices">`;
  if(convoStep===0) html+=choice("よく来るよ",1)+choice("たまに来る",1)+choice("今日が初めて",1);
- else if(convoStep===1) html+=choice("家でゆっくりする",2)+choice("友達や家族と出かける",2)+choice("旅行や新しい場所に行く",2)+choice("趣味を楽しむ",2);
- else if(convoStep===2) html+=choice("一緒に出かけたい",3)+choice("家でのんびりしたい",3)+choice("その時の気分で両方",3);
- else html+=choice("もう少し話す",1)+`<button class="secondary" onclick="askContactChoice()">📱 連絡先について話す</button>`;
+ else if(convoStep===1) html+=choice("ちょっと休憩しに来た",2)+choice("友達と待ち合わせ",2)+choice("近くに用事があって",2)+choice("なんとなく寄ってみた",2);
+ else if(convoStep===2) html+=choice("うん、この辺だよ",3)+choice("少し離れたところ",3)+choice("最近引っ越してきた",3);
+ else html+=choice("名前を教える",1)+`<button class="secondary" onclick="askContactChoice()">📱 連絡先について話す</button>`;
  html+=`<button class="secondary" onclick="day()">今日は帰る</button></div></div>`; A.innerHTML=html;
 }
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`;}
