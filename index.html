@@ -549,5 +549,5 @@ document.addEventListener("click",function(e){
  const b=e.target.closest&&e.target.closest("[data-go-place]");
  if(b){e.preventDefault();meetAt(Number(b.getAttribute("data-go-place")))}
 });
-try{bootGame()}catch(e){A=document.querySelector("#app");A.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${e.message}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`}
+try{bootGame()}catch(e){const app=document.querySelector("#app");if(app){app.innerHTML=`<div class="card"><h2>読み込みエラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="location.reload()">もう一度読み込む</button></div>`;}}
 </script></body></html>
