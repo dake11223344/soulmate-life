@@ -464,8 +464,18 @@ function phone(){
 function affinity(i){if(!state.affinity)state.affinity={};return state.affinity[i]||0}
 function addAffinity(i,n){if(!state.affinity)state.affinity={};state.affinity[i]=Math.max(0,Math.min(100,affinity(i)+n))}
 function openContact(i){
- const n=npcs[i],a=affinity(i);
- A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
+ const n=npcs[i];if(!n)return phone();
+ A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age} · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 Message</button><button class="option" onclick="askDate(${i})">💕 Ask on a Date</button><button class="secondary" onclick="phone()">← Contacts</button></div>`;
+}
+function askDate(i){
+ i=Number(i);const n=npcs[i];if(!n)return phone();
+ const a=affinity(i),need=n.dateStyle==="casual"?12:n.dateStyle==="balanced"?22:32;
+ if(a>=need){
+  A.innerHTML=`<h2>💕 Ask ${n.name.split(" ")[0]} on a Date</h2><div class="card"><p><b>You:</b> Would you like to go out with me sometime?</p><p><b>${n.name.split(" ")[0]}:</b> Yeah, I'd like that. 😊</p><button class="primary" onclick="dateScene(${i})">Go on the date</button><button class="secondary" onclick="openContact(${i})">Maybe later</button></div>`;
+ }else{
+  const replies=n.dateStyle==="serious"?"I'd like to get to know you a little better first.":"Maybe not yet, but let's keep talking.";
+  A.innerHTML=`<h2>💕 Ask ${n.name.split(" ")[0]} on a Date</h2><div class="card"><p><b>You:</b> Would you like to go out with me sometime?</p><p><b>${n.name.split(" ")[0]}:</b> ${replies}</p><p class="small">Their feelings are hidden. Spending time together and having conversations can change their answer later.</p><button class="primary" onclick="openContact(${i})">Okay</button></div>`;
+ }
 }
 const chatCategories=[
  {name:"日常",icon:"☀️",topics:["Today","Work","Lunch","Commute home","Weather","Feeling tired","Been busy lately?","Plans for today"]},
@@ -697,7 +707,7 @@ function bootGame(){
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.careerMenu=careerMenu; window.jobMarket=jobMarket; window.chooseJob=chooseJob; window.schoolMenu=schoolMenu; window.startSchool=startSchool; window.attendSchool=attendSchool; window.quitSchool=quitSchool; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
