@@ -75,33 +75,86 @@ const npcs=[
 function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
 function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
 function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューゲーム</button></div></div>`}
-function assetName(group,i){return group+"_"+String(i+1).padStart(2,"0")+".png"}
 function creatorPortrait(){
- const layers=[
-  ["face",state.look.face||0],
-  ["skin",state.look.skin||0],
-  ["hair",state.look.hair||0],
-  ["eyebrow",state.look.brow||0],
-  ["eye",state.look.eye||0],
-  ["eye_color",state.look.eyeColor||0],
-  ["nose",state.look.nose||0],
-  ["mouth",state.look.mouth||0],
- ];
- return '<div class="assetPortrait">'+layers.map(x=>'<img class="assetLayer" src="'+assetName(x[0],x[1])+'" alt="">').join("")+'</div>';
+ const L=state.look||{}, skin=["#f7d7c4","#edc2a8","#dca985","#c98e68","#a96f50","#7d4d38"][L.skin||0]||"#f7d7c4";
+ const hc=colors[L.color||0]||colors[0], iris=["#4a3025","#6b4937","#8a6847","#58705a","#4f6883","#745b79"][L.eyeColor||0]||"#4a3025";
+ const face=(L.face||0)%6, eye=(L.eye||0)%7, brow=(L.brow||0)%6, nose=(L.nose||0)%6, mouth=(L.mouth||0)%6, hair=(L.hair||0)%10;
+ const rx=[74,78,70,76,72,80][face], ry=[94,91,98,96,90,94][face];
+ const eyeY=[164,162,165,163,166,161,164][eye], eyeRx=[16,18,15,17,14,19,16][eye], eyeRy=[9,8,10,7,8,9,6][eye];
+ const browY=[139,137,141,138,143,136][brow], browCurve=[0,-4,3,-2,5,-5][brow];
+ const mouthY=[224,225,223,226,222,224][mouth];
+ const hairBack=[
+  '<path d="M72 110 Q88 38 160 42 Q237 39 252 112 L245 300 Q213 330 191 302 L91 302 Q66 322 67 270Z"/>',
+  '<path d="M72 115 Q83 45 160 42 Q238 45 249 117 Q270 204 235 302 Q214 329 193 300 L92 300 Q62 320 75 236Z"/>',
+  '<path d="M78 110 Q92 42 160 43 Q230 43 245 112 L231 292 Q210 320 191 294 L92 294 Q69 314 76 250Z"/>',
+  '<path d="M83 108 Q96 48 160 45 Q226 48 239 109 L231 276 Q215 304 194 282 L95 282 Q76 300 81 236Z"/>',
+  '<path d="M89 105 Q104 50 160 48 Q219 49 232 107 L225 247 Q207 276 193 258 L102 258 Q83 276 88 226Z"/>',
+  '<path d="M92 104 Q103 52 160 50 Q217 52 228 105 L220 230 Q201 248 190 237 L108 237 Q93 249 92 218Z"/>',
+  '<path d="M78 112 Q88 42 160 42 Q236 42 247 112 Q259 177 240 260 Q218 300 196 274 L91 274 Q66 297 75 235Z"/>',
+  '<path d="M80 109 Q91 44 160 44 Q232 45 243 110 L237 288 Q211 316 192 290 L94 290 Q71 311 79 238Z"/>',
+  '<path d="M91 102 Q105 52 160 50 Q215 52 229 103 L224 215 Q207 235 191 225 L108 225 Q91 235 92 210Z"/>',
+  '<path d="M94 101 Q109 55 160 53 Q212 55 226 102 L220 204 Q204 220 190 213 L111 213 Q95 221 95 201Z"/>'
+ ][hair];
+ const fringe=[
+  '<path d="M87 119 Q96 61 160 58 Q224 60 235 119 Q205 91 183 111 Q158 82 136 111 Q112 88 87 119Z"/>',
+  '<path d="M88 119 Q101 61 160 59 Q222 61 233 119 Q205 95 174 103 Q145 111 119 94 Q104 101 88 119Z"/>',
+  '<path d="M88 119 Q100 60 160 58 Q222 60 234 119 Q206 91 168 100 L154 151 L143 103 Q111 92 88 119Z"/>',
+  '<path d="M88 119 Q99 61 160 59 Q221 61 233 119 Q190 83 141 104 Q111 94 88 119Z"/>',
+  '<path d="M91 116 Q104 63 160 61 Q216 63 230 116 Q204 92 181 106 Q158 86 138 106 Q113 91 91 116Z"/>',
+  '<path d="M93 115 Q105 64 160 62 Q215 64 228 115 Q201 91 175 104 Q147 91 123 105 Q108 100 93 115Z"/>',
+  '<path d="M88 119 Q98 59 160 58 Q224 60 234 119 Q211 98 186 107 Q162 86 145 114 Q116 90 88 119Z"/>',
+  '<path d="M89 118 Q101 60 160 59 Q220 61 232 118 Q207 91 179 104 Q153 91 128 104 Q106 94 89 118Z"/>',
+  '<path d="M95 111 Q108 66 160 64 Q212 66 225 111 Q203 92 181 101 Q159 86 139 102 Q115 91 95 111Z"/>',
+  '<path d="M98 109 Q111 68 160 66 Q209 68 222 109 Q200 91 178 101 Q157 89 137 102 Q117 93 98 109Z"/>'
+ ][hair];
+ const browPath=(x,flip)=>'M'+x+' '+browY+' Q'+(x+16)+' '+(browY+browCurve)+' '+(x+31)+' '+(browY+(flip?-1:1));
+ const eyeSvg=(x)=>'<ellipse cx="'+x+'" cy="'+eyeY+'" rx="'+eyeRx+'" ry="'+eyeRy+'" fill="#fff"/><ellipse cx="'+x+'" cy="'+eyeY+'" rx="6.5" ry="7.5" fill="'+iris+'"/><circle cx="'+x+'" cy="'+eyeY+'" r="3.4" fill="#252126"/><circle cx="'+(x-2)+'" cy="'+(eyeY-3)+'" r="1.8" fill="#fff"/><path d="M'+(x-eyeRx)+' '+eyeY+' Q'+x+' '+(eyeY-eyeRy-4)+' '+(x+eyeRx)+' '+eyeY+'" fill="none" stroke="#513c39" stroke-width="3" stroke-linecap="round"/>';
+ const noseSvg=[
+  '<path d="M160 174 Q156 193 160 197 Q165 199 169 196" fill="none" stroke="#c88778" stroke-width="2.4" stroke-linecap="round"/>',
+  '<path d="M160 177 Q158 194 153 198 Q160 202 168 198" fill="none" stroke="#c88778" stroke-width="2.2" stroke-linecap="round"/>',
+  '<path d="M160 176 Q164 192 160 198" fill="none" stroke="#c88778" stroke-width="2.5" stroke-linecap="round"/>',
+  '<path d="M154 197 Q160 201 167 197" fill="none" stroke="#c88778" stroke-width="2.2" stroke-linecap="round"/>',
+  '<path d="M160 178 L157 196 Q162 200 168 197" fill="none" stroke="#c88778" stroke-width="2" stroke-linecap="round"/>',
+  '<path d="M155 198 Q160 195 166 198" fill="none" stroke="#c88778" stroke-width="2.3" stroke-linecap="round"/>'
+ ][nose];
+ const mouths=[
+  '<path d="M143 '+mouthY+' Q160 '+(mouthY+10)+' 178 '+mouthY+'" fill="none" stroke="#b95868" stroke-width="3.5" stroke-linecap="round"/>',
+  '<path d="M143 '+mouthY+' Q160 '+(mouthY+5)+' 178 '+mouthY+'" fill="none" stroke="#b95868" stroke-width="3.5" stroke-linecap="round"/>',
+  '<ellipse cx="160" cy="'+mouthY+'" rx="15" ry="6" fill="#d67b88"/><path d="M147 '+mouthY+' Q160 '+(mouthY-3)+' 173 '+mouthY+'" stroke="#a94f61" fill="none"/>',
+  '<path d="M145 '+mouthY+' Q160 '+(mouthY-4)+' 176 '+mouthY+'" fill="none" stroke="#b95868" stroke-width="3.5" stroke-linecap="round"/>',
+  '<path d="M142 '+mouthY+' Q160 '+(mouthY+13)+' 179 '+mouthY+'" fill="none" stroke="#b95868" stroke-width="4" stroke-linecap="round"/>',
+  '<ellipse cx="160" cy="'+mouthY+'" rx="12" ry="5" fill="#c96a78"/>'
+ ][mouth];
+ return '<svg viewBox="0 0 320 360" width="100%" height="100%" aria-label="character avatar">'+
+ '<defs><linearGradient id="hairSh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+hc+'"/><stop offset=".65" stop-color="'+hc+'"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient><radialGradient id="skinSh"><stop offset=".65" stop-color="'+skin+'"/><stop offset="1" stop-color="#b76e61" stop-opacity=".18"/></radialGradient></defs>'+
+ '<g fill="url(#hairSh)">'+hairBack+'</g>'+
+ '<path d="M133 245 Q132 274 119 291 L201 291 Q188 274 187 245Z" fill="'+skin+'"/>'+
+ '<ellipse cx="83" cy="174" rx="15" ry="22" fill="'+skin+'"/><ellipse cx="237" cy="174" rx="15" ry="22" fill="'+skin+'"/>'+
+ '<ellipse cx="160" cy="168" rx="'+rx+'" ry="'+ry+'" fill="url(#skinSh)"/>'+
+ '<ellipse cx="126" cy="202" rx="20" ry="9" fill="#ee8e9a" opacity=".12"/><ellipse cx="194" cy="202" rx="20" ry="9" fill="#ee8e9a" opacity=".12"/>'+
+ '<g fill="none" stroke="'+hc+'" stroke-width="5" stroke-linecap="round"><path d="'+browPath(105,false)+'"/><path d="'+browPath(184,true)+'"/></g>'+
+ eyeSvg(126)+eyeSvg(194)+noseSvg+mouths+
+ '<g fill="url(#hairSh)">'+fringe+'</g>'+
+ '<path d="M111 85 Q128 65 150 62" stroke="#fff" stroke-opacity=".22" stroke-width="7" fill="none" stroke-linecap="round"/>'+
+ '<path d="M96 291 Q160 265 224 291 L243 360 L77 360Z" fill="#fff" opacity=".96"/>'+
+ '</svg>';
 }
 function create(){
  state.avatarTab=state.avatarTab||"face";
  state.look.eyeColor=state.look.eyeColor||0;
- const counts={face:7,skin:6,eye:10,eye_color:6,eyebrow:6,nose:6,mouth:6,hair:11,hair_color:10};
+ const counts={face:6,skin:6,eye:7,eye_color:6,eyebrow:6,nose:6,mouth:6,hair:10,hair_color:16};
  const keys={face:"face",skin:"skin",eye:"eye",eye_color:"eyeColor",eyebrow:"brow",nose:"nose",mouth:"mouth",hair:"hair",hair_color:"color"};
  const labs={face:"顔の輪郭",skin:"肌の色",eye:"目",eye_color:"目の色",eyebrow:"眉",nose:"鼻",mouth:"口",hair:"髪型",hair_color:"髪の色"};
  const tab=state.avatarTab;
  const stateKey=keys[tab];
  let choices="";
+ const skinCols=["#f7d7c4","#edc2a8","#dca985","#c98e68","#a96f50","#7d4d38"], eyeCols=["#4a3025","#6b4937","#8a6847","#58705a","#4f6883","#745b79"];
  for(let i=0;i<counts[tab];i++){
-   choices+='<button class="assetChoice '+((state.look[stateKey]||0)===i?"on":"")+'" onclick="state.look.'+stateKey+'='+i+';create()"><img src="'+assetName(tab,i)+'" alt="'+labs[tab]+' '+(i+1)+'"></button>';
+   const isColor=tab==="skin"||tab==="eye_color"||tab==="hair_color";
+   const c=tab==="skin"?skinCols[i]:tab==="eye_color"?eyeCols[i]:colors[i];
+   choices+='<button class="featureChoice '+((state.look[stateKey]||0)===i?"on":"")+'" onclick="state.look.'+stateKey+'='+i+';create()">'+(isColor?'<span class="colorDot" style="display:block;background:'+c+'"></span>':'<span class="sample">'+(i+1)+'</span>')+'</button>';
  }
- A.innerHTML='<div class="maker"><div class="creatorHeader"><h2>主人公を作成</h2><div class="creatorSteps"><i class="on"></i><i></i><i></i><i></i></div></div><div class="characterStage"><div class="characterPortrait">'+creatorPortrait()+'</div></div><div class="card"><label>名前（ニックネーム）</label><input id="nm" value="'+state.name+'" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">'+Array.from({length:14},(_,i)=>'<option '+(state.age==22+i?"selected":"")+'>'+(22+i)+'</option>').join("")+'</select></div><div class="card"><h3>あなたの性別</h3><div class="row"><button class="option '+(state.gender==="female"?"selected":"")+'" onclick="state.gender=\'female\';create()">女性</button><button class="option '+(state.gender==="male"?"selected":"")+'" onclick="state.gender=\'male\';create()">男性</button></div><h3>恋愛対象</h3><div class="row"><button class="option '+(state.target==="female"?"selected":"")+'" onclick="state.target=\'female\';create()">女性</button><button class="option '+(state.target==="male"?"selected":"")+'" onclick="state.target=\'male\';create()">男性</button></div></div><div class="card"><div class="featureTabs">'+Object.keys(labs).map(k=>'<button class="'+(tab===k?"on":"")+'" onclick="state.avatarTab=\''+k+'\';create()">'+labs[k]+'</button>').join("")+'</div><h3>'+labs[tab]+'</h3><div class="assetChoices">'+choices+'</div></div><button class="primary" onclick="state.name=document.querySelector(\'#nm\').value||\'Mika\';state.age=+document.querySelector(\'#age\').value;state.screen=\'quiz\';render()">次へ　›</button></div>';
+ A.innerHTML='<div class="maker"><div class="creatorHeader"><h2>主人公を作成</h2><div class="creatorSteps"><i class="on"></i><i></i><i></i><i></i></div></div><div class="characterStage"><div class="characterPortrait">'+creatorPortrait()+'</div></div><div class="card"><label>名前（ニックネーム）</label><input id="nm" value="'+state.name+'" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">'+Array.from({length:14},(_,i)=>'<option '+(state.age==22+i?"selected":"")+'>'+(22+i)+'</option>').join("")+'</select></div><div class="card"><h3>あなたの性別</h3><div class="row"><button class="option '+(state.gender==="female"?"selected":"")+'" onclick="state.gender=\'female\';create()">女性</button><button class="option '+(state.gender==="male"?"selected":"")+'" onclick="state.gender=\'male\';create()">男性</button></div><h3>恋愛対象</h3><div class="row"><button class="option '+(state.target==="female"?"selected":"")+'" onclick="state.target=\'female\';create()">女性</button><button class="option '+(state.target==="male"?"selected":"")+'" onclick="state.target=\'male\';create()">男性</button></div></div><div class="card"><div class="featureTabs">'+Object.keys(labs).map(k=>'<button class="'+(tab===k?"on":"")+'" onclick="state.avatarTab=\''+k+'\';create()">'+labs[k]+'</button>').join("")+'</div><h3>'+labs[tab]+'</h3><div class="featureChoices">'+choices+'</div></div><button class="primary" onclick="state.name=document.querySelector(\'#nm\').value||\'Mika\';state.age=+document.querySelector(\'#age\').value;state.screen=\'quiz\';render()">次へ　›</button></div>';
 }
 function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="day";return render()} A.innerHTML=`<div class="small">質問 ${state.q+1} / ${questions.length}</div><div class="card"><h2>${q[0]}</h2>${q[1].map((o,i)=>`<button class="option" onclick="answer(${i})">${o[0]}</button>`).join("")}</div>`}
 function selectFace(i){state.look.face=i;render()}
