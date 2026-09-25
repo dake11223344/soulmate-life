@@ -584,16 +584,61 @@ function sendPlayerReply(i,topicIndex,choiceIndex){
 }
 window.showPlayerMessageChoices=showPlayerMessageChoices;window.sendPlayerReply=sendPlayerReply;window.continueChat=continueChat;window.finishChat=finishChat;
 function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
-window.messageMenu=messageMenu;window.randomMessage=randomMessage;window.topicMenu=topicMenu;window.openTopicCategory=openTopicCategory;window.sendChatTopic=sendChatTopic;window.casualMessage=casualMessage;
+window.messageMenu=messageMenu;window.openIncoming=openIncoming; window.replyIncoming=replyIncoming; window.ignoreIncoming=ignoreIncoming; window.randomMessage=randomMessage;window.topicMenu=topicMenu;window.openTopicCategory=openTopicCategory;window.sendChatTopic=sendChatTopic;window.casualMessage=casualMessage;
+const incomingMessageTemplates=[
+ {text:"Good morning! What are you up to today?",choices:[
+  {text:"Just getting my day started. How about you?",reply:"Same here. I have a few things to do, but nothing too crazy."},
+  {text:"I have a pretty busy day ahead.",reply:"Good luck today. Don't forget to give yourself a break too."},
+  {text:"Not much planned yet. What about you?",reply:"Honestly, same. I kind of like days like that sometimes."}
+ ]},
+ {text:"Random question—what's your ideal way to spend a day off?",choices:[
+  {text:"Probably staying home and relaxing.",reply:"That sounds nice. A completely lazy day can be pretty perfect."},
+  {text:"I like going out and doing something.",reply:"Same. Even just finding a new place to eat makes the day more fun."},
+  {text:"It depends on my mood.",reply:"That's probably the best answer. Sometimes I want plans, sometimes I want absolutely nothing."}
+ ]},
+ {text:"I was thinking about our conversation earlier. You made me curious—what kind of movies do you usually like?",choices:[
+  {text:"Mostly comedies. I like something easy to watch.",reply:"Okay, that's useful information. Now I know what kind of movie I should suggest someday."},
+  {text:"I like thrillers and mysteries.",reply:"Nice. I love when a movie actually keeps you guessing."},
+  {text:"Honestly, I'll watch almost anything.",reply:"That's dangerous—you'd be way too easy to convince to have a movie marathon."}
+ ]},
+ {text:"Hey, how's your day going so far?",choices:[
+  {text:"Pretty good, actually.",reply:"Glad to hear it. Hopefully it stays that way."},
+  {text:"A little stressful today.",reply:"I'm sorry. I hope the rest of your day is easier on you."},
+  {text:"Kind of boring so far.",reply:"Then I guess my message arrived at a good time 😄"}
+ ]}
+];
+function ensureIncoming(){
+ if(!state.incomingMessages)state.incomingMessages={};
+ if(!state.ignoredMessages)state.ignoredMessages={};
+}
+function createIncomingMessage(){
+ ensureIncoming();const ids=Array.isArray(state.contacts)?state.contacts:[];if(!ids.length)return;
+ const eligible=ids.filter(i=>affinity(i)>=8);if(!eligible.length)return;
+ const day=state.day||1;if(Object.values(state.incomingMessages).some(m=>m&&m.day===day))return;
+ const i=eligible[(day*7+eligible.length)%eligible.length],n=npcs[i];const chance=n.textStyle==="frequent"?2:n.textStyle==="warm"?3:5;
+ if((day+i*3)%chance!==0)return;
+ const t=(day+i)%incomingMessageTemplates.length;
+ state.incomingMessages[i]={day:day,template:t,read:false};saveGame();
+}
+function incomingCount(){ensureIncoming();return Object.values(state.incomingMessages).filter(m=>m&&!m.read).length}
 function morningMessage(){
- const ids=Array.isArray(state.contacts)?state.contacts:[]; if(!ids.length)return "";
- const eligible=ids.filter(i=>affinity(i)>=12);
- if(!eligible.length)return "";
- const day=state.day||1, i=eligible[(day*7)%eligible.length],n=npcs[i];
- const chance=n.textStyle==="frequent"?2:n.textStyle==="warm"?4:6;
- if((day+i*3)%chance!==0)return "";
- addAffinity(i,2);
- return `<div class="card"><h3>📩 Morning message</h3><p><b>${n.name.split(" ")[0]}:</b> おはよう。今日は何してる？</p><button class="option" onclick="messageMenu(${i})">Reply</button></div>`;
+ createIncomingMessage();ensureIncoming();
+ const entries=Object.entries(state.incomingMessages).filter(([i,m])=>m&&m.day===(state.day||1)&&!m.read);
+ if(!entries.length)return "";
+ const [i,m]=entries[0],n=npcs[Number(i)],t=incomingMessageTemplates[m.template];
+ return `<div class="card"><h3>📩 New message from ${n.name.split(" ")[0]}</h3><p><b>${n.name.split(" ")[0]}:</b> ${t.text}</p><button class="primary" onclick="openIncoming(${i})">Reply</button><button class="secondary" onclick="ignoreIncoming(${i})">Ignore for now</button></div>`;
+}
+function openIncoming(i){
+ i=Number(i);ensureIncoming();const m=state.incomingMessages[i];if(!m)return phone();const n=npcs[i],t=incomingMessageTemplates[m.template];m.read=true;saveGame();
+ A.innerHTML=`<h2>📩 ${n.name.split(" ")[0]}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${t.text}</p><p class="small">Choose your reply</p>${t.choices.map((x,k)=>`<button class="option" onclick="replyIncoming(${i},${k})">${x.text}</button>`).join("")}<button class="secondary" onclick="ignoreIncoming(${i})">Ignore for now</button></div>`;
+}
+function replyIncoming(i,k){
+ i=Number(i);k=Number(k);ensureIncoming();const m=state.incomingMessages[i];if(!m)return phone();const n=npcs[i],t=incomingMessageTemplates[m.template],ch=t.choices[k]||t.choices[0];
+ addAffinity(i,3);delete state.incomingMessages[i];saveGame();
+ A.innerHTML=`<h2>💬 ${n.name.split(" ")[0]}</h2><div class="card"><p><b>You:</b> ${ch.text}</p><p><b>${n.name.split(" ")[0]}:</b> ${ch.reply}</p><button class="primary" onclick="messageMenu(${i})">Keep talking</button><button class="secondary" onclick="day()">Back to day</button></div>`;
+}
+function ignoreIncoming(i){
+ i=Number(i);ensureIncoming();const m=state.incomingMessages[i];if(m)m.read=true;saveGame();day();
 }
 function dateScene(i){
  if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">Back</button></div>';return}
@@ -604,7 +649,7 @@ function dateScene(i){
 function relationships(){
  A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
 }
-function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
+function nav(){const unread=incomingCount();return `<div class="nav"><button class="ghost" onclick="render()">🏠 Life</button><button class="ghost" onclick="relationships()">❤️ Relationships</button><button class="ghost" onclick="phone()">📱 Phone${unread?` (${unread})`:""}</button><button class="ghost" onclick="goOut()">🗺️ Go out</button></div>`}
 function render(){saveGame();var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
 function bootGame(){
  if(!A)return;
