@@ -185,7 +185,16 @@ function work(){
  state.money+=168; state.energy=Math.max(0,state.energy-20);
  A.innerHTML=`<div class="statbar"><span class="pill">${c.month} ${c.date} · ${c.weekday} 5:00 PM</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`;
 }
-function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="meetAt(0)">☕ カフェ <span class="small">1時間 · $8</span></button><button class="option" onclick="meetAt(1)">🌳 公園 <span class="small">1時間 · 無料</span></button><button class="option" onclick="meetAt(2)">🛍️ ショッピング <span class="small">1–2時間</span></button><button class="option" onclick="meetAt(3)">📚 図書館 <span class="small">2時間 · 無料</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
+function goOut(){
+ A.innerHTML=`<h2>どこへ行く？</h2><div class="card" id="outingList">
+ <button class="option outingBtn" data-place="0">☕ カフェ <span class="small">1時間 · $8</span></button>
+ <button class="option outingBtn" data-place="1">🌳 公園 <span class="small">1時間 · 無料</span></button>
+ <button class="option outingBtn" data-place="2">🛍️ ショッピング <span class="small">1–2時間</span></button>
+ <button class="option outingBtn" data-place="3">📚 図書館 <span class="small">2時間 · 無料</span></button></div>
+ <button class="secondary" id="outingBack">← 戻る</button>`;
+ document.querySelectorAll(".outingBtn").forEach(btn=>btn.addEventListener("click",()=>meetAt(Number(btn.dataset.place))));
+ document.querySelector("#outingBack").addEventListener("click",()=>{state.screen="day";render()});
+}
 function cafe(){meetAt(0)}
 function meetAt(i){currentNpc=i;convoStep=0;let m=meetings[i],n=npcs[i];state.money-=m.cost;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`}
 function talk(){convoStep=0;conversation()}
