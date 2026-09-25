@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -265,12 +265,26 @@ function endDay(){
  state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";saveGame();showNewDay();
 }
 const careerJobs=[
- {id:"retail",name:"Retail Associate",education:"High School",pay:144,stress:14,energy:16},
- {id:"admin",name:"Administrative Assistant",education:"High School",pay:168,stress:16,energy:18},
- {id:"medical",name:"Medical Office Assistant",education:"Associate",pay:200,stress:17,energy:18},
- {id:"buyer",name:"Buyer Assistant",education:"Bachelor",pay:232,stress:19,energy:20},
- {id:"analyst",name:"Business Analyst",education:"Bachelor",pay:280,stress:20,energy:20},
- {id:"nurse",name:"Registered Nurse",education:"Nursing",pay:320,stress:24,energy:25}
+ {id:"retail",track:"retail",name:"Retail Associate",education:"High School",pay:144,stress:14,energy:16},
+ {id:"retail_mgr",track:"retail",name:"Retail Manager",education:"High School",pay:224,stress:20,energy:20,years:3},
+ {id:"admin",track:"admin",name:"Administrative Assistant",education:"High School",pay:168,stress:16,energy:18},
+ {id:"office_mgr",track:"admin",name:"Office Manager",education:"High School",pay:232,stress:20,energy:20,years:4},
+ {id:"warehouse",track:"warehouse",name:"Warehouse Coordinator",education:"High School",pay:184,stress:18,energy:22},
+ {id:"warehouse_mgr",track:"warehouse",name:"Warehouse Manager",education:"High School",pay:264,stress:23,energy:23,years:5},
+ {id:"medical",track:"medical",name:"Medical Office Assistant",education:"Associate",pay:200,stress:17,energy:18},
+ {id:"medical_sr",track:"medical",name:"Senior Medical Office Specialist",education:"Associate",pay:256,stress:19,energy:19,years:5},
+ {id:"tech",track:"tech",name:"IT Support Specialist",education:"Associate",pay:216,stress:19,energy:18},
+ {id:"tech_sr",track:"tech",name:"Senior IT Support Specialist",education:"Associate",pay:288,stress:22,energy:20,years:5},
+ {id:"logistics",track:"logistics",name:"Logistics Coordinator",education:"Associate",pay:216,stress:20,energy:19},
+ {id:"logistics_sr",track:"logistics",name:"Senior Logistics Specialist",education:"Associate",pay:296,stress:23,energy:21,years:5},
+ {id:"buyer",track:"buyer",name:"Buyer Assistant",education:"Bachelor",pay:232,stress:19,energy:20},
+ {id:"buyer_sr",track:"buyer",name:"Senior Buyer",education:"Bachelor",pay:328,stress:24,energy:21,years:5},
+ {id:"analyst",track:"analyst",name:"Business Analyst",education:"Bachelor",pay:280,stress:20,energy:20},
+ {id:"analyst_sr",track:"analyst",name:"Senior Business Analyst",education:"Bachelor",pay:368,stress:24,energy:21,years:5},
+ {id:"planner",track:"planner",name:"Supply Planner",education:"Bachelor",pay:272,stress:22,energy:20},
+ {id:"planner_sr",track:"planner",name:"Senior Supply Planner",education:"Bachelor",pay:360,stress:25,energy:21,years:5},
+ {id:"nurse",track:"nurse",name:"Registered Nurse",education:"Nursing",pay:320,stress:24,energy:25},
+ {id:"nurse_sr",track:"nurse",name:"Senior Registered Nurse",education:"Nursing",pay:400,stress:27,energy:26,years:5}
 ];
 const schools=[
  {id:"associate",name:"Associate Degree",from:["High School"],result:"Associate",days:45,tuition:1800},
@@ -287,6 +301,9 @@ function educationAllows(req){
  return (rank[state.education]||0)>=(rank[req]||0);
 }
 function currentCareer(){initCareer();return careerJobs.find(j=>j.id===state.career)||careerJobs[0]}
+function ensureCareerExperience(){if(!state.careerExperience)state.careerExperience={}}
+function careerYears(track){ensureCareerExperience();return Math.floor((state.careerExperience[track]||0)/260)}
+function jobUnlocked(j){if(!educationAllows(j.education))return false;return !j.years||careerYears(j.track)>=j.years}
 function careerMenu(){
  initCareer();const job=currentCareer(),school=state.school&&schools.find(x=>x.id===state.school);
  let html='<h2>💼 Career & School</h2><div class="card"><p><b>Education:</b> '+state.education+'</p><p><b>Current job:</b> '+(school?'On hold while in school':job.name)+'</p>';
@@ -299,7 +316,7 @@ function jobMarket(){
  careerJobs.forEach(j=>{const ok=educationAllows(j.education);html+='<button class="option" '+(ok?'onclick="chooseJob(\''+j.id+'\')"':'disabled')+'>'+j.name+' · $'+j.pay+'/day<br><span class="small">'+(ok?'Requires '+j.education:'🔒 Requires '+j.education)+'</span></button>'});
  html+='</div><button class="secondary" onclick="careerMenu()">← Back</button>';A.innerHTML=html;
 }
-function chooseJob(id){const j=careerJobs.find(x=>x.id===id);if(!j||!educationAllows(j.education))return;state.career=id;saveGame();careerMenu()}
+function chooseJob(id){const j=careerJobs.find(x=>x.id===id);if(!j||!jobUnlocked(j))return;state.career=id;saveGame();careerMenu()}
 function schoolMenu(){
  initCareer();let html='<h2>🎓 School</h2><div class="card"><p>Going to school pauses your full-time job. School uses weekdays and you will not receive your normal work pay.</p>';
  schools.filter(x=>x.from.includes(state.education)).forEach(x=>html+='<button class="option" onclick="startSchool(\''+x.id+'\')">'+x.name+'<br><span class="small">$'+x.tuition+' tuition · '+x.days+' school days</span></button>');
@@ -315,7 +332,7 @@ function attendSchool(){
 function quitSchool(){state.school=null;state.schoolDays=0;saveGame();careerMenu()}
 function work(){
  initCareer();const c=calendarInfo(); if(state.school)return careerMenu();if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
- const job=currentCareer();state.workedDay=c.d;state.money+=job.pay;state.energy=Math.max(0,state.energy-job.energy);state.stress=Math.min(100,(state.stress||0)+job.stress);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();saveGame();
+ const job=currentCareer();ensureCareerExperience();state.careerExperience[job.track]=(state.careerExperience[job.track]||0)+1;state.workedDay=c.d;state.money+=job.pay;state.energy=Math.max(0,state.energy-job.energy);state.stress=Math.min(100,(state.stress||0)+job.stress);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();saveGame();
  A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 ${job.name} — Shift Complete</h2><p>You worked through the morning and afternoon.</p><p class="small">+${job.pay} · ⚡ -${job.energy} · 🧠 Stress +${job.stress}</p><button class="primary" onclick="goOut()">Go out after work</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Refresh</button><button class="secondary" onclick="day()">Go home</button><button class="secondary" onclick="endDay()">🌙 Sleep</button></div>`;
 }
 function shopItems(){return [
