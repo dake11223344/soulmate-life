@@ -65,12 +65,12 @@ const questions=[
 ["恋人とはどんな関係が理想？",[["できるだけ一緒に過ごしたい",["contact",12]],["一緒の時間も自分の時間も大切",["contact",2]],["お互いかなり自由でいたい",["contact",-12]]]]
 ];
 const npcs=[
-{name:"Noah Bennett",age:29,job:"Physical Therapist",emoji:"👨🏻",traits:{family:85,career:55,social:45,contact:68,adventure:55}},
-{name:"Ethan Park",age:33,job:"Software Engineer",emoji:"👨🏻‍💻",traits:{family:78,career:72,social:30,contact:45,adventure:30}},
-{name:"Liam Carter",age:30,job:"Real Estate Agent",emoji:"🧑🏽",traits:{family:35,career:72,social:92,contact:80,adventure:78},blocked:true},
-{name:"Lucas Reed",age:28,job:"Carpenter",emoji:"👨🏽",traits:{family:82,career:50,social:67,contact:60,adventure:70}},
-{name:"Henry Walsh",age:31,job:"Accountant",emoji:"🧔🏻",traits:{family:80,career:62,social:25,contact:48,adventure:20}},
-{name:"Caleb Wright",age:30,job:"Nurse",emoji:"👨🏾‍⚕️",traits:{family:84,career:64,social:60,contact:70,adventure:48}}
+{name:"Noah Bennett",age:29,job:"Physical Therapist",emoji:"👨🏻",traits:{family:85,career:55,social:45,contact:68,adventure:55},textStyle:"warm",dateStyle:"serious"},
+{name:"Ethan Park",age:33,job:"Software Engineer",emoji:"👨🏻‍💻",traits:{family:78,career:72,social:30,contact:45,adventure:30},textStyle:"space",dateStyle:"serious"},
+{name:"Liam Carter",age:30,job:"Real Estate Agent",emoji:"🧑🏽",traits:{family:35,career:72,social:92,contact:80,adventure:78},textStyle:"frequent",dateStyle:"casual",blocked:true},
+{name:"Lucas Reed",age:28,job:"Carpenter",emoji:"👨🏽",traits:{family:82,career:50,social:67,contact:60,adventure:70},textStyle:"warm",dateStyle:"balanced"},
+{name:"Henry Walsh",age:31,job:"Accountant",emoji:"🧔🏻",traits:{family:80,career:62,social:25,contact:48,adventure:20},textStyle:"space",dateStyle:"serious"},
+{name:"Caleb Wright",age:30,job:"Nurse",emoji:"👨🏾‍⚕️",traits:{family:84,career:64,social:60,contact:70,adventure:48},textStyle:"frequent",dateStyle:"balanced"}
 ];
 function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
 function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
@@ -175,7 +175,7 @@ function day(){
  const c=calendarInfo(),low=moodCheck(),worked=state.workedDay===c.d;
  let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。あと${Math.max(1,(state.lowMoodUntil||c.d)-c.d+1)}日ほど、デートや外出をする気力がありません。休息を優先しましょう。</p></div>`:"";
  const intro=c.d===1?"新しい一年が始まった。":c.weekend?"休日の朝。今日は自由に過ごせる。":"新しい一日の始まり。";
- A.innerHTML=statusBar(c)+note+`<div class="card"><h2>${c.d}日目 — 自宅</h2><p class="event">${intro}</p>${(!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 仕事へ行く</button>':(!c.weekend&&worked?'<button class="option" disabled>✓ 今日の仕事は終了</button>':'')}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>${nav()}`;
+ A.innerHTML=statusBar(c)+note+morningMessage()+`<div class="card"><h2>${c.d}日目 — 自宅</h2><p class="event">${intro}</p>${(!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 仕事へ行く</button>':(!c.weekend&&worked?'<button class="option" disabled>✓ 今日の仕事は終了</button>':'')}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>${nav()}`;
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;return}
@@ -261,10 +261,10 @@ function phone(){
  A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3>${list}</div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>${nav()}`;
 }
 function affinity(i){if(!state.affinity)state.affinity={};return state.affinity[i]||0}
-function addAffinity(i,n){if(!state.affinity)state.affinity={};state.affinity[i]=Math.min(100,affinity(i)+n)}
+function addAffinity(i,n){if(!state.affinity)state.affinity={};state.affinity[i]=Math.max(0,Math.min(100,affinity(i)+n))}
 function openContact(i){
  const n=npcs[i],a=affinity(i);
- A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><p><b>💗 親密度 ${a}/100</b></p><div style="height:10px;background:#eee;border-radius:10px;overflow:hidden"><div style="height:100%;width:${a}%;background:#f36b9b"></div></div><br><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
+ A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
 }
 const chatTopics=["仕事","休日","食べ物","映画","音楽","旅行","家族","子どもの頃","趣味","ペット","料理","季節","買い物","カフェ","運動","本","ゲーム","将来","友達","最近あったこと"];
 const chatOpeners=["今日はどんな一日だった？","そういえば、ちょっと聞きたいんだけど","ふと思い出したんだけど","今ちょっと時間ある？","この前の話なんだけど"];
@@ -282,29 +282,43 @@ function chatVariant(i){
  return {topic,opener,reply,mood,id:(seed%2000)+1};
 }
 function messageMenu(i){
- const n=npcs[i],a=affinity(i),v=chatVariant(i);
- let invite=a>=35?`<button class="option" onclick="askDate(${i})">💕 デートに誘う</button>`:`<button class="option" disabled>🔒 デートに誘う <span class="small">親密度35以上で解放</span></button>`;
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">親密度 💗 ${a}/100</p><p class="small">今日の話題：${v.topic}</p><button class="option" onclick="casualMessage(${i})">💬 何でもない話をする</button>${invite}<button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+ const n=npcs[i],v=chatVariant(i);
+ A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">今日の話題：${v.topic}</p><button class="option" onclick="casualMessage(${i})">💬 何でもない話をする</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
 }
 function casualMessage(i){
- if(!state.lastChatDay)state.lastChatDay={};
- if(state.lastChatDay[i]===(state.day||1)){A.innerHTML='<div class="card"><h2>💬 今日はもう話した</h2><p>同じ相手への何でもないメッセージは1日1回までです。</p><button class="primary" onclick="messageMenu('+i+')">戻る</button></div>';return}
- if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日できる行動を使い切りました。明日に進みましょう。</p><button class="primary" onclick="day()">戻る</button></div>';return}
- state.lastChatDay[i]=(state.day||1);state.dailyActions=(state.dailyActions||0)+1;
- const n=npcs[i],v=chatVariant(i),before=affinity(i),gain=2+(v.id%4);addAffinity(i,gain);
+ if(!state.lastChatDay)state.lastChatDay={}; if(!state.chatStreak)state.chatStreak={};
+ if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日できる行動を使い切りました。</p><button class="primary" onclick="day()">戻る</button></div>';return}
+ const n=npcs[i],today=state.day||1,last=state.lastChatDay[i]||0;
+ if(last===today){A.innerHTML='<div class="card"><h2>💬 今日はもう話した</h2><p>また明日にしよう。</p><button class="primary" onclick="messageMenu('+i+')">戻る</button></div>';return}
+ const consecutive=last===today-1; state.chatStreak[i]=consecutive?(state.chatStreak[i]||1)+1:1;
+ state.lastChatDay[i]=today;state.dailyActions=(state.dailyActions||0)+1;
+ const v=chatVariant(i);let gain=2+(v.id%4),reaction="";
+ if(n.textStyle==="space"&&state.chatStreak[i]>=3){gain=-3;reaction="毎日メッセージが続いて、少し返信がそっけなくなった。";}
+ else if(n.textStyle==="frequent"){gain+=2;reaction="連絡を取り合うのが好きみたい。返信も早い。";}
+ else reaction="自然に会話が続いた。";
+ addAffinity(i,gain);
  const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。"][v.id%5];
- const canInvite=affinity(i)>=45&&before<45;
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">Conversation #${v.id}/2000 · ${v.topic}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.mood} ${v.reply}</p><p class="small">💗 親密度 +${gain} → ${affinity(i)}/100</p>${canInvite?`<div class="event">最近、${n.name.split(" ")[0]}との距離が近くなってきた。</div><button class="primary" onclick="incomingDate(${i})">📩 新しいメッセージを見る</button>`:''}<button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
+ A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.mood} ${v.reply}</p><div class="event">${reaction}</div><button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
 }
 function askDate(i){
  const n=npcs[i],a=affinity(i);
- if(a<35)return messageMenu(i);
- const accepted=a>=50 || ((state.day||1)+i)%3!==0;
- if(accepted){addAffinity(i,5);A.innerHTML=`<div class="card"><h2>💕 デートの約束</h2><p><b>あなた:</b> 今度、二人で出かけない？</p><p><b>${n.name.split(" ")[0]}:</b> いいね。行こう！</p><p class="small">💗 親密度 +5</p><button class="primary" onclick="dateScene(${i})">デートへ</button><button class="secondary" onclick="messageMenu(${i})">あとで</button></div>`}
- else A.innerHTML=`<div class="card"><h2>💬 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> ごめん、もう少し仲良くなってからでもいい？</p><p class="small">親密度は下がりません。</p><button class="primary" onclick="messageMenu(${i})">戻る</button></div>`;
+ let threshold=n.dateStyle==="casual"?8:n.dateStyle==="balanced"?25:42;
+ const accepted=a>=threshold;
+ if(accepted){addAffinity(i,5);A.innerHTML=`<div class="card"><h2>💕 デートの約束</h2><p><b>あなた:</b> 今度、二人で出かけない？</p><p><b>${n.name.split(" ")[0]}:</b> ${n.dateStyle==="casual"?"もちろん。楽しそう、行こう！":"いいね。行こう！"}</p><button class="primary" onclick="dateScene(${i})">デートへ</button><button class="secondary" onclick="messageMenu(${i})">あとで</button></div>`}
+ else A.innerHTML=`<div class="card"><h2>💬 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> ごめん、もう少しお互いを知ってからがいいかな。</p><button class="primary" onclick="messageMenu(${i})">戻る</button></div>`;
 }
 function incomingDate(i){
  const n=npcs[i];A.innerHTML=`<div class="card"><h2>📩 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> 今度時間ある？よかったら一緒に出かけない？</p><button class="primary" onclick="dateScene(${i})">💕 行く</button><button class="secondary" onclick="messageMenu(${i})">今回はやめておく</button></div>`;
+}
+function morningMessage(){
+ const ids=Array.isArray(state.contacts)?state.contacts:[]; if(!ids.length)return "";
+ const eligible=ids.filter(i=>affinity(i)>=12);
+ if(!eligible.length)return "";
+ const day=state.day||1, i=eligible[(day*7)%eligible.length],n=npcs[i];
+ const chance=n.textStyle==="frequent"?2:n.textStyle==="warm"?4:6;
+ if((day+i*3)%chance!==0)return "";
+ addAffinity(i,2);
+ return `<div class="card"><h3>📩 朝のメッセージ</h3><p><b>${n.name.split(" ")[0]}:</b> おはよう。今日は何してる？</p><button class="option" onclick="messageMenu(${i})">返信する</button></div>`;
 }
 function dateScene(i){
  if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">戻る</button></div>';return}
@@ -321,7 +335,7 @@ function bootGame(){
  if(!A)return;
  window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
+ window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
