@@ -285,38 +285,7 @@ function refresh(){
 }
 window.shopping=shopping;window.buyItem=buyItem;window.refresh=refresh;
 window.currentNpc=0;window.convoStep=0;
-const outingPlaces=[
-{name:"☕ カフェ",icon:"☕",periods:["morning","afternoon"],cost:8,hours:2,tags:["social","coffee","calm"]},
-{name:"🚶 朝の散歩",icon:"🚶",periods:["morning"],cost:0,hours:2,tags:["outdoor","calm","fitness"]},
-{name:"📚 図書館",icon:"📚",periods:["morning","afternoon"],cost:0,hours:2,tags:["quiet","books","geek"]},
-{name:"🛍️ ショッピング",icon:"🛍️",periods:["morning","afternoon"],cost:15,hours:2,tags:["social","fashion"]},
-{name:"🥐 ベーカリー",icon:"🥐",periods:["morning"],cost:7,hours:2,tags:["food","calm"]},
-{name:"🐕 ドッグパーク",icon:"🐕",periods:["morning","afternoon"],cost:0,hours:2,tags:["pets","outdoor"]},
-{name:"🌿 ファーマーズマーケット",icon:"🌿",periods:["morning"],cost:12,hours:2,tags:["food","outdoor","social"]},
-{name:"🏋️ ジム",icon:"🏋️",periods:["morning","afternoon","night"],cost:10,hours:2,tags:["fitness"]},
-{name:"🧘 ヨガクラス",icon:"🧘",periods:["afternoon"],cost:18,hours:2,tags:["fitness","calm"]},
-{name:"🥾 ハイキング",icon:"🥾",periods:["afternoon"],cost:5,hours:4,tags:["outdoor","adventure","fitness"]},
-{name:"🎪 お祭り",icon:"🎪",periods:["afternoon","night"],cost:20,hours:4,tags:["social","adventure"]},
-{name:"🏛️ 美術館",icon:"🏛️",periods:["afternoon"],cost:18,hours:2,tags:["art","quiet"]},
-{name:"🎨 アートクラス",icon:"🎨",periods:["afternoon"],cost:25,hours:2,tags:["art","creative"]},
-{name:"🍳 料理教室",icon:"🍳",periods:["afternoon"],cost:30,hours:2,tags:["food","social"]},
-{name:"🎮 ゲームショップ",icon:"🎮",periods:["afternoon"],cost:10,hours:2,tags:["geek","games"]},
-{name:"🎳 ボウリング",icon:"🎳",periods:["afternoon","night"],cost:18,hours:2,tags:["social","games"]},
-{name:"🏖️ 湖・ビーチ",icon:"🏖️",periods:["afternoon"],cost:5,hours:4,tags:["outdoor","adventure"]},
-{name:"🚲 サイクリング",icon:"🚲",periods:["afternoon"],cost:5,hours:2,tags:["fitness","outdoor"]},
-{name:"🌱 ガーデンセンター",icon:"🌱",periods:["morning","afternoon"],cost:8,hours:2,tags:["calm","outdoor"]},
-{name:"🧋 ティーショップ",icon:"🧋",periods:["afternoon"],cost:8,hours:2,tags:["social","food"]},
-{name:"🍸 バー",icon:"🍸",periods:["night"],cost:22,hours:2,tags:["nightlife","social"]},
-{name:"💃 クラブ",icon:"💃",periods:["night"],cost:30,hours:4,tags:["nightlife","social","adventure"]},
-{name:"🎬 ひとり映画",icon:"🎬",periods:["night"],cost:16,hours:2,tags:["movies","quiet"]},
-{name:"🎤 ライブハウス",icon:"🎤",periods:["night"],cost:28,hours:4,tags:["music","nightlife"]},
-{name:"🎵 カラオケ",icon:"🎵",periods:["night"],cost:20,hours:2,tags:["music","social"]},
-{name:"🍜 ラーメン店",icon:"🍜",periods:["night"],cost:16,hours:2,tags:["food","casual"]},
-{name:"🌃 夜景スポット",icon:"🌃",periods:["night"],cost:0,hours:2,tags:["calm","romantic"]},
-{name:"🎲 ボードゲームカフェ",icon:"🎲",periods:["afternoon","night"],cost:15,hours:2,tags:["geek","games","social"]},
-{name:"🧠 トリビアナイト",icon:"🧠",periods:["night"],cost:12,hours:2,tags:["geek","social"]},
-{name:"🍽️ レストラン",icon:"🍽️",periods:["night"],cost:28,hours:2,tags:["food","social"]}
-];
+const outingPlaces=[{"name":"☕ カフェ","icon":"☕","periods":["morning","afternoon"],"cost":8,"hours":2,"tags":["social","coffee","calm"],"open":"ここのコーヒー、何がおすすめ？","qs":["コーヒーよく飲む？","カフェ巡りする？","甘いものも好き？"]},{"name":"🚶 朝の散歩","icon":"🚶","periods":["morning"],"cost":0,"hours":2,"tags":["outdoor","calm","fitness"],"open":"朝に歩くと気持ちいいね。よく散歩する？","qs":["朝型？","この辺よく歩く？","休みの日も早起きする？"]},{"name":"📚 図書館","icon":"📚","periods":["morning","afternoon"],"cost":0,"hours":2,"tags":["quiet","books","geek"],"open":"何か面白そうな本見つかった？","qs":["どんな本読む？","静かな場所好き？","最近読んでよかった本ある？"]},{"name":"🛍️ ショッピング","icon":"🛍️","periods":["morning","afternoon"],"cost":15,"hours":2,"tags":["social","fashion"],"open":"何か探してるものある？","qs":["買い物は計画派？","服選ぶの好き？","今日は何を見に来たの？"]},{"name":"🥐 ベーカリー","icon":"🥐","periods":["morning"],"cost":7,"hours":2,"tags":["food","calm"],"open":"ここのパン、いい匂いだね。何にする？","qs":["甘いパンと惣菜パンどっち派？","朝ごはん食べる派？","お気に入りのパン屋ある？"]},{"name":"🐕 ドッグパーク","icon":"🐕","periods":["morning","afternoon"],"cost":0,"hours":2,"tags":["pets","outdoor"],"open":"犬好き？見てるだけでも楽しいね。","qs":["犬飼ってる？","どんな犬が好き？","動物は好き？"]},{"name":"🌿 ファーマーズマーケット","icon":"🌿","periods":["morning"],"cost":12,"hours":2,"tags":["food","outdoor","social"],"open":"新鮮なの多いね。何を買う予定？","qs":["料理する？","地元のお店好き？","野菜と果物どっちよく買う？"]},{"name":"🏋️ ジム","icon":"🏋️","periods":["morning","afternoon","night"],"cost":10,"hours":2,"tags":["fitness"],"open":"今日は何のトレーニングするの？","qs":["運動は週何回くらい？","筋トレと有酸素どっち派？","運動始めたきっかけは？"]},{"name":"🧘 ヨガクラス","icon":"🧘","periods":["afternoon"],"cost":18,"hours":2,"tags":["fitness","calm"],"open":"このクラス初めて？","qs":["ヨガよくする？","リラックス系とハード系どっち好き？","運動の後って何する？"]},{"name":"🥾 ハイキング","icon":"🥾","periods":["afternoon"],"cost":5,"hours":4,"tags":["outdoor","adventure","fitness"],"open":"このコース来たことある？","qs":["山とか自然好き？","長いコースも平気？","次に行きたい場所ある？"]},{"name":"🎪 お祭り","icon":"🎪","periods":["afternoon","night"],"cost":20,"hours":4,"tags":["social","adventure"],"open":"何から見に行く？","qs":["屋台なら何食べる？","お祭りよく行く？","乗り物とゲームどっち派？"]},{"name":"🏛️ 美術館","icon":"🏛️","periods":["afternoon"],"cost":18,"hours":2,"tags":["art","quiet"],"open":"この展示、けっこう面白いね。","qs":["美術館よく来る？","どんなアートが好き？","じっくり見る派？"]},{"name":"🎨 アートクラス","icon":"🎨","periods":["afternoon"],"cost":25,"hours":2,"tags":["art","creative"],"open":"何作るかもう決めた？","qs":["絵を描くの好き？","こういうクラス初めて？","得意なものある？"]},{"name":"🍳 料理教室","icon":"🍳","periods":["afternoon"],"cost":30,"hours":2,"tags":["food","social"],"open":"料理は普段からする？","qs":["得意料理ある？","作るのと食べるのどっちが好き？","新しいレシピ試す？"]},{"name":"🎮 ゲームショップ","icon":"🎮","periods":["afternoon"],"cost":10,"hours":2,"tags":["geek","games"],"open":"何か探してるゲームある？","qs":["どんなジャンルが好き？","最近何やってる？","一人で遊ぶ派？"]},{"name":"🎳 ボウリング","icon":"🎳","periods":["afternoon","night"],"cost":18,"hours":2,"tags":["social","games"],"open":"ボウリング得意？","qs":["最高スコアどれくらい？","勝負するの好き？","こういう遊びよくする？"]},{"name":"🏖️ 湖・ビーチ","icon":"🏖️","periods":["afternoon"],"cost":5,"hours":4,"tags":["outdoor","adventure"],"open":"今日はちょうど気持ちいいね。","qs":["泳ぐ派？のんびり派？","水辺好き？","夏は何して過ごす？"]},{"name":"🚲 サイクリング","icon":"🚲","periods":["afternoon"],"cost":5,"hours":2,"tags":["fitness","outdoor"],"open":"けっこう走る予定？","qs":["自転車よく乗る？","街と自然どっち走るの好き？","遠出もする？"]},{"name":"🌱 ガーデンセンター","icon":"🌱","periods":["morning","afternoon"],"cost":8,"hours":2,"tags":["calm","outdoor"],"open":"何か育ててるの？","qs":["植物好き？","家に緑ある？","育てやすいおすすめある？"]},{"name":"🧋 ティーショップ","icon":"🧋","periods":["afternoon"],"cost":8,"hours":2,"tags":["social","food"],"open":"何頼むか決めた？","qs":["甘さどれくらいが好き？","コーヒーとお茶どっち派？","新しい味試す？"]},{"name":"🍸 バー","icon":"🍸","periods":["night"],"cost":22,"hours":2,"tags":["nightlife","social"],"open":"ここ、よく来る？","qs":["静かなバーと賑やかなバーどっち派？","一人でも飲みに行く？","夜はよく出かける？"]},{"name":"💃 クラブ","icon":"💃","periods":["night"],"cost":30,"hours":4,"tags":["nightlife","social","adventure"],"open":"この曲いいね。こういうところよく来る？","qs":["踊るの好き？","夜更かし平気？","どんな音楽が好き？"]},{"name":"🎬 ひとり映画","icon":"🎬","periods":["night"],"cost":16,"hours":2,"tags":["movies","quiet"],"open":"何観る予定？","qs":["映画館は一人でも来る？","どんなジャンルが好き？","映画は字幕派？"]},{"name":"🎤 ライブハウス","icon":"🎤","periods":["night"],"cost":28,"hours":4,"tags":["music","nightlife"],"open":"このアーティスト知ってる？","qs":["ライブよく行く？","どんな音楽聴く？","好きなアーティストいる？"]},{"name":"🎵 カラオケ","icon":"🎵","periods":["night"],"cost":20,"hours":2,"tags":["music","social"],"open":"何歌うの？","qs":["カラオケ得意？","最初に何歌う？","一人カラオケできる？"]},{"name":"🍜 ラーメン店","icon":"🍜","periods":["night"],"cost":16,"hours":2,"tags":["food","casual"],"open":"何味にする？","qs":["こってりとあっさりどっち派？","ラーメンよく食べる？","辛いの平気？"]},{"name":"🌃 夜景スポット","icon":"🌃","periods":["night"],"cost":0,"hours":2,"tags":["calm","romantic"],"open":"ここ、思ったよりきれいだね。","qs":["夜景好き？","静かな場所好き？","夜のドライブする？"]},{"name":"🎲 ボードゲームカフェ","icon":"🎲","periods":["afternoon","night"],"cost":15,"hours":2,"tags":["geek","games","social"],"open":"何かやったことあるゲームある？","qs":["協力ゲームと対戦どっち派？","ボードゲーム好き？","負けず嫌い？"]},{"name":"🧠 トリビアナイト","icon":"🧠","periods":["night"],"cost":12,"hours":2,"tags":["geek","social"],"open":"こういうクイズ得意？","qs":["得意ジャンルある？","チーム戦好き？","雑学覚えるの好き？"]},{"name":"🍽️ レストラン","icon":"🍽️","periods":["night"],"cost":28,"hours":2,"tags":["food","social"],"open":"何頼むか迷うね。","qs":["外食よくする？","好きな料理は？","新しい店試す派？"]}]
 function npcInterests(n,i){
  const t=n.traits||{},tags=[];
  if(t.adventure>=60)tags.push("outdoor","adventure","fitness");
@@ -345,7 +314,7 @@ function goOut(){
 }
 function getMeeting(i){
  const p=outingPlaces[Number(i)];if(!p)return null;
- return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:`${p.name}で過ごしていると、近くにいた人と自然に目が合った。`,open:`ここ、よく来る？`,qs:["今日は一人で来たの？","こういう場所好き？","休みの日は何してる？"]};
+ return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:`${p.name}で過ごしていると、近くにいた人と自然に目が合った。`,open:p.open,qs:p.qs};
 }
 function meetAt(placeIndex){
  try{
