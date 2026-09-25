@@ -266,21 +266,35 @@ function openContact(i){
  const n=npcs[i],a=affinity(i);
  A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><p><b>💗 親密度 ${a}/100</b></p><div style="height:10px;background:#eee;border-radius:10px;overflow:hidden"><div style="height:100%;width:${a}%;background:#f36b9b"></div></div><br><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
 }
+const chatTopics=["仕事","休日","食べ物","映画","音楽","旅行","家族","子どもの頃","趣味","ペット","料理","季節","買い物","カフェ","運動","本","ゲーム","将来","友達","最近あったこと"];
+const chatOpeners=["今日はどんな一日だった？","そういえば、ちょっと聞きたいんだけど","ふと思い出したんだけど","今ちょっと時間ある？","この前の話なんだけど"];
+const chatMoods=["😊","🙂","😂","😌","🤔"];
+const chatReplies=[
+ "それ、けっこうわかる。僕も似たようなことあるよ。",
+ "へえ、そうなんだ。もう少し聞いてみたい。",
+ "それいいね。なんか君らしい気がする。",
+ "僕はちょっと違うかも。でもそういう考え方も好きだな。",
+ "面白いね。今度会ったときにもその話しようよ。"
+];
+function chatVariant(i){
+ const d=state.day||1,a=affinity(i),seed=(d*37+i*71+a*13+(state.dailyActions||0)*17);
+ const topic=chatTopics[seed%chatTopics.length],opener=chatOpeners[Math.floor(seed/3)%chatOpeners.length],reply=chatReplies[Math.floor(seed/7)%chatReplies.length],mood=chatMoods[Math.floor(seed/11)%chatMoods.length];
+ return {topic,opener,reply,mood,id:(seed%2000)+1};
+}
 function messageMenu(i){
- const n=npcs[i],a=affinity(i);
+ const n=npcs[i],a=affinity(i),v=chatVariant(i);
  let invite=a>=35?`<button class="option" onclick="askDate(${i})">💕 デートに誘う</button>`:`<button class="option" disabled>🔒 デートに誘う <span class="small">親密度35以上で解放</span></button>`;
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">親密度 💗 ${a}/100</p><button class="option" onclick="casualMessage(${i})">💬 何でもない話をする</button>${invite}<button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+ A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">親密度 💗 ${a}/100</p><p class="small">今日の話題：${v.topic}</p><button class="option" onclick="casualMessage(${i})">💬 何でもない話をする</button>${invite}<button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
 }
 function casualMessage(i){
  if(!state.lastChatDay)state.lastChatDay={};
  if(state.lastChatDay[i]===(state.day||1)){A.innerHTML='<div class="card"><h2>💬 今日はもう話した</h2><p>同じ相手への何でもないメッセージは1日1回までです。</p><button class="primary" onclick="messageMenu('+i+')">戻る</button></div>';return}
  if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日できる行動を使い切りました。明日に進みましょう。</p><button class="primary" onclick="day()">戻る</button></div>';return}
  state.lastChatDay[i]=(state.day||1);state.dailyActions=(state.dailyActions||0)+1;
- const n=npcs[i],before=affinity(i);addAffinity(i,4);
- const replies=["今日はまあまあだったよ。そっちは？","ちょうど休憩してたところ。メッセージありがとう。","それわかる。今度会ったときもっと話そう。"];
- const reply=replies[((state.day||1)+i)%replies.length];
- const canInvite=affinity(i)>=45 && before<45;
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p><b>あなた:</b> 今日どうだった？</p><p><b>${n.name.split(" ")[0]}:</b> ${reply}</p><p class="small">💗 親密度 +4 → ${affinity(i)}/100</p>${canInvite?`<div class="event">最近、${n.name.split(" ")[0]}との距離が近くなってきた。</div><button class="primary" onclick="incomingDate(${i})">📩 新しいメッセージを見る</button>`:''}<button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
+ const n=npcs[i],v=chatVariant(i),before=affinity(i),gain=2+(v.id%4);addAffinity(i,gain);
+ const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。"][v.id%5];
+ const canInvite=affinity(i)>=45&&before<45;
+ A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><p class="small">Conversation #${v.id}/2000 · ${v.topic}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.mood} ${v.reply}</p><p class="small">💗 親密度 +${gain} → ${affinity(i)}/100</p>${canInvite?`<div class="event">最近、${n.name.split(" ")[0]}との距離が近くなってきた。</div><button class="primary" onclick="incomingDate(${i})">📩 新しいメッセージを見る</button>`:''}<button class="secondary" onclick="messageMenu(${i})">← メッセージへ</button></div>`;
 }
 function askDate(i){
  const n=npcs[i],a=affinity(i);
