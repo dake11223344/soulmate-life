@@ -199,6 +199,7 @@ function refresh(){
  state.energy=Math.min(100,state.energy+15);state.stress=Math.max(0,(state.stress||0)-20);
  A.innerHTML=`<div class="card"><h2>🛁 リフレッシュした</h2><p>ゆっくり休んで少し気持ちが軽くなった。</p><p class="small">⚡ +15　🧠 ストレス -20</p><button class="primary" onclick="day()">続ける</button></div>`;
 }
+window.shopping=shopping;window.buyItem=buyItem;window.refresh=refresh;
 window.currentNpc=0;window.convoStep=0;
 function goOut(){
  if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><p>ストレスが高く、今は休息が必要です。</p><button class="primary" onclick="day()">家で休む</button></div>';return}
