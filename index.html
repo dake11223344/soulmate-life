@@ -199,6 +199,13 @@ function refresh(){
  state.energy=Math.min(100,state.energy+15);state.stress=Math.max(0,(state.stress||0)-20);
  A.innerHTML=`<div class="card"><h2>🛁 リフレッシュした</h2><p>ゆっくり休んで少し気持ちが軽くなった。</p><p class="small">⚡ +15　🧠 ストレス -20</p><button class="primary" onclick="day()">続ける</button></div>`;
 }
+let currentNpc=0,convoStep=0;
+const meetings=[
+ {place:"☕ カフェ",cost:8,intro:"窓際の席に座ろうとすると、近くにいた男性と目が合った。",open:"ここのコーヒーけっこう好きなんだ。君はコーヒー好き？",qs:["今日は仕事帰り？","休みの日は何してる？","最近いいところ行った？"]},
+ {place:"🌳 公園",cost:0,intro:"落としたイヤホンを拾ってくれた男性と話すことになった。",open:"これ、君のだよね？よかった。ここよく来る？",qs:["外で過ごすの好き？","どんな仕事してる？","おすすめの場所ある？"]},
+ {place:"🛍️ ショッピング",cost:15,intro:"商品を取ろうとしたタイミングが重なって、隣の男性と笑ってしまった。",open:"あ、ごめん。どうぞ。これ人気なのかな？",qs:["買い物は決めてから来る？","休みの日も出かける？","このあとまだ買い物する？"]},
+ {place:"📚 図書館",cost:0,intro:"同じ棚の本を見ていた男性が声をかけてきた。",open:"その本、気になってたんだ。面白そう？",qs:["普段も本読む？","どんな仕事してる？","静かな場所好き？"]}
+];
 function goOut(){
  if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><p>ストレスが高く、今は休息が必要です。</p><button class="primary" onclick="day()">家で休む</button></div>';return}
  A.innerHTML=`<h2>どこへ行く？</h2><div class="card">
