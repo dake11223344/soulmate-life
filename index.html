@@ -39,7 +39,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 .assetChoice{border:1px solid #e7e7eb;background:#fff;border-radius:16px;padding:6px;height:92px;overflow:hidden}
 .assetChoice.on{outline:3px solid #ff4b8b;background:#fff5f9}
 .assetChoice img{width:100%;height:70px;object-fit:contain}
-</style>
+.realFace,.rfHairBack,.rfNeck,.rfHead,.rfHairTop,.rfBrow,.rfEye,.rfNose,.rfMouth,.rfBody{display:none!important}</style>
 </head>
 <body><main id="app"></main><script>
 const A=document.querySelector("#app");
@@ -75,7 +75,6 @@ const npcs=[
 function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
 function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
 function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューゲーム</button></div></div>`}
-function avatarArt(g,h,f){let skins=["#f7d9c4","#efc3a5","#dda57e","#bf805e","#925c43","#613b2d"],hcs=["#38231e","#6b4030","#a76a43","#d7aa70","#171515","#8b2635","#c77d88","#71635e","#aaa"];let shapes=["48% 48% 52% 52%","46% 46% 50% 50%","44% 44% 52% 52%","42% 42% 46% 46%","50% 50% 40% 40%","48% 48% 55% 55%","43% 43% 52% 52%"];return '<div class="realFace" style="--sk:'+skins[state.look.skin%skins.length]+';--hc:'+hcs[state.look.color%hcs.length]+';--ec:'+(["#754b2e","#9a7138","#49634d","#526b7e","#33251f"][state.look.eyeColor||0])+';--shape:'+shapes[state.look.face%shapes.length]+'"><i class="rfHairBack"></i><i class="rfNeck"></i><i class="rfHead"></i><i class="rfHairTop"></i><i class="rfBrow l"></i><i class="rfBrow r"></i><i class="rfEye l"></i><i class="rfEye r"></i><i class="rfNose"></i><i class="rfMouth"></i><i class="rfBody"></i></div>'}
 function assetName(group,i){return group+"_"+String(i+1).padStart(2,"0")+".png"}
 function creatorPortrait(){
  const layers=[
