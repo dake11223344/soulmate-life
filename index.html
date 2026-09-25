@@ -439,63 +439,53 @@ function chatVariant(i,topicIndex){
  return {category:x.category,icon:x.icon,topic:x.topic,opener:chatOpeners[Math.floor(seed/3+x.ti)%chatOpeners.length],reply:chatReplies[Math.floor(seed/7+x.ci)%chatReplies.length],id:(seed+x.ci*83+x.ti*19)%2000+1};
 }
 function messageMenu(i){
- const n=npcs[i];
- A.innerHTML=`<h2>💬 ${n.name}</h2><div class="card"><button class="option" onclick="topicMenu(${i})">💬 話題を選んで話す</button><button class="option" onclick="randomMessage(${i})">🎲 おまかせで話す</button><button class="option" onclick="askDate(${i})">💕 デートに誘う</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+ i=Number(i); const n=npcs[i]; if(!n)return;
+ A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card"><button class="option" onclick="topicMenu('+i+')">💬 話題を選んで話す</button><button class="option" onclick="randomMessage('+i+')">🎲 おまかせで話す</button><button class="option" onclick="askDate('+i+')">💕 デートに誘う</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 function randomMessage(i){
- const list=allChatTopics();
- const seed=(state.day||1)*97+i*43+(state.chatCount&&state.chatCount[i]||0)*31+(state.period==="afternoon"?11:state.period==="night"?23:5);
- casualMessage(i,seed%list.length);
+ i=Number(i); const list=allChatTopics(); if(!npcs[i]||!list.length)return;
+ const seed=(state.day||1)*97+i*43+((state.chatCount&&state.chatCount[i])||0)*31;
+ sendChatTopic(i,seed%list.length);
 }
-function startSelectedTopic(){const sel=document.getElementById("topicSelect");if(!sel)return;const ci=Number(sel.value),person=Number(window.activeTopicPerson);let start=0;for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;const count=chatCategories[ci].topics.length;casualMessage(person,start+(((state.day||1)*31+person*13)%count));}
-window.startSelectedTopic=startSelectedTopic;
 function topicMenu(i){
- window.activeTopicPerson=Number(i);
- A.innerHTML=`<h2>💬 何を話す？</h2><div class="card"><label class="small">話題カテゴリー</label><select id="topicSelect" onchange="startSelectedTopic()" style="width:100%;padding:18px;margin:12px 0 18px;border:1px solid #ddd;border-radius:18px;font-size:18px;background:white">${chatCategories.map((c,ci)=>`<option value="${ci}">${c.icon} ${c.name}</option>`).join("")}</select><button type="button" class="primary" id="topicSendBtn">この話題でメッセージする</button></div><button type="button" class="secondary" id="messageTopicBack">← 戻る</button>`;
- document.getElementById("topicSendBtn").onclick=startSelectedTopic;
- document.getElementById("messageTopicBack").onclick=function(){messageMenu(Number(window.activeTopicPerson));};
+ i=Number(i); if(!npcs[i])return;
+ let html='<h2>💬 何を話す？</h2><div class="card">';
+ chatCategories.forEach(function(c,ci){html+='<button type="button" class="option" onclick="openTopicCategory('+i+','+ci+')">'+c.icon+' '+c.name+'</button>';});
+ html+='</div><button class="secondary" onclick="messageMenu('+i+')">← 戻る</button>';
+ A.innerHTML=html;
 }
-window.topicMenu=topicMenu;
-function replyTiming(i){
- const n=npcs[i];
- if(!n)return "返信なし";
- if(n.textStyle==="frequent")return "すぐに返信がきた。";
- if(n.textStyle==="space")return "少し時間がたってから返信がきた。";
- return "しばらくして返信がきた。";
+function openTopicCategory(i,ci){
+ i=Number(i);ci=Number(ci);const c=chatCategories[ci];if(!npcs[i]||!c)return;
+ let start=0;for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;
+ let html='<h2>'+c.icon+' '+c.name+'</h2><div class="card">';
+ c.topics.forEach(function(t,ti){html+='<button type="button" class="option" onclick="sendChatTopic('+i+','+(start+ti)+')">'+t+'</button>';});
+ html+='</div><button class="secondary" onclick="topicMenu('+i+')">← カテゴリーへ</button>';
+ A.innerHTML=html;
 }
-function casualMessage(i,topicIndex){
- if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
+function messageReplyTiming(i){
+ const n=npcs[i];if(!n)return '';
+ if(n.textStyle==='frequent')return 'すぐに返信がきた。';
+ if(n.textStyle==='space')return '少し時間がたってから返信がきた。';
+ return 'しばらくして返信がきた。';
+}
+function sendChatTopic(i,topicIndex){
+ i=Number(i);topicIndex=Number(topicIndex);const n=npcs[i];if(!n)return;
+ if(!useHours(2)){A.innerHTML='<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>';return;}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
- const n=npcs[i],today=state.day||1;
- if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0}
- state.chatCount[i]=(state.chatCount[i]||0)+1;
- const count=state.chatCount[i];
- const v=chatVariant(i,Number(topicIndex)<0?null:topicIndex);let gain=0,reaction="",timing=replyTiming(i);
- if(n.textStyle==="frequent"){
-   gain=count<=3?4:0;
-   reaction=count<=3?`メッセージが好きみたい。今日${count}回目の会話も楽しそう。`:"たくさん話せて満足しているみたい。これ以上は今日は親密度は上がらない。";
- }else if(n.textStyle==="space"){
-   if(count>=3)gain=-2-(count-3);
-   else gain=count===1?2:0;
-   reaction=count>=3?`連絡が多すぎると感じているみたい。今日${count}回目なので少し距離を置きたそう。`:"返信はくるけど、頻繁なメッセージはあまり好きではなさそう。";
- }else{
-   gain=count<=2?2:0;
-   reaction=count<=2?"自然に会話が続いた。":"今日は十分話したみたい。親密度はこれ以上上がらない。";
- }
+ const today=state.day||1;if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0;}
+ state.chatCount[i]=(state.chatCount[i]||0)+1;const count=state.chatCount[i];
+ const v=chatVariant(i,topicIndex);let gain=0,reaction='';
+ if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction=count<=3?'メッセージが好きみたい。会話を楽しんでいる。':'今日はたくさん話せたみたい。';}
+ else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
+ else{gain=count<=2?2:0;reaction=count<=2?'自然に会話が続いた。':'今日は十分話したみたい。';}
  addAffinity(i,gain);
- const you=["私はけっこう好きかも。","最近ちょうど気になってた。","それについて話したかった！","私はこういうの、わりと大事だと思う。","うーん、私は少し違うかな。","それ面白いね。私はどうだろう。","わかる！私も似た感じ。","へえ、もっと聞きたい。"][(v.id+count)%8];
- A.innerHTML=`<h2>${v.icon} ${v.topic}</h2><div class="card"><p><b>${n.name.split(" ")[0]}:</b> ${v.opener} 「${v.topic}」ってどう思う？</p><p><b>あなた:</b> ${you}</p><p><b>${n.name.split(" ")[0]}:</b> ${v.reply}</p><div class="event">${timing}<br>${reaction}</div><button class="primary" onclick="messageMenu(${i})">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact(${i})">← 戻る</button></div>`;
+ const yours=['私はけっこう好きかも。','最近ちょうど気になってた。','それについて話したかった！','私はこういうの、わりと大事だと思う。','うーん、私は少し違うかな。','それ面白いね。私はどうだろう。','わかる！私も似た感じ。','へえ、もっと聞きたい。'];
+ const you=yours[(v.id+count)%yours.length];
+ saveGame();
+ A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(' ')[0]+':</b> '+v.opener+' 「'+v.topic+'」ってどう思う？</p><p><b>あなた:</b> '+you+'</p><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><div class="event">'+messageReplyTiming(i)+'<br>'+reaction+'</div><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
-function askDate(i){
- const n=npcs[i],a=affinity(i);
- let threshold=n.dateStyle==="casual"?8:n.dateStyle==="balanced"?25:42;
- const available=npcAvailable(i),accepted=a>=threshold&&available;
- if(accepted){addAffinity(i,5);A.innerHTML=`<div class="card"><h2>💕 デートの約束</h2><p><b>あなた:</b> 今度、二人で出かけない？</p><p><b>${n.name.split(" ")[0]}:</b> ${n.dateStyle==="casual"?"もちろん。楽しそう、行こう！":"いいね。行こう！"}</p><button class="primary" onclick="dateScene(${i})">デートへ</button><button class="secondary" onclick="messageMenu(${i})">あとで</button></div>`}
- else A.innerHTML=`<div class="card"><h2>💬 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> ${!available?"今日は予定が合わなさそう。また別の時間に誘って。":"ごめん、もう少しお互いを知ってからがいいかな。"}</p><button class="primary" onclick="messageMenu(${i})">戻る</button></div>`;
-}
-function incomingDate(i){
- const n=npcs[i];A.innerHTML=`<div class="card"><h2>📩 ${n.name}</h2><p><b>${n.name.split(" ")[0]}:</b> 今度${n.schedule==="weekendday"?"休日の昼":n.schedule==="flexible"?"時間あるとき":n.schedule==="shift"?"予定が合う日":"夜"}、時間ある？よかったら一緒に出かけない？</p><button class="primary" onclick="dateScene(${i})">💕 行く</button><button class="secondary" onclick="messageMenu(${i})">今回はやめておく</button></div>`;
-}
+function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
+window.messageMenu=messageMenu;window.randomMessage=randomMessage;window.topicMenu=topicMenu;window.openTopicCategory=openTopicCategory;window.sendChatTopic=sendChatTopic;window.casualMessage=casualMessage;
 function morningMessage(){
  const ids=Array.isArray(state.contacts)?state.contacts:[]; if(!ids.length)return "";
  const eligible=ids.filter(i=>affinity(i)>=12);
