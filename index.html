@@ -186,14 +186,25 @@ function work(){
  state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);moodCheck();
  A.innerHTML=statusBar(c)+`<div class="card"><h2>仕事が終わった</h2><p>今日の仕事は終了。今日はもう仕事できません。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`;
 }
+function shopItems(){return [
+ ["☕ 好きなドリンク",6,6],["🍰 スイーツ",8,8],["🕯️ キャンドル",15,12],
+ ["👚 新しい服",45,16],["🎮 趣味のもの",35,18],["💐 花",20,10],
+ ["📚 本",18,9],["🧴 スキンケア",28,13],["🪴 観葉植物",24,11],["🎧 音楽・イヤホン小物",30,14]
+]}
 function shopping(){
- const items=[["☕ 好きなドリンク",6,6],["🍰 スイーツ",8,8],["🕯️ キャンドル",15,12],["👚 新しい服",45,16],["🎮 趣味のもの",35,18],["💐 花",20,10]];
- A.innerHTML=`<h2>🛍️ 買い物</h2><div class="card"><p>ちょっとした買い物で気分転換できます。</p>${items.map((x,i)=>`<button class="option" onclick="buyItem(${i})">${x[0]} <span class="small">$${x[1]} · ストレス -${x[2]}</span></button>`).join("")}</div><button class="secondary" onclick="day()">← 戻る</button>`;
+ try{
+  const items=shopItems();
+  A.innerHTML=`<h2>🛍️ 買い物</h2><div class="card"><p>買い物で気分転換。欲しいものを選んでね。</p>${items.map((x,i)=>`<button class="option shopItem" data-shop="${i}">${x[0]} <span class="small">$${x[1]} · ストレス -${x[2]}</span></button>`).join("")}</div><button class="secondary" data-shop-back="1">← 戻る</button>`;
+ }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">戻る</button></div>`}
 }
 function buyItem(i){
- const items=[["好きなドリンク",6,6],["スイーツ",8,8],["キャンドル",15,12],["新しい服",45,16],["趣味のもの",35,18],["花",20,10]],x=items[i];
- if(state.money<x[1]){alert("お金が足りません");return}
- state.money-=x[1];state.stress=Math.max(0,(state.stress||0)-x[2]);state.inventory.push(x[0]);shopping();
+ try{
+  const x=shopItems()[Number(i)];if(!x)throw new Error("商品データが見つかりません");
+  if((state.money||0)<x[1]){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="shopping()">戻る</button></div>';return}
+  if(!Array.isArray(state.inventory))state.inventory=[];
+  state.money-=x[1];state.stress=Math.max(0,(state.stress||0)-x[2]);state.inventory.push(x[0]);
+  A.innerHTML=`<div class="card"><h2>🛍️ 購入しました</h2><p>${x[0]}</p><p class="small">-$${x[1]}　🧠 ストレス -${x[2]} → ${state.stress}%</p><button class="primary" onclick="shopping()">買い物を続ける</button><button class="secondary" onclick="day()">家に戻る</button></div>`;
+ }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">戻る</button></div>`}
 }
 function refresh(){
  state.energy=Math.min(100,state.energy+15);state.stress=Math.max(0,(state.stress||0)-20);
@@ -299,6 +310,12 @@ function bootGame(){
  window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
+document.addEventListener("click",function(e){
+ const shop=e.target.closest&&e.target.closest("[data-shop]");
+ if(shop){e.preventDefault();buyItem(Number(shop.getAttribute("data-shop")));return}
+ const back=e.target.closest&&e.target.closest("[data-shop-back]");
+ if(back){e.preventDefault();day();return}
+});
 document.addEventListener("click",function(e){
  const b=e.target.closest&&e.target.closest("[data-go-place]");
  if(b){e.preventDefault();meetAt(Number(b.getAttribute("data-go-place")))}
