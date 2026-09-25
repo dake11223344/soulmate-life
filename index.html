@@ -329,9 +329,17 @@ function careerMenu(){
  html+='<button class="secondary" onclick="day()">← Back</button></div>';A.innerHTML=html;
 }
 function jobMarket(){
- initCareer();let html='<h2>🔎 Job Market</h2><div class="card"><p class="small">Jobs unlock based on your education.</p>';
- careerJobs.forEach(j=>{const ok=educationAllows(j.education);html+='<button class="option" '+(ok?'onclick="chooseJob(\''+j.id+'\')"':'disabled')+'>'+j.name+' · $'+j.pay+'/day<br><span class="small">'+(ok?'Requires '+j.education:'🔒 Requires '+j.education)+'</span></button>'});
- html+='</div><button class="secondary" onclick="careerMenu()">← Back</button>';A.innerHTML=html;
+ initCareer();ensureCareerExperience();
+ let html='<h2>🔎 Job Market</h2><div class="card"><p class="small">All careers are always shown. Locked careers stay visible so you can see what you need.</p>';
+ careerJobs.forEach(function(j){
+  const ok=jobUnlocked(j),yrs=careerYears(j.track);
+  let req='Requires '+j.education;
+  if(j.years)req+=' · '+j.years+' years experience ('+Math.min(yrs,j.years)+'/'+j.years+')';
+  const action=ok ? 'onclick="chooseJob(&quot;'+j.id+'&quot;)"' : 'disabled';
+  html+='<button class="option" '+action+'>'+j.name+' · $'+j.pay+'/day<br><span class="small">'+(ok?'✅ ':'🔒 ')+req+'</span></button>';
+ });
+ html+='</div><button class="secondary" onclick="careerMenu()">← Back</button>';
+ A.innerHTML=html;
 }
 function chooseJob(id){const j=careerJobs.find(x=>x.id===id);if(!j||!jobUnlocked(j))return;state.career=id;saveGame();careerMenu()}
 function schoolMenu(){
