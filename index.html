@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{},officialPartners:{},friendInvites:{}};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{},officialPartners:{},friendInvites:{},npcRelationships:{},friendAdviceSeen:{}};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -169,6 +169,43 @@ function hiddenRelationshipType(i){
  if((d.strong||[]).includes(i))return "strong";
  if((d.risky||[]).includes(i))return "risky";
  return "unavailable";
+}
+function ensureNpcRelationships(){
+ if(!state.npcRelationships||typeof state.npcRelationships!=="object")state.npcRelationships={};
+ if(!state.friendAdviceSeen||typeof state.friendAdviceSeen!=="object")state.friendAdviceSeen={};
+ ensureRelationshipDestiny();
+ for(let i=0;i<npcs.length;i++){
+  if(i===state.relationshipDestiny.soulmate)continue;
+  if(state.npcRelationships[i]==null){
+   const seed=(i*19+((state.relationshipDestiny&&state.relationshipDestiny.soulmate)||0)*7)%100;
+   state.npcRelationships[i]=seed<28?"taken":"single";
+  }
+ }
+}
+function npcDatingStatus(i){
+ ensureNpcRelationships();i=Number(i);
+ if(i===state.relationshipDestiny.soulmate){
+  const cycle=(state.day||1)%1095;
+  return (cycle>=250&&cycle<430)||(cycle>=700&&cycle<850)?"taken":"single";
+ }
+ return state.npcRelationships[i]||"single";
+}
+function friendAdvice(i){
+ ensureSocialState();ensureDatingStory();i=Number(i);const n=npcs[i];if(!n)return;
+ const friends=(state.friends||[]).map(Number);if(!friends.length){A.innerHTML='<div class="card"><h2>💙 No close friend yet</h2><p>Build a platonic friendship first. Close friends can sometimes notice things you miss.</p><button class="primary" onclick="openContact('+i+')">Back</button></div>';return}
+ const f=npcs[friends[((state.day||1)+i)%friends.length]],type=hiddenRelationshipType(i),count=state.dateCounts[i]||0;
+ let advice="They seem nice, but I think you should take your time and pay attention to how you feel around them.";
+ if(type==="soulmate")advice="I don't know where this will go, but you seem really comfortable around them. Just don't rush it.";
+ else if(type==="strong")advice="You two seem pretty good together. Nobody is perfect, but I can see why you like them.";
+ else if(type==="risky")advice="I can't put my finger on it, but something about this relationship worries me. Keep your eyes open.";
+ else if(count>=7){const story=unavailableStoryFor(i);advice=story.id==="cheating"||story.id==="married"?"I saw something that made me uncomfortable. I think you should ask them directly whether there is someone else.":"Something feels off to me. I care about you, so I don't want you to ignore the warning signs."}
+ A.innerHTML='<div class="card"><h2>💙 Advice from '+f.name.split(" ")[0]+'</h2><p>“'+advice+'”</p><p class="small">Your friend can be right or wrong. This does not reveal the hidden match category.</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';
+}
+function friendInviteMessage(i){
+ i=Number(i);const n=npcs[i];if(!n)return;
+ const plans=["grab coffee","go out this weekend","check out a party","hang out","take a weekend trip"];
+ const p=plans[((state.day||1)+i)%plans.length];
+ A.innerHTML='<div class="card"><h2>💙 '+n.name.split(" ")[0]+' wants to make plans</h2><p><b>'+n.name.split(" ")[0]+':</b> Hey! Want to '+p+' together?</p><button class="primary" onclick="friendPlans('+i+')">Make a plan</button><button class="secondary" onclick="day()">Maybe later</button></div>';
 }
 function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、YouのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">GamesはSoulmateが誰か教えてくれません。会話、Values、生活の中からYou自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューGames</button></div></div>`}
 function creatorPortrait(){
@@ -573,7 +610,7 @@ function openContact(i){
  ensureSocialState();if(!state.officialPartners)state.officialPartners={};const n=npcs[i];if(!n)return phone();i=Number(i);
  const friend=state.friends.includes(i),official=state.officialPartners[i]||"";
  const status=official?'❤️ '+official:(friend?'💙 Friend':'');
- A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p>'+(status?'<p><b>'+status+'</b></p>':'')+'<button class="primary" onclick="messageMenu('+i+')">💬 Message</button>'+(friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button>':official?'<button class="option" onclick="askDate('+i+')">💕 Plan a Date</button>':'<button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button><button class="option" onclick="friendZone('+i+')">💙 Become Platonic Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
+ A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p>'+(status?'<p><b>'+status+'</b></p>':'')+'<button class="primary" onclick="messageMenu('+i+')">💬 Message</button>'+(!friend?'<button class="option" onclick="friendAdvice('+i+')">💙 Ask a friend for advice</button>':'')+(friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button>':official?'<button class="option" onclick="askDate('+i+')">💕 Plan a Date</button>':'<button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button><button class="option" onclick="friendZone('+i+')">💙 Become Platonic Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
 }
 function friendZone(i){
  ensureSocialState();i=Number(i);if(!state.officialPartners)state.officialPartners={};
@@ -594,6 +631,7 @@ function friendPlans(i){const n=npcs[i];A.innerHTML='<h2>💙 Plans with '+n.nam
 function doFriendPlan(i,type){const c=calendarInfo();if(type==="Weekend Trip"&&!c.weekend){A.innerHTML='<div class="card"><h2>✈️ Weekend only</h2><p>Travel with friends is available on Saturday or Sunday.</p><button class="primary" onclick="friendPlans('+i+')">Back</button></div>';return}state.energy=Math.max(0,(state.energy||0)-(type==="Weekend Trip"?25:12));state.stress=Math.max(0,(state.stress||0)-(type==="Weekend Trip"?30:15));addAffinity(i,4);saveGame();A.innerHTML='<div class="card"><h2>💙 '+type+'</h2><p>You spent time together as friends.</p><p class="small">FRIEND ZONE · Platonic</p><button class="primary" onclick="day()">Continue</button></div>'}
 function askDate(i){
  ensureSocialState();i=Number(i);const n=npcs[i];if(!n)return phone();const a=affinity(i),need=n.dateStyle==="casual"?12:n.dateStyle==="balanced"?22:32;
+ if(!(state.officialPartners&&state.officialPartners[i])&&npcDatingStatus(i)==="taken"){A.innerHTML='<div class="card"><h2>💕 Not Available</h2><p>'+n.name.split(" ")[0]+' tells you they are seeing someone right now, so they do not want to go on a date.</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';return}
  if(state.friends.includes(i)){A.innerHTML='<div class="card"><h2>💙 Friend Zone</h2><p>You and '+n.name.split(" ")[0]+' are currently platonic friends.</p><button class="primary" onclick="openContact('+i+')">Back</button></div>';return}
  if(a<need){const reply=n.dateStyle==="serious"?"I'd like to get to know you a little better first.":"Maybe not yet, but let's keep talking.";A.innerHTML='<h2>💕 Ask '+n.name.split(" ")[0]+' on a Date</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';return}
  let html='<h2>💕 Set a Date with '+n.name.split(" ")[0]+'</h2><div class="card"><p>They said yes! Choose a day:</p>';
@@ -646,7 +684,7 @@ function chatVariant(i,topicIndex){
 }
 function messageMenu(i){
  i=Number(i); const n=npcs[i]; if(!n)return;
- A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card"><button class="option" onclick="topicMenu('+i+')">💬 Choose a topic</button><button class="option" onclick="randomMessage('+i+')">🎲 Pick a topic for me</button><button class="secondary" onclick="openContact('+i+')">← Back</button></div>';
+ A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card">'+((state.friends||[]).includes(i)?'<button class="option" onclick="friendPlans('+i+')">📅 Ask to meet up / travel</button>':'')+'<button class="option" onclick="topicMenu('+i+')">💬 Choose a topic</button><button class="option" onclick="randomMessage('+i+')">🎲 Pick a topic for me</button><button class="secondary" onclick="openContact('+i+')">← Back</button></div>';
 }
 function randomMessage(i){
  i=Number(i); const list=allChatTopics(); if(!npcs[i]||!list.length)return;
@@ -787,7 +825,12 @@ function ensureIncoming(){
  if(!state.ignoredMessages)state.ignoredMessages={};
 }
 function createIncomingMessage(){
- ensureIncoming();
+ ensureIncoming();ensureSocialState();
+ const friendIds=(state.friends||[]).map(Number);
+ if(friendIds.length&&(state.day||1)%5===0&&!Object.values(state.incomingMessages).some(m=>m&&m.day===(state.day||1))){
+  const fi=friendIds[(state.day||1)%friendIds.length];
+  state.incomingMessages[fi]={day:state.day||1,friendPlan:true,read:false};saveGame();return;
+ }
  if(state.incomingHandledDay===(state.day||1))return;const ids=Array.isArray(state.contacts)?state.contacts:[];if(!ids.length)return;
  const eligible=ids.filter(i=>affinity(i)>=8 || (Array.isArray(state.friends)&&state.friends.includes(Number(i))));if(!eligible.length)return;
  const day=state.day||1;if(Object.values(state.incomingMessages).some(m=>m&&m.day===day))return;
@@ -801,7 +844,7 @@ function morningMessage(){
  createIncomingMessage();ensureIncoming();
  const entries=Object.entries(state.incomingMessages).filter(([i,m])=>m&&m.day===(state.day||1)&&!m.read);
  if(!entries.length)return "";
- const [i,m]=entries[0],n=npcs[Number(i)],t=incomingMessageTemplates[m.template];
+ const [i,m]=entries[0],n=npcs[Number(i)];if(m.friendPlan)return `<div class="card"><h3>📩 New message from ${n.name.split(" ")[0]}</h3><p><b>${n.name.split(" ")[0]}:</b> Want to make plans and hang out?</p><button class="primary" onclick="friendInviteMessage(${i})">Reply</button><button class="secondary" onclick="ignoreIncoming(${i})">Maybe later</button></div>`;const t=incomingMessageTemplates[m.template];
  return `<div class="card"><h3>📩 New message from ${n.name.split(" ")[0]}</h3><p><b>${n.name.split(" ")[0]}:</b> ${t.text}</p><button class="primary" onclick="openIncoming(${i})">Reply</button><button class="secondary" onclick="ignoreIncoming(${i})">Ignore for now</button></div>`;
 }
 function openIncoming(i){
@@ -871,7 +914,8 @@ function bootGame(){
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.careerMenu=careerMenu; window.jobMarket=jobMarket; window.chooseJob=chooseJob; window.schoolMenu=schoolMenu; window.startSchool=startSchool; window.attendSchool=attendSchool; window.quitSchool=quitSchool; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.friendZone=friendZone; window.friendPlans=friendPlans; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledDate=cancelScheduledDate; window.goScheduledDate=goScheduledDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.friendAdvice=friendAdvice; window.friendInviteMessage=friendInviteMessage;
+ window.friendZone=friendZone; window.friendPlans=friendPlans; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledDate=cancelScheduledDate; window.goScheduledDate=goScheduledDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
