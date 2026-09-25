@@ -269,7 +269,7 @@ function day(){
  const c=calendarInfo(),blocked=moodCheck(),m=moodStatus(),worked=state.workedDay===c.d;
  if(!state.period)state.period="morning";
  const isMorning=state.period==="morning",isNight=state.period==="night";
- const dayType=c.weekend?(c.weekday==='Sat'?'🎉 SATURDAY — WEEKEND · FREE DAY':'🎉 SUNDAY — WEEKEND · FREE DAY'):'💼 '+fullWeekday(c.weekday)+' — WORK DAY';
+ const dayType=c.weekend?(c.weekday==='Sat'?'🎉 SATURDAY — WEEKEND':'🎉 SUNDAY — WEEKEND'):'💼 '+fullWeekday(c.weekday)+' — WORK DAY';
  const intro=c.weekend?(isMorning?'Your whole day is free starting this morning.':'Enjoy your weekend free time.'):(worked?'Work is finished. Your evening is free.':'Work is scheduled from morning through afternoon.');
  let note=m?'<div class="card"><h3>'+m.title+'</h3><p>'+m.text+'</p></div>':'';
  if(blocked){A.innerHTML=statusBar(c)+note+'<div class="card"><h2>Rest Day</h2><p>Your body and mind need recovery today.</p><button class="primary" onclick="endDay()">🛌 Rest for the whole day</button></div>'+nav();return}
@@ -287,7 +287,7 @@ function playNewDaySound(){
 }
 function showNewDay(){
  const c=calendarInfo();day();const bar=A.querySelector(".statbar");if(bar)bar.classList.add("newDayFlash");
- const banner=document.createElement("div");banner.className="dayBanner";banner.innerHTML=(c.weekend?(c.weekday==="Sat"?"🎉 SATURDAY · WEEKEND · FREE DAY":"🎉 SUNDAY · WEEKEND · FREE DAY"):"💼 "+fullWeekday(c.weekday)+" · WORK DAY")+"<br><span class='small'>"+c.month+" "+c.date+" · Day "+c.d+" of 365</span>";A.insertBefore(banner,A.firstChild);playNewDaySound();setTimeout(()=>{if(banner&&banner.parentNode)banner.remove()},2200);
+ const banner=document.createElement("div");banner.className="dayBanner";banner.innerHTML=(c.weekend?(c.weekday==="Sat"?"🎉 SATURDAY · WEEKEND":"🎉 SUNDAY · WEEKEND"):"💼 "+fullWeekday(c.weekday)+" · WORK DAY")+"<br><span class='small'>"+c.month+" "+c.date+" · Day "+c.d+" of 365</span>";A.insertBefore(banner,A.firstChild);playNewDaySound();setTimeout(()=>{if(banner&&banner.parentNode)banner.remove()},2200);
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>Year 1 Complete 🎉</h2><p>You made it through 365 days.</p><button class="primary" onclick="state.screen='day';render()">Back to Day 365</button></div>`;return}
