@@ -43,7 +43,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 </head>
 <body><main id="app"></main><script>
 const A=document.querySelector("#app");
-const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
+const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0}};
 const hair=["Long Straight","Soft Wave","Layered Long","Side Part","Ponytail","Bun","Half Up","Medium","Bob","Short","Pixie","Braids","Twin Tail","Curly","Wolf Cut","Shag"];
 const colors=["#171717","#3b271e","#70462f","#a66c43","#d3a77c","#f0c98e","#ddd3ca","#b8342c","#e77f9c","#7b4bb7","#344b92","#5ca8d8","#54856d","#bfc2c7","#f5f1ea","#8b3f31"];
@@ -170,21 +170,30 @@ function moodCheck(){
  if(state.stress>=90 && (state.lowMoodUntil||0)<(state.day||1)) state.lowMoodUntil=(state.day||1)+3;
  return (state.lowMoodUntil||0)>=(state.day||1);
 }
-function statusBar(c){return `<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday}</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ストレス ${state.stress||0}%</span><span class="pill">🕒 行動 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
+function periodLabel(){return state.period==="morning"?"🌅 朝":state.period==="afternoon"?"☀️ 昼":"🌙 夜"}
+function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()}</span><span class="pill">🌸 1年目</span><span class="pill">${c.month} ${c.date} · ${c.weekday}</span><span class="pill">📅 ${c.d}/365日</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ストレス ${state.stress||0}%</span><span class="pill">🕒 行動 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
 function day(){
  const c=calendarInfo(),low=moodCheck(),worked=state.workedDay===c.d;
- let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。あと${Math.max(1,(state.lowMoodUntil||c.d)-c.d+1)}日ほど、デートや外出をする気力がありません。休息を優先しましょう。</p></div>`:"";
- const intro=c.d===1?"新しい一年が始まった。":c.weekend?"休日の朝。今日は自由に過ごせる。":"新しい一日の始まり。";
- A.innerHTML=statusBar(c)+note+morningMessage()+`<div class="card"><h2>${c.d}日目 — 自宅</h2><p class="event">${intro}</p>${(!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 仕事へ行く</button>':(!c.weekend&&worked?'<button class="option" disabled>✓ 今日の仕事は終了</button>':'')}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>${nav()}`;
+ if(!state.period)state.period="morning";
+ let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。しばらく休息を優先しましょう。</p></div>`:"";
+ const isMorning=state.period==="morning",isAfternoon=state.period==="afternoon",isNight=state.period==="night";
+ const intro=isMorning?(c.weekend?"休日の朝。今日は自由に過ごせる。":"朝。今日をどう過ごそう？"):isAfternoon?"昼になった。まだ時間がある。":"夜になった。今日の残りをどう過ごそう？";
+ A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 仕事へ行く（夜まで）</button>':''}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
+}
+function nextPeriod(){
+ if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM"}
+ else if(state.period==="afternoon"){state.period="night";state.time="7:00 PM"}
+ else return endDay();
+ day();
 }
 function endDay(){
  if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;return}
- state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.time="7:00 AM";state.screen="day";render();
+ state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.screen="day";render();
 }
 function work(){
- const c=calendarInfo(); if(c.weekend||state.workedDay===c.d)return day(); if(moodCheck())return day();
- state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);moodCheck();
- A.innerHTML=statusBar(c)+`<div class="card"><h2>仕事が終わった</h2><p>今日の仕事は終了。今日はもう仕事できません。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 今日を終える</button></div>`;
+ const c=calendarInfo(); if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
+ state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);state.period="night";state.time="6:00 PM";moodCheck();
+ A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 仕事が終わった — 夜</h2><p>朝から働いて、昼の時間帯は仕事で過ぎました。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 寝る</button></div>`;
 }
 function shopItems(){return [
  ["☕ 好きなドリンク",6,6],["🍰 スイーツ",8,8],["🕯️ キャンドル",15,12],
@@ -333,7 +342,7 @@ function nav(){return `<div class="nav"><button class="ghost" onclick="render()"
 function render(){var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
 function bootGame(){
  if(!A)return;
- window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
+ window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
  window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.askDate=askDate; window.incomingDate=incomingDate; window.dateScene=dateScene; window.relationships=relationships;
  render();
