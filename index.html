@@ -342,7 +342,7 @@ function getMeeting(i){
  "🎪 お祭り":["思ったより人多いね。何から見る？",["屋台なら何食べる？","お祭りよく行く？","人混み平気？"]],
  "🏛️ 美術館":["この作品、なんか気になるね。",["美術館よく来る？","どんなアートが好き？","一人で見る派？誰かと見る派？"]],
  "🎨 アートクラス":["それ上手だね。こういうのよくやる？",["絵を描くの好き？","他に作るHobbiesある？","完成したら飾る？"]],
- "🍳 Cooking教室":["いい匂いしてきたね。Do you cook?",["得意Cookingある？","家でよく作る？","誰かにCookingするの好き？"]],
+ "🍳 Cooking教室":["It smells really good in here. Do you cook often?",["What do you like to cook?","Do you cook at home much?","Do you enjoy cooking for other people?"]],
  "🎮 Gamesショップ":["何か探してるGamesある？",["普段Gamesする？","一人用と対戦どっち好き？","最近ハマったGamesある？"]],
  "🎳 ボウリング":["スコアどれくらいいけそう？",["ボウリング得意？","負けず嫌い？","Friendsとよく遊びに行く？"]],
  "🏖️ 湖・ビーチ":["今日は外にいるだけで気持ちいいね。",["泳ぐの好き？","海と山ならどっち？","夏は外で遊ぶ派？"]],
@@ -378,32 +378,21 @@ function meetAt(placeIndex){
 }
 function talk(){window.convoStep=0;conversation()}
 function answersFor(q,step){
- if(step===0){
-  if(/Coffee/.test(q))return ["うん、飲んだことあるよ","まだ。何がおすすめ？","Coffeeよりお茶派かな"];
-  if(/散歩/.test(q))return ["うん、よく歩くよ","たまに散歩する","朝の散歩はあまりしないかな"];
-  if(/Books|探して/.test(q))return ["小説を探してる","気になってたBooksを見に来た","今日は特に決めてないよ"];
-  if(/買おう|迷って/.test(q))return ["うん、買おうか迷ってる","見るだけのつもり","別のものを探してるよ"];
-  if(/トレーニング/.test(q))return ["うん、よく来るよ","最近通い始めた","今日は体験で来たよ"];
-  if(/コース/.test(q))return ["うん、初めて","前にも来たことあるよ","この辺はまだ詳しくない"];
-  if(/人多い/.test(q))return ["まず屋台見たい","イベントから見たい","少しぶらぶらしたい"];
-  if(/踊る/.test(q))return ["好き！","たまになら","見る方が好きかな"];
-  if(/Movies/.test(q))return ["うん、このMovies観に来た","別の作品と迷ってた","なんとなくMoviesが観たくて"];
-  return ["うん、ここ気になってた","たまに来るよ","今日はたまたま来てみた"];
- }
- if(/どんな運動/.test(q))return ["ヨガや軽い運動が好き","ランニングが好き","筋トレが好き"];
- if(/朝型.*夜型/.test(q))return ["朝型かな","夜型かな","どっちでもないかも"];
- if(/海と山/.test(q))return ["海が好き","山が好き","どっちも好き"];
- if(/犬派.*猫派/.test(q))return ["Dogs!","Cats!","どっちも好き"];
- if(/一人.*誰か|一人派.*一緒/.test(q))return ["一人で楽しむのが好き","誰かと一緒が好き","どっちも好き"];
- if(/静かな.*賑やか/.test(q))return ["静かなところが好き","賑やかなところが好き","その日の気分かな"];
- if(/協力系.*対戦系/.test(q))return ["協力系が好き","対戦系が好き","どっちも好き"];
- if(/何食べる/.test(q))return ["Sweetsかな","しょっぱいもの","気になった屋台を試す"];
- if(/何味/.test(q))return ["醤油が好き","味噌が好き","豚骨が好き"];
- if(/どんな|何を|何歌う|得意Cooking|ジャンル|曲|アート|Books/.test(q))return ["定番のものが好きかな","その時の気分で変わる","新しいものも試してみたい"];
- if(/よく|普段|週に何回|多い/.test(q))return ["けっこうするよ","たまにかな","あまりしないかな"];
- if(/好き|平気|得意/.test(q))return ["うん、好き！","まあまあかな","実はあまり得意じゃない"];
- if(/ある|いる|飼ってる/.test(q))return ["あるよ","まだないけど興味ある","今のところないかな"];
- return ["うん、そうだね","私は少し違うかな","まだわからないかな"];
+ const x=String(q||"").toLowerCase();
+ if(/cook|cooking|料理/.test(x))return ["Yeah, I cook pretty often.","Sometimes. Mostly simple things.","Not much, but I'd like to learn."];
+ if(/coffee|コーヒー/.test(x))return ["Yeah, I drink coffee pretty often.","Sometimes, but not every day.","I'm more of a tea person."];
+ if(/walk|散歩/.test(x))return ["Yeah, I go for walks pretty often.","Sometimes, when the weather is nice.","Not very often, honestly."];
+ if(/book|本|read/.test(x))return ["I like novels.","I read a little bit of everything.","I'm just browsing today."];
+ if(/buy|shopping|買/.test(x))return ["I usually know what I want.","I like looking around first.","I'm just browsing today."];
+ if(/workout|training|gym|運動|トレーニング/.test(x))return ["I work out pretty regularly.","A couple of times a week.","I'm just getting into it."];
+ if(/movie|映画/.test(x))return ["I watch movies pretty often.","Mostly at home, honestly.","I love going to the theater."];
+ if(/music|song|band|音楽|曲/.test(x))return ["I listen to music all the time.","Mostly when I'm driving or relaxing.","It depends on my mood."];
+ if(/dog|cat|pet|犬|猫|ペット/.test(x))return ["I'm definitely a dog person.","Probably cats.","Honestly, I like both."];
+ if(/morning|night|朝型|夜型/.test(x))return ["I'm more of a morning person.","Definitely a night owl.","It really depends on the day."];
+ if(/first time|初めて|course|コース/.test(x))return ["Yeah, it's my first time here.","I've been here before.","I've been wanting to try this place."];
+ if(/often|usually|how many|よく|普段|週に何回/.test(x))return ["Pretty often.","Every once in a while.","Not very often."];
+ if(/like|好き|enjoy/.test(x))return ["Yeah, I really like it.","It's okay—I enjoy it sometimes.","It's not really my thing."];
+ return ["Yeah, I've been curious about this place.","I've been here a couple of times.","I just decided to check it out today."];
 }
 function conversation(){
  let n=npcs[window.currentNpc],m=getMeeting(window.currentPlace==null?0:window.currentPlace),name=n.name.split(" ")[0];
