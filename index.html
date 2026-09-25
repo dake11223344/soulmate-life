@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{},officialPartners:{},friendInvites:{},npcRelationships:{},friendAdviceSeen:{}};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[],incomingHandledDay:0,relationshipDestiny:null,dateCounts:{},relationshipReveals:{},officialPartners:{},friendInvites:{},npcRelationships:{},friendAdviceSeen:{},gameYears:2};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -293,11 +293,12 @@ function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="da
 function selectFace(i){state.look.face=i;render()}
 function selectEye(i){state.look.eye=i;render()}
 function answer(i){let [k,d]=questions[state.q][1][i][1];state.score[k]=Math.max(0,Math.min(100,state.score[k]+d));state.q++;render()}
-function calendarInfo(){
- const d=Math.max(1,Math.min(365,state.day||1)),date=new Date(2026,0,d);
- const weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
- return {d,weekday:weekdays[date.getDay()],month:months[date.getMonth()],date:date.getDate(),weekend:[0,6].includes(date.getDay())};
+function gameLimitDays(){return Math.min(5,Math.max(2,Number(state.gameYears)||2))*365}
+function calendarInfoFor(day){
+ const d=Math.max(1,Math.min(1825,day||1)),date=new Date(2026,0,d-1),weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ return {d,year:Math.floor((d-1)/365)+1,weekday:weekdays[date.getDay()],month:months[date.getMonth()],date:date.getDate(),weekend:[0,6].includes(date.getDay())}
 }
+function calendarInfo(){return calendarInfoFor(state.day||1)}
 function moodCheck(){
  state.stress=Math.max(0,Math.min(100,state.stress||0));
  const d=state.day||1;
@@ -317,7 +318,7 @@ function moodStatus(){
 }
 function fullWeekday(w){return ({Mon:"MONDAY",Tue:"TUESDAY",Wed:"WEDNESDAY",Thu:"THURSDAY",Fri:"FRIDAY",Sat:"SATURDAY",Sun:"SUNDAY"})[w]||w}
 function periodLabel(){return state.period==="morning"?"🌅 AM":state.period==="afternoon"?"☀️ PM":"🌙 Night"}
-function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()} ${state.periodHours==null?4:state.periodHours}h</span><span class="pill">${c.weekend?(c.weekday==="Sat"?"🎉 SATURDAY":"🎉 SUNDAY"):"💼 "+fullWeekday(c.weekday)}</span><span class="pill">${c.month} ${c.date}<br>${c.weekday}</span><span class="pill">📅 ${c.d}/365</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ${state.stress||0}%</span><span class="pill">🕒 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
+function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()} ${state.periodHours==null?4:state.periodHours}h</span><span class="pill">${c.weekend?(c.weekday==="Sat"?"🎉 SATURDAY":"🎉 SUNDAY"):"💼 "+fullWeekday(c.weekday)}</span><span class="pill">${c.month} ${c.date}<br>${c.weekday}</span><span class="pill">📅 Year ${c.year}<br>Day ${((c.d-1)%365)+1}</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ${state.stress||0}%</span><span class="pill">🕒 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
 function ensureSocialState(){if(!Array.isArray(state.friends))state.friends=[];if(!Array.isArray(state.scheduledDates))state.scheduledDates=[]}
 function dateForDay(d){ensureSocialState();return state.scheduledDates.find(x=>x&&x.day===d&&!x.cancelled&&!x.done)}
 function scheduleSummary(){
@@ -325,7 +326,7 @@ function scheduleSummary(){
  if(!upcoming.length)return '<p class="small">📅 No upcoming plans.</p>';
  return '<p class="small"><b>📅 Schedule:</b><br>'+upcoming.map(x=>{const c=calendarInfoFor(x.day),n=npcs[x.npc];return c.weekday+' '+c.month+' '+c.date+' — Date with '+(n?n.name.split(" ")[0]:"someone")}).join('<br>')+'</p>';
 }
-function calendarInfoFor(day){const d=Math.max(1,Math.min(365,day||1)),date=new Date(2026,0,d),weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return {d,weekday:weekdays[date.getDay()],month:months[date.getMonth()],date:date.getDate(),weekend:[0,6].includes(date.getDay())}}
+
 function todayDateCard(){
  const plan=dateForDay(state.day||1);if(!plan)return '';
  const n=npcs[plan.npc];if(!n)return '';
@@ -353,10 +354,20 @@ function playNewDaySound(){
 }
 function showNewDay(){
  const c=calendarInfo();day();const bar=A.querySelector(".statbar");if(bar)bar.classList.add("newDayFlash");
- const banner=document.createElement("div");banner.className="dayBanner";banner.innerHTML=(c.weekend?(c.weekday==="Sat"?"🎉 SATURDAY · WEEKEND":"🎉 SUNDAY · WEEKEND"):"💼 "+fullWeekday(c.weekday)+" · WORK DAY")+"<br><span class='small'>"+c.month+" "+c.date+" · Day "+c.d+" of 365</span>";A.insertBefore(banner,A.firstChild);playNewDaySound();setTimeout(()=>{if(banner&&banner.parentNode)banner.remove()},2200);
+ const banner=document.createElement("div");banner.className="dayBanner";banner.innerHTML=(c.weekend?(c.weekday==="Sat"?"🎉 SATURDAY · WEEKEND":"🎉 SUNDAY · WEEKEND"):"💼 "+fullWeekday(c.weekday)+" · WORK DAY")+"<br><span class='small'>"+c.month+" "+c.date+" · Year "+c.year+"</span>";A.insertBefore(banner,A.firstChild);playNewDaySound();setTimeout(()=>{if(banner&&banner.parentNode)banner.remove()},2200);
+}
+function extendGameOneYear(){
+ state.gameYears=Math.min(5,(Number(state.gameYears)||2)+1);saveGame();showNewDay();
+}
+function gameTimeCheckpoint(){
+ const y=Number(state.gameYears)||2;
+ if(y>=5){
+  A.innerHTML='<div class="card"><h2>Five Years Complete 💗</h2><p>Your story has reached the five-year maximum.</p><p>Who you chose—and what happened in those relationships—is your ending.</p><button class="primary" onclick="state.screen=\'day\';render()">View Final Day</button></div>';return;
+ }
+ A.innerHTML='<div class="card"><h2>Year '+y+' Complete</h2><p>You have not reached marriage yet.</p><p>Do you want one more year to keep looking for your soulmate?</p><button class="primary" onclick="extendGameOneYear()">❤️ Continue for Year '+(y+1)+'</button><button class="secondary" onclick="state.screen=\'day\';render()">Stay on Final Day</button></div>';
 }
 function endDay(){
- if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>Year 1 Complete 🎉</h2><p>You made it through 365 days.</p><button class="primary" onclick="state.screen='day';render()">Back to Day 365</button></div>`;return}
+ if((state.day||1)>=gameLimitDays()){gameTimeCheckpoint();return}
  state.day=(state.day||1)+1;state.energy=Math.min(100,(state.energy||0)+35);state.stress=Math.max(0,(state.stress||0)-12);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";saveGame();showNewDay();
 }
 const careerJobs=[
@@ -914,7 +925,8 @@ function bootGame(){
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.careerMenu=careerMenu; window.jobMarket=jobMarket; window.chooseJob=chooseJob; window.schoolMenu=schoolMenu; window.startSchool=startSchool; window.attendSchool=attendSchool; window.quitSchool=quitSchool; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.friendAdvice=friendAdvice; window.friendInviteMessage=friendInviteMessage;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.extendGameOneYear=extendGameOneYear;
+ window.friendAdvice=friendAdvice; window.friendInviteMessage=friendInviteMessage;
  window.friendZone=friendZone; window.friendPlans=friendPlans; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledDate=cancelScheduledDate; window.goScheduledDate=goScheduledDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
