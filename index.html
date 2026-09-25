@@ -430,13 +430,32 @@ const chatCategories=[
  {name:"恋愛",icon:"💕",topics:["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]},
  {name:"ふざける",icon:"😂",topics:["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]}
 ];
-const chatOpeners=["今日はどうだった？","そういえば聞いてみたかったんだけど","ふと思ったんだけど","ねえ、ちょっと聞いていい？","この前から気になってたんだけど","急に思い出した（笑）","ところでさ","全然関係ないんだけど"];
-const chatReplies=["それ、けっこうわかる。僕も似たようなことあるよ。","へえ、そうなんだ。もう少し聞きたい。","それいいね。なんか君らしい気がする。","僕はちょっと違うかも。でもその考え方もわかる。","面白いね。今度会ったときにもその話しようよ。","それ初めて聞いた。意外かも。","いい質問だね。僕ならたぶんそうするかな。","なんか話してたら時間あっという間だね。"];
+const playerMessageStarts=[
+ "そういえば、{topic}ってどう？","ちょっと聞きたいんだけど、{topic}は好き？","今日ふと{topic}のこと考えてた。","{topic}について話したくなった（笑）","ねえ、{topic}ってどんな感じ？","急なんだけど、{topic}について聞いてもいい？"
+];
+const playerMessageChoices=[
+ ["私はけっこう好き！","最近ちょうど気になってる。","私はあまり詳しくないかも。","あなたはどう？"],
+ ["私は大事だと思う。","その時によるかな。","私はちょっと違う考えかも。","もっと聞きたい！"],
+ ["それ楽しそう。","私もやってみたい。","実はちょっと苦手（笑）","おすすめ教えて。"],
+ ["私はそういうの好きだよ。","まだよく分からないかな。","意外と気にしないかも。","あなたの場合はどう？"]
+];
+const npcReplySets={
+ frequent:["わかる！僕もそれ好き。話し始めると止まらないかも（笑）","ちょうど僕もその話したかった。気が合うね。","いいね！それなら今度一緒にやってみたい。","返信早すぎた？（笑）でもその話、気になった。","それ面白い。もうちょっと詳しく聞かせて！","僕は結構好き。こういう話できるの嬉しい。","それならおすすめあるよ。今度教える！","え、僕も同じこと考えてた（笑）"],
+ warm:["うん、それいいね。僕もわりと好きだよ。","なるほど。そういう考え方も素敵だと思う。","僕は少し違うけど、話を聞くのは好き。","それ、もう少し聞いてみたいな。","なんとなく君らしい答えな気がする。","僕の場合は少し違うかな。でも面白いね。","こういう話、ゆっくりできるのいいね。","今度会ったときにもその話したいな。"],
+ space:["なるほど。僕はわりとマイペースかな。","そうなんだ。僕は少し違うかも。","面白いね。また時間あるとき話そう。","僕はあまり詳しくないけど、ちょっと気になる。","うん、そういう考えもあるよね。","僕ならたぶん別の方を選ぶかな。","へえ。意外だった。","それについては少し考えてみたいかも。"]
+};
 function allChatTopics(){return chatCategories.flatMap((c,ci)=>c.topics.map((t,ti)=>({category:c.name,icon:c.icon,topic:t,ci,ti})))}
 function chatVariant(i,topicIndex){
- const list=allChatTopics(),d=state.day||1,a=affinity(i),seed=d*37+i*71+a*13+(state.dailyActions||0)*17;
- const x=list[topicIndex==null?seed%list.length:Number(topicIndex)%list.length];
- return {category:x.category,icon:x.icon,topic:x.topic,opener:chatOpeners[Math.floor(seed/3+x.ti)%chatOpeners.length],reply:chatReplies[Math.floor(seed/7+x.ci)%chatReplies.length],id:(seed+x.ci*83+x.ti*19)%2000+1};
+ const list=allChatTopics(),d=state.day||1,a=affinity(i),count=(state.chatCount&&state.chatCount[i])||0;
+ const x=list[topicIndex==null?0:Math.abs(Number(topicIndex))%list.length];
+ const seed=Math.abs(d*101+i*193+a*47+count*271+x.ci*59+x.ti*83);
+ const start=playerMessageStarts[seed%playerMessageStarts.length].replace("{topic}",x.topic);
+ const choiceSet=playerMessageChoices[(seed+x.ti)%playerMessageChoices.length];
+ const style=(npcs[i]&&npcs[i].textStyle)||"warm";
+ const replies=npcReplySets[style]||npcReplySets.warm;
+ const reply=replies[Math.floor(seed/7)%replies.length];
+ const id=(x.ci*8+x.ti)*48+(seed%48)+1;
+ return {category:x.category,icon:x.icon,topic:x.topic,ci:x.ci,ti:x.ti,opener:start,choices:choiceSet,reply:reply,id:id};
 }
 function messageMenu(i){
  i=Number(i); const n=npcs[i]; if(!n)return;
@@ -481,21 +500,15 @@ function sendChatTopic(i,topicIndex){
 }
 function showPlayerMessageChoices(i,topicIndex){
  const n=npcs[i],v=chatVariant(i,topicIndex);
- const choices=[
-  '私はけっこう好きかも。',
-  '最近ちょうど気になってた！',
-  '私は少し違うかな。',
-  'それについてもっと聞きたい。'
- ];
- let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた → '+n.name.split(' ')[0]+':</b> 「'+v.topic+'」の話なんだけど…</p><p class="small">送るメッセージを選んでください</p>';
- choices.forEach(function(c,idx){html+='<button class="option" onclick="sendPlayerReply('+i+','+topicIndex+','+idx+')">'+c+'</button>';});
+ let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた → '+n.name.split(' ')[0]+':</b> '+v.opener+'</p><p class="small">続けて送る内容を選んでください</p>';
+ v.choices.forEach(function(c,idx){html+='<button class="option" onclick="sendPlayerReply('+i+','+topicIndex+','+idx+')">'+c+'</button>';});
  html+='<button class="secondary" onclick="openTopicCategory('+i+','+v.ci+')">← 戻る</button></div>';
  A.innerHTML=html;
 }
 function sendPlayerReply(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
  const v=chatVariant(i,topicIndex);
- const choices=['私はけっこう好きかも。','最近ちょうど気になってた！','私は少し違うかな。','それについてもっと聞きたい。'];
+ const choices=v.choices;
  const you=choices[choiceIndex]||choices[0];
  const count=(state.chatCount&&state.chatCount[i])||1;
  let gain=0,reaction='';
@@ -503,7 +516,7 @@ function sendPlayerReply(i,topicIndex,choiceIndex){
  else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
  else{gain=count<=2?2:0;reaction='自然に会話が続いた。';}
  addAffinity(i,gain);state.pendingChat=null;saveGame();
- A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+you+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+v.opener+'<br>'+you+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 window.showPlayerMessageChoices=showPlayerMessageChoices;window.sendPlayerReply=sendPlayerReply;
 function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
