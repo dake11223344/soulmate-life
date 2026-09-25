@@ -560,18 +560,34 @@ function getMeeting(i){
  const c=conv[p.name]||["ここ、よく来る？",["今日は一人？","こういう場所好き？","休みの日は何してる？"]];
  return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:`${p.name}で過ごしていると、近くにいた人と自然に話すきっかけができた。`,open:c[0],qs:c[1]};
 }
+function soloOutingResult(m){
+ const moments=[
+  "You take your time, enjoy the atmosphere, and leave in a much better mood.",
+  "Nothing dramatic happens. You simply have a really nice time on your own.",
+  "You slow down, enjoy being out of the house, and feel refreshed afterward.",
+  "It turns into one of those simple days that is surprisingly fun.",
+  "You enjoy the place at your own pace. No new people, no pressure—just a good outing."
+ ];
+ const text=moments[((state.day||1)+state.encounterCount+(window.currentPlace||0))%moments.length];
+ state.stress=Math.max(0,(state.stress||0)-10);saveGame();
+ A.innerHTML='<div class="card"><h2>'+m.place+'</h2><p>'+text+'</p><p class="small">🧠 Stress -10</p><button class="primary" onclick="day()">Continue</button></div>';
+}
 function meetAt(placeIndex){
  try{
-  const place=Number(placeIndex),m=getMeeting(place);if(!m)throw new Error("出会いデータが見つかりません");
-  if((state.periodHours==null?4:state.periodHours)<m.hours){A.innerHTML='<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="goOut()">Back</button></div>';return}
-  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">Back</button></div>';return}
-  state.encounterCount=(state.encounterCount||0)+1;
+  const place=Number(placeIndex),m=getMeeting(place);if(!m)throw new Error("Outing data could not be found.");
+  if((state.periodHours==null?4:state.periodHours)<m.hours){A.innerHTML='<div class="card"><h2>⏰ Not enough time</h2><button class="primary" onclick="goOut()">Back</button></div>';return}
+  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 Not enough money</h2><button class="primary" onclick="goOut()">Back</button></div>';return}
+  state.encounterCount=(state.encounterCount||0)+1;window.currentPlace=place;
+  state.money-=m.cost;useHours(m.hours);
+  // Going out is not automatically a dating encounter. About half of outings are simply enjoyable time alone.
+  const encounter=((state.day||1)*13+place*7+state.encounterCount*5)%100<48;
+  if(!encounter)return soloOutingResult(m);
   let candidates=npcs.map((n,idx)=>idx).filter(idx=>!npcs[idx].blocked&&npcInterests(npcs[idx],idx).some(t=>m.tags.includes(t)));
   if(!candidates.length)candidates=npcs.map((n,idx)=>idx).filter(idx=>!n.blocked);
-  const seed=(state.day||1)*11+place*7+state.encounterCount*5;window.currentNpc=candidates[seed%candidates.length];window.currentPlace=place;window.convoStep=0;
-  const n=npcs[window.currentNpc];state.money-=m.cost;useHours(m.hours);
-  A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`;
- }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家にBack</button></div>`}
+  const seed=(state.day||1)*11+place*7+state.encounterCount*5;window.currentNpc=candidates[seed%candidates.length];window.convoStep=0;
+  const n=npcs[window.currentNpc];
+  A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><div class="name">'+n.name+', '+n.age+'</div><div class="small">'+n.job+'</div></div><div class="card"><p class="event">'+m.intro+'</p><p><b>'+n.name.split(" ")[0]+':</b> “'+m.open+'”</p><button class="option" onclick="talk()">💬 Talk</button><button class="option" onclick="day()">👋 Keep enjoying your outing</button></div>';
+ }catch(e){A.innerHTML='<div class="card"><h2>⚠️ Outing error</h2><p>'+String(e.message||e)+'</p><button class="primary" onclick="day()">Go home</button></div>'}
 }
 function talk(){window.convoStep=0;conversation()}
 function answersFor(q,step){
