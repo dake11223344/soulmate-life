@@ -57,13 +57,13 @@ const questions=[
 ["恋人との連絡はどれくらいが心地いい？",[["毎日こまめに",["contact",18]],["1日に数回くらい",["contact",7]],["必要な時で十分",["contact",-18]]]],
 ["返信がしばらく来なかったら？",[["少し不安になる",["contact",12]],["忙しいのかなと思う",["contact",0]],["あまり気にならない",["contact",-12]]]],
 ["意見がぶつかった時は？",[["すぐ話し合いたい",["contact",10]],["少し時間を置いてから話す",["contact",0]],["できれば争いは避けたい",["contact",-7]]]],
-["将来、結婚については？",[["いつかしたい",["family",14]],["相手や状況次第",["family",3]],["特にこだわらない",["family",-10]]]],
-["将来、子どもについては？",[["ほしい",["family",18]],["まだ分からない",["family",0]],["ほしくない",["family",-20]]]],
-["家族との付き合いは？",[["かなり大切にしたい",["family",12]],["ほどよい距離がいい",["family",2]],["あまり重視しない",["family",-12]]]],
-["仕事について一番近いのは？",[["成長や昇進を重視したい",["career",16]],["生活とのバランスが大切",["career",2]],["仕事は生活のためと割り切る",["career",-12]]]],
-["仕事と恋愛の予定がぶつかったら？",[["できるだけ恋人との予定を優先",["career",-12]],["状況によって決める",["career",0]],["仕事を優先することが多い",["career",15]]]],
+["The future、Marriageについては？",[["いつかしたい",["family",14]],["相手や状況次第",["family",3]],["特にこだわらない",["family",-10]]]],
+["The future、子どもについては？",[["ほしい",["family",18]],["まだ分からない",["family",0]],["ほしくない",["family",-20]]]],
+["Familyとの付き合いは？",[["かなり大切にしたい",["family",12]],["ほどよい距離がいい",["family",2]],["あまり重視しない",["family",-12]]]],
+["Workについて一番近いのは？",[["成長や昇進を重視したい",["career",16]],["生活とのバランスが大切",["career",2]],["Workは生活のためと割り切る",["career",-12]]]],
+["WorkとRelationshipsの予定がぶつかったら？",[["できるだけ恋人との予定を優先",["career",-12]],["状況によって決める",["career",0]],["Workを優先することが多い",["career",15]]]],
 ["転職や引っ越しにつながる大きなチャンスが来たら？",[["積極的に挑戦する",["career",10]],["恋人と相談して決める",["family",6]],["今の安定を優先する",["adventure",-10]]]],
-["理想のデートに近いのは？",[["家で料理や映画",["adventure",-10]],["カフェや街歩き",["social",5]],["旅行やアウトドア",["adventure",15]]]],
+["Ideal dateに近いのは？",[["家でCookingやMovies",["adventure",-10]],["カフェや街歩き",["social",5]],["旅行やアウトドア",["adventure",15]]]],
 ["新しいことを試すのは？",[["かなり好き",["adventure",15]],["興味があれば",["adventure",4]],["慣れたものの方が安心",["adventure",-14]]]],
 ["恋人とはどんな関係が理想？",[["できるだけ一緒に過ごしたい",["contact",12]],["一緒の時間も自分の時間も大切",["contact",2]],["お互いかなり自由でいたい",["contact",-12]]]]
 ];
@@ -140,7 +140,7 @@ const npcs=[
 {name:"Vincent Barnes",age:38,job:"Photographer",emoji:"👨🏾",traits:{family:31,career:93,social:23,contact:73,adventure:71},textStyle:"warm",dateStyle:"serious",schedule:"weekendday"}];
 function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
 function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
-function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューゲーム</button></div></div>`}
+function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、YouのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">GamesはSoulmateが誰か教えてくれません。会話、Values、生活の中からYou自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューGames</button></div></div>`}
 function creatorPortrait(){
  const L=state.look||{}, skin=["#f7d7c4","#edc2a8","#dca985","#c98e68","#a96f50","#7d4d38"][L.skin||0]||"#f7d7c4";
  const hc=colors[L.color||0]||colors[0], iris=["#4a3025","#6b4937","#8a6847","#58705a","#4f6883","#745b79"][L.eyeColor||0]||"#4a3025";
@@ -220,7 +220,7 @@ function create(){
    const c=tab==="skin"?skinCols[i]:tab==="eye_color"?eyeCols[i]:colors[i];
    choices+='<button class="featureChoice '+((state.look[stateKey]||0)===i?"on":"")+'" onclick="state.look.'+stateKey+'='+i+';create()">'+(isColor?'<span class="colorDot" style="display:block;background:'+c+'"></span>':'<span class="sample">'+(i+1)+'</span>')+'</button>';
  }
- A.innerHTML='<div class="maker"><div class="creatorHeader"><h2>主人公を作成</h2><div class="creatorSteps"><i class="on"></i><i></i><i></i><i></i></div></div><div class="characterStage"><div class="characterPortrait">'+creatorPortrait()+'</div></div><div class="card"><label>名前（ニックネーム）</label><input id="nm" value="'+state.name+'" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">'+Array.from({length:14},(_,i)=>'<option '+(state.age==22+i?"selected":"")+'>'+(22+i)+'</option>').join("")+'</select></div><div class="card"><h3>あなたの性別</h3><div class="row"><button class="option '+(state.gender==="female"?"selected":"")+'" onclick="state.gender=\'female\';create()">女性</button><button class="option '+(state.gender==="male"?"selected":"")+'" onclick="state.gender=\'male\';create()">男性</button></div><h3>恋愛対象</h3><div class="row"><button class="option '+(state.target==="female"?"selected":"")+'" onclick="state.target=\'female\';create()">女性</button><button class="option '+(state.target==="male"?"selected":"")+'" onclick="state.target=\'male\';create()">男性</button></div></div><div class="card"><div class="featureTabs">'+Object.keys(labs).map(k=>'<button class="'+(tab===k?"on":"")+'" onclick="state.avatarTab=\''+k+'\';create()">'+labs[k]+'</button>').join("")+'</div><h3>'+labs[tab]+'</h3><div class="featureChoices">'+choices+'</div></div><button class="primary" onclick="state.name=document.querySelector(\'#nm\').value||\'Mika\';state.age=+document.querySelector(\'#age\').value;state.screen=\'quiz\';render()">次へ　›</button></div>';
+ A.innerHTML='<div class="maker"><div class="creatorHeader"><h2>主人公を作成</h2><div class="creatorSteps"><i class="on"></i><i></i><i></i><i></i></div></div><div class="characterStage"><div class="characterPortrait">'+creatorPortrait()+'</div></div><div class="card"><label>名前（ニックネーム）</label><input id="nm" value="'+state.name+'" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">'+Array.from({length:14},(_,i)=>'<option '+(state.age==22+i?"selected":"")+'>'+(22+i)+'</option>').join("")+'</select></div><div class="card"><h3>Youの性別</h3><div class="row"><button class="option '+(state.gender==="female"?"selected":"")+'" onclick="state.gender=\'female\';create()">女性</button><button class="option '+(state.gender==="male"?"selected":"")+'" onclick="state.gender=\'male\';create()">男性</button></div><h3>Relationships対象</h3><div class="row"><button class="option '+(state.target==="female"?"selected":"")+'" onclick="state.target=\'female\';create()">女性</button><button class="option '+(state.target==="male"?"selected":"")+'" onclick="state.target=\'male\';create()">男性</button></div></div><div class="card"><div class="featureTabs">'+Object.keys(labs).map(k=>'<button class="'+(tab===k?"on":"")+'" onclick="state.avatarTab=\''+k+'\';create()">'+labs[k]+'</button>').join("")+'</div><h3>'+labs[tab]+'</h3><div class="featureChoices">'+choices+'</div></div><button class="primary" onclick="state.name=document.querySelector(\'#nm\').value||\'Mika\';state.age=+document.querySelector(\'#age\').value;state.screen=\'quiz\';render()">次へ　›</button></div>';
 }
 function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="day";return render()} A.innerHTML=`<div class="small">質問 ${state.q+1} / ${questions.length}</div><div class="card"><h2>${q[0]}</h2>${q[1].map((o,i)=>`<button class="option" onclick="answer(${i})">${o[0]}</button>`).join("")}</div>`}
 function selectFace(i){state.look.face=i;render()}
@@ -244,7 +244,7 @@ function day(){
  let note=low?`<div class="card"><h3>🌧️ 気分がかなり落ち込んでいる</h3><p>ストレスが限界に達しました。しばらく休息を優先しましょう。</p></div>`:"";
  const isMorning=state.period==="morning",isAfternoon=state.period==="afternoon",isNight=state.period==="night";
  const intro=isMorning?(c.weekend?"休日の朝。今日は自由に過ごせる。":"朝。今日をどう過ごそう？"):isAfternoon?"昼になった。まだ時間がある。":"夜になった。今日の残りをどう過ごそう？";
- A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 仕事へ行く（夜まで）</button>':''}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
+ A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+`<div class="card"><h2>${c.d}日目 — ${periodLabel()}</h2><p class="event">${intro}</p>${(isMorning&&!c.weekend&&!worked&&!low)?'<button class="primary" onclick="work()">💼 Workへ行く（夜まで）</button>':''}<button class="secondary" onclick="goOut()">🗺️ 出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button>${!isNight?'<button class="primary" onclick="nextPeriod()">⏩ 次の時間へ</button>':'<button class="primary" onclick="endDay()">🌙 寝る</button>'}</div>${nav()}`;
 }
 function nextPeriod(){
  if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
@@ -253,42 +253,42 @@ function nextPeriod(){
  day();
 }
 function endDay(){
- if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目に戻る</button></div>`;return}
+ if((state.day||1)>=365){A.innerHTML=`<div class="card"><h2>1年目終了 🎉</h2><p>365日を過ごしました。</p><button class="primary" onclick="state.screen='day';render()">365日目にBack</button></div>`;return}
  state.day=(state.day||1)+1;state.energy=100;state.stress=Math.max(0,(state.stress||0)-5);state.dailyActions=0;state.period="morning";state.time="7:00 AM";state.periodHours=4;state.screen="day";render();
 }
 function work(){
  const c=calendarInfo(); if(c.weekend||state.workedDay===c.d||state.period!=="morning")return day(); if(moodCheck())return day();
  state.workedDay=c.d;state.money+=168;state.energy=Math.max(0,state.energy-20);state.stress=Math.min(100,(state.stress||0)+18);state.period="night";state.time="6:00 PM";state.periodHours=4;moodCheck();
- A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 仕事が終わった — 夜</h2><p>朝から働いて、昼の時間帯は仕事で過ぎました。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 寝る</button></div>`;
+ A.innerHTML=statusBar(c)+`<div class="card"><h2>💼 Workが終わった — 夜</h2><p>朝から働いて、昼の時間帯はWorkで過ぎました。</p><p class="small">+$168　⚡ -20　🧠 ストレス +18</p><button class="primary" onclick="goOut()">Work帰りに出かける</button><button class="secondary" onclick="shopping()">🛍️ 買い物</button><button class="secondary" onclick="refresh()">🛁 リフレッシュ</button><button class="secondary" onclick="day()">家に帰る</button><button class="secondary" onclick="endDay()">🌙 寝る</button></div>`;
 }
 function shopItems(){return [
  ["☕ 好きなドリンク",6,6],["🍰 スイーツ",8,8],["🕯️ キャンドル",15,12],
- ["👚 新しい服",45,16],["🎮 趣味のもの",35,18],["💐 花",20,10],
- ["📚 本",18,9],["🧴 スキンケア",28,13],["🪴 観葉植物",24,11],["🎧 音楽・イヤホン小物",30,14]
+ ["👚 新しいFashion",45,16],["🎮 Hobbiesのもの",35,18],["💐 花",20,10],
+ ["📚 Books",18,9],["🧴 スキンケア",28,13],["🪴 観葉植物",24,11],["🎧 Music・イヤホン小物",30,14]
 ]}
 function shopping(){
  try{
   const items=shopItems();
-  A.innerHTML=`<h2>🛍️ 買い物</h2><div class="card"><p>買い物で気分転換。欲しいものを選んでね。</p>${items.map((x,i)=>`<button class="option shopItem" data-shop="${i}">${x[0]} <span class="small">$${x[1]} · ストレス -${x[2]}</span></button>`).join("")}</div><button class="secondary" data-shop-back="1">← 戻る</button>`;
- }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">戻る</button></div>`}
+  A.innerHTML=`<h2>🛍️ 買い物</h2><div class="card"><p>買い物で気分転換。欲しいものを選んでね。</p>${items.map((x,i)=>`<button class="option shopItem" data-shop="${i}">${x[0]} <span class="small">$${x[1]} · ストレス -${x[2]}</span></button>`).join("")}</div><button class="secondary" data-shop-back="1">← Back</button>`;
+ }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">Back</button></div>`}
 }
 function buyItem(i){
  try{
   const x=shopItems()[Number(i)];if(!x)throw new Error("商品データが見つかりません");
-  if((state.money||0)<x[1]){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="shopping()">戻る</button></div>';return}
+  if((state.money||0)<x[1]){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="shopping()">Back</button></div>';return}
   if(!Array.isArray(state.inventory))state.inventory=[];
   state.money-=x[1];state.stress=Math.max(0,(state.stress||0)-x[2]);state.inventory.push(x[0]);
-  A.innerHTML=`<div class="card"><h2>🛍️ 購入しました</h2><p>${x[0]}</p><p class="small">-$${x[1]}　🧠 ストレス -${x[2]} → ${state.stress}%</p><button class="primary" onclick="shopping()">買い物を続ける</button><button class="secondary" onclick="day()">家に戻る</button></div>`;
- }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">戻る</button></div>`}
+  A.innerHTML=`<div class="card"><h2>🛍️ 購入しました</h2><p>${x[0]}</p><p class="small">-$${x[1]}　🧠 ストレス -${x[2]} → ${state.stress}%</p><button class="primary" onclick="shopping()">買い物を続ける</button><button class="secondary" onclick="day()">家にBack</button></div>`;
+ }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 買い物エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">Back</button></div>`}
 }
 function refresh(){
- if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>`;return}
+ if(!useHours(2)){A.innerHTML=`<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="day()">Back</button></div>`;return}
  state.energy=Math.min(100,state.energy+15);state.stress=Math.max(0,(state.stress||0)-20);
  A.innerHTML=`<div class="card"><h2>🛁 リフレッシュした</h2><p>ゆっくり休んで少し気持ちが軽くなった。</p><p class="small">⚡ +15　🧠 ストレス -20</p><button class="primary" onclick="day()">続ける</button></div>`;
 }
 window.shopping=shopping;window.buyItem=buyItem;window.refresh=refresh;
 window.currentNpc=0;window.convoStep=0;
-const outingPlaces=[{"name":"☕ カフェ","icon":"☕","periods":["morning","afternoon"],"cost":8,"hours":2,"tags":["social","coffee","calm"],"open":"ここのコーヒー、何がおすすめ？","qs":["コーヒーよく飲む？","カフェ巡りする？","甘いものも好き？"]},{"name":"🚶 朝の散歩","icon":"🚶","periods":["morning"],"cost":0,"hours":2,"tags":["outdoor","calm","fitness"],"open":"朝に歩くと気持ちいいね。よく散歩する？","qs":["朝型？","この辺よく歩く？","休みの日も早起きする？"]},{"name":"📚 図書館","icon":"📚","periods":["morning","afternoon"],"cost":0,"hours":2,"tags":["quiet","books","geek"],"open":"何か面白そうな本見つかった？","qs":["どんな本読む？","静かな場所好き？","最近読んでよかった本ある？"]},{"name":"🛍️ ショッピング","icon":"🛍️","periods":["morning","afternoon"],"cost":15,"hours":2,"tags":["social","fashion"],"open":"何か探してるものある？","qs":["買い物は計画派？","服選ぶの好き？","今日は何を見に来たの？"]},{"name":"🥐 ベーカリー","icon":"🥐","periods":["morning"],"cost":7,"hours":2,"tags":["food","calm"],"open":"ここのパン、いい匂いだね。何にする？","qs":["甘いパンと惣菜パンどっち派？","朝ごはん食べる派？","お気に入りのパン屋ある？"]},{"name":"🐕 ドッグパーク","icon":"🐕","periods":["morning","afternoon"],"cost":0,"hours":2,"tags":["pets","outdoor"],"open":"犬好き？見てるだけでも楽しいね。","qs":["犬飼ってる？","どんな犬が好き？","動物は好き？"]},{"name":"🌿 ファーマーズマーケット","icon":"🌿","periods":["morning"],"cost":12,"hours":2,"tags":["food","outdoor","social"],"open":"新鮮なの多いね。何を買う予定？","qs":["料理する？","地元のお店好き？","野菜と果物どっちよく買う？"]},{"name":"🏋️ ジム","icon":"🏋️","periods":["morning","afternoon","night"],"cost":10,"hours":2,"tags":["fitness"],"open":"今日は何のトレーニングするの？","qs":["運動は週何回くらい？","筋トレと有酸素どっち派？","運動始めたきっかけは？"]},{"name":"🧘 ヨガクラス","icon":"🧘","periods":["afternoon"],"cost":18,"hours":2,"tags":["fitness","calm"],"open":"このクラス初めて？","qs":["ヨガよくする？","リラックス系とハード系どっち好き？","運動の後って何する？"]},{"name":"🥾 ハイキング","icon":"🥾","periods":["afternoon"],"cost":5,"hours":4,"tags":["outdoor","adventure","fitness"],"open":"このコース来たことある？","qs":["山とか自然好き？","長いコースも平気？","次に行きたい場所ある？"]},{"name":"🎪 お祭り","icon":"🎪","periods":["afternoon","night"],"cost":20,"hours":4,"tags":["social","adventure"],"open":"何から見に行く？","qs":["屋台なら何食べる？","お祭りよく行く？","乗り物とゲームどっち派？"]},{"name":"🏛️ 美術館","icon":"🏛️","periods":["afternoon"],"cost":18,"hours":2,"tags":["art","quiet"],"open":"この展示、けっこう面白いね。","qs":["美術館よく来る？","どんなアートが好き？","じっくり見る派？"]},{"name":"🎨 アートクラス","icon":"🎨","periods":["afternoon"],"cost":25,"hours":2,"tags":["art","creative"],"open":"何作るかもう決めた？","qs":["絵を描くの好き？","こういうクラス初めて？","得意なものある？"]},{"name":"🍳 料理教室","icon":"🍳","periods":["afternoon"],"cost":30,"hours":2,"tags":["food","social"],"open":"料理は普段からする？","qs":["得意料理ある？","作るのと食べるのどっちが好き？","新しいレシピ試す？"]},{"name":"🎮 ゲームショップ","icon":"🎮","periods":["afternoon"],"cost":10,"hours":2,"tags":["geek","games"],"open":"何か探してるゲームある？","qs":["どんなジャンルが好き？","最近何やってる？","一人で遊ぶ派？"]},{"name":"🎳 ボウリング","icon":"🎳","periods":["afternoon","night"],"cost":18,"hours":2,"tags":["social","games"],"open":"ボウリング得意？","qs":["最高スコアどれくらい？","勝負するの好き？","こういう遊びよくする？"]},{"name":"🏖️ 湖・ビーチ","icon":"🏖️","periods":["afternoon"],"cost":5,"hours":4,"tags":["outdoor","adventure"],"open":"今日はちょうど気持ちいいね。","qs":["泳ぐ派？のんびり派？","水辺好き？","夏は何して過ごす？"]},{"name":"🚲 サイクリング","icon":"🚲","periods":["afternoon"],"cost":5,"hours":2,"tags":["fitness","outdoor"],"open":"けっこう走る予定？","qs":["自転車よく乗る？","街と自然どっち走るの好き？","遠出もする？"]},{"name":"🌱 ガーデンセンター","icon":"🌱","periods":["morning","afternoon"],"cost":8,"hours":2,"tags":["calm","outdoor"],"open":"何か育ててるの？","qs":["植物好き？","家に緑ある？","育てやすいおすすめある？"]},{"name":"🧋 ティーショップ","icon":"🧋","periods":["afternoon"],"cost":8,"hours":2,"tags":["social","food"],"open":"何頼むか決めた？","qs":["甘さどれくらいが好き？","コーヒーとお茶どっち派？","新しい味試す？"]},{"name":"🍸 バー","icon":"🍸","periods":["night"],"cost":22,"hours":2,"tags":["nightlife","social"],"open":"ここ、よく来る？","qs":["静かなバーと賑やかなバーどっち派？","一人でも飲みに行く？","夜はよく出かける？"]},{"name":"💃 クラブ","icon":"💃","periods":["night"],"cost":30,"hours":4,"tags":["nightlife","social","adventure"],"open":"この曲いいね。こういうところよく来る？","qs":["踊るの好き？","夜更かし平気？","どんな音楽が好き？"]},{"name":"🎬 ひとり映画","icon":"🎬","periods":["night"],"cost":16,"hours":2,"tags":["movies","quiet"],"open":"何観る予定？","qs":["映画館は一人でも来る？","どんなジャンルが好き？","映画は字幕派？"]},{"name":"🎤 ライブハウス","icon":"🎤","periods":["night"],"cost":28,"hours":4,"tags":["music","nightlife"],"open":"このアーティスト知ってる？","qs":["ライブよく行く？","どんな音楽聴く？","好きなアーティストいる？"]},{"name":"🎵 カラオケ","icon":"🎵","periods":["night"],"cost":20,"hours":2,"tags":["music","social"],"open":"何歌うの？","qs":["カラオケ得意？","最初に何歌う？","一人カラオケできる？"]},{"name":"🍜 ラーメン店","icon":"🍜","periods":["night"],"cost":16,"hours":2,"tags":["food","casual"],"open":"何味にする？","qs":["こってりとあっさりどっち派？","ラーメンよく食べる？","辛いの平気？"]},{"name":"🌃 夜景スポット","icon":"🌃","periods":["night"],"cost":0,"hours":2,"tags":["calm","romantic"],"open":"ここ、思ったよりきれいだね。","qs":["夜景好き？","静かな場所好き？","夜のドライブする？"]},{"name":"🎲 ボードゲームカフェ","icon":"🎲","periods":["afternoon","night"],"cost":15,"hours":2,"tags":["geek","games","social"],"open":"何かやったことあるゲームある？","qs":["協力ゲームと対戦どっち派？","ボードゲーム好き？","負けず嫌い？"]},{"name":"🧠 トリビアナイト","icon":"🧠","periods":["night"],"cost":12,"hours":2,"tags":["geek","social"],"open":"こういうクイズ得意？","qs":["得意ジャンルある？","チーム戦好き？","雑学覚えるの好き？"]},{"name":"🍽️ レストラン","icon":"🍽️","periods":["night"],"cost":28,"hours":2,"tags":["food","social"],"open":"何頼むか迷うね。","qs":["外食よくする？","好きな料理は？","新しい店試す派？"]}]
+const outingPlaces=[{"name":"☕ カフェ","icon":"☕","periods":["morning","afternoon"],"cost":8,"hours":2,"tags":["social","coffee","calm"],"open":"ここのCoffee、何がおすすめ？","qs":["Coffeeよく飲む？","カフェ巡りする？","Sweetsも好き？"]},{"name":"🚶 朝の散歩","icon":"🚶","periods":["morning"],"cost":0,"hours":2,"tags":["outdoor","calm","fitness"],"open":"朝に歩くと気持ちいいね。よく散歩する？","qs":["朝型？","この辺よく歩く？","休みの日も早起きする？"]},{"name":"📚 図書館","icon":"📚","periods":["morning","afternoon"],"cost":0,"hours":2,"tags":["quiet","books","geek"],"open":"何か面白そうなBooks見つかった？","qs":["どんなBooks読む？","静かな場所好き？","最近読んでよかったBooksある？"]},{"name":"🛍️ ショッピング","icon":"🛍️","periods":["morning","afternoon"],"cost":15,"hours":2,"tags":["social","fashion"],"open":"何か探してるものある？","qs":["買い物は計画派？","Fashion選ぶの好き？","今日は何を見に来たの？"]},{"name":"🥐 ベーカリー","icon":"🥐","periods":["morning"],"cost":7,"hours":2,"tags":["food","calm"],"open":"ここのパン、いい匂いだね。何にする？","qs":["甘いパンと惣菜パンどっち派？","朝ごはん食べる派？","お気に入りのパン屋ある？"]},{"name":"🐕 ドッグパーク","icon":"🐕","periods":["morning","afternoon"],"cost":0,"hours":2,"tags":["pets","outdoor"],"open":"犬好き？見てるだけでも楽しいね。","qs":["犬飼ってる？","どんな犬が好き？","動物は好き？"]},{"name":"🌿 ファーマーズマーケット","icon":"🌿","periods":["morning"],"cost":12,"hours":2,"tags":["food","outdoor","social"],"open":"新鮮なの多いね。何を買う予定？","qs":["Do you cook?","地元のお店好き？","野菜と果物どっちよく買う？"]},{"name":"🏋️ ジム","icon":"🏋️","periods":["morning","afternoon","night"],"cost":10,"hours":2,"tags":["fitness"],"open":"今日は何のトレーニングするの？","qs":["運動は週何回くらい？","筋トレと有酸素どっち派？","運動始めたきっかけは？"]},{"name":"🧘 ヨガクラス","icon":"🧘","periods":["afternoon"],"cost":18,"hours":2,"tags":["fitness","calm"],"open":"このクラス初めて？","qs":["ヨガよくする？","リラックス系とハード系どっち好き？","運動の後って何する？"]},{"name":"🥾 ハイキング","icon":"🥾","periods":["afternoon"],"cost":5,"hours":4,"tags":["outdoor","adventure","fitness"],"open":"このコース来たことある？","qs":["山とか自然好き？","長いコースも平気？","次に行きたい場所ある？"]},{"name":"🎪 お祭り","icon":"🎪","periods":["afternoon","night"],"cost":20,"hours":4,"tags":["social","adventure"],"open":"何から見に行く？","qs":["屋台なら何食べる？","お祭りよく行く？","乗り物とGamesどっち派？"]},{"name":"🏛️ 美術館","icon":"🏛️","periods":["afternoon"],"cost":18,"hours":2,"tags":["art","quiet"],"open":"この展示、けっこう面白いね。","qs":["美術館よく来る？","どんなアートが好き？","じっくり見る派？"]},{"name":"🎨 アートクラス","icon":"🎨","periods":["afternoon"],"cost":25,"hours":2,"tags":["art","creative"],"open":"何作るかもう決めた？","qs":["絵を描くの好き？","こういうクラス初めて？","得意なものある？"]},{"name":"🍳 Cooking教室","icon":"🍳","periods":["afternoon"],"cost":30,"hours":2,"tags":["food","social"],"open":"Cookingは普段からする？","qs":["得意Cookingある？","作るのと食べるのどっちが好き？","新しいレシピ試す？"]},{"name":"🎮 Gamesショップ","icon":"🎮","periods":["afternoon"],"cost":10,"hours":2,"tags":["geek","games"],"open":"何か探してるGamesある？","qs":["どんなジャンルが好き？","最近何やってる？","一人で遊ぶ派？"]},{"name":"🎳 ボウリング","icon":"🎳","periods":["afternoon","night"],"cost":18,"hours":2,"tags":["social","games"],"open":"ボウリング得意？","qs":["最高スコアどれくらい？","勝負するの好き？","こういう遊びよくする？"]},{"name":"🏖️ 湖・ビーチ","icon":"🏖️","periods":["afternoon"],"cost":5,"hours":4,"tags":["outdoor","adventure"],"open":"今日はちょうど気持ちいいね。","qs":["泳ぐ派？のんびり派？","水辺好き？","夏は何して過ごす？"]},{"name":"🚲 サイクリング","icon":"🚲","periods":["afternoon"],"cost":5,"hours":2,"tags":["fitness","outdoor"],"open":"けっこう走る予定？","qs":["自転車よく乗る？","街と自然どっち走るの好き？","遠出もする？"]},{"name":"🌱 ガーデンセンター","icon":"🌱","periods":["morning","afternoon"],"cost":8,"hours":2,"tags":["calm","outdoor"],"open":"何か育ててるの？","qs":["植物好き？","家に緑ある？","育てやすいおすすめある？"]},{"name":"🧋 ティーショップ","icon":"🧋","periods":["afternoon"],"cost":8,"hours":2,"tags":["social","food"],"open":"何頼むか決めた？","qs":["甘さどれくらいが好き？","Coffeeとお茶どっち派？","新しい味試す？"]},{"name":"🍸 バー","icon":"🍸","periods":["night"],"cost":22,"hours":2,"tags":["nightlife","social"],"open":"ここ、よく来る？","qs":["静かなバーと賑やかなバーどっち派？","一人でも飲みに行く？","夜はよく出かける？"]},{"name":"💃 クラブ","icon":"💃","periods":["night"],"cost":30,"hours":4,"tags":["nightlife","social","adventure"],"open":"この曲いいね。こういうところよく来る？","qs":["踊るの好き？","夜更かし平気？","どんなMusicが好き？"]},{"name":"🎬 ひとりMovies","icon":"🎬","periods":["night"],"cost":16,"hours":2,"tags":["movies","quiet"],"open":"何観る予定？","qs":["Movies館は一人でも来る？","どんなジャンルが好き？","Moviesは字幕派？"]},{"name":"🎤 ライブハウス","icon":"🎤","periods":["night"],"cost":28,"hours":4,"tags":["music","nightlife"],"open":"このアーティスト知ってる？","qs":["ライブよく行く？","どんなMusic聴く？","好きなアーティストいる？"]},{"name":"🎵 カラオケ","icon":"🎵","periods":["night"],"cost":20,"hours":2,"tags":["music","social"],"open":"何歌うの？","qs":["カラオケ得意？","最初に何歌う？","一人カラオケできる？"]},{"name":"🍜 ラーメン店","icon":"🍜","periods":["night"],"cost":16,"hours":2,"tags":["food","casual"],"open":"何味にする？","qs":["こってりとあっさりどっち派？","ラーメンよく食べる？","辛いの平気？"]},{"name":"🌃 夜景スポット","icon":"🌃","periods":["night"],"cost":0,"hours":2,"tags":["calm","romantic"],"open":"ここ、思ったよりきれいだね。","qs":["夜景好き？","静かな場所好き？","夜のドライブする？"]},{"name":"🎲 ボードGamesカフェ","icon":"🎲","periods":["afternoon","night"],"cost":15,"hours":2,"tags":["geek","games","social"],"open":"何かやったことあるGamesある？","qs":["協力Gamesと対戦どっち派？","ボードGames好き？","負けず嫌い？"]},{"name":"🧠 トリビアナイト","icon":"🧠","periods":["night"],"cost":12,"hours":2,"tags":["geek","social"],"open":"こういうクイズ得意？","qs":["得意ジャンルある？","チーム戦好き？","雑学覚えるの好き？"]},{"name":"🍽️ レストラン","icon":"🍽️","periods":["night"],"cost":28,"hours":2,"tags":["food","social"],"open":"何頼むか迷うね。","qs":["外食よくする？","好きなCookingは？","新しい店試す派？"]}]
 function npcInterests(n,i){
  const t=n.traits||{},tags=[];
  if(t.adventure>=60)tags.push("outdoor","adventure","fitness");
@@ -317,41 +317,41 @@ function useHours(h){
 function goOut(){
  if(moodCheck()){A.innerHTML='<div class="card"><h2>🌧️ 今日は外出できない</h2><button class="primary" onclick="day()">家で休む</button></div>';return}
  const p=state.period||"morning",list=outingPlaces.map((x,i)=>({x,i})).filter(o=>o.x.periods.includes(p));
- A.innerHTML=`<h2>🗺️ ${periodLabel()} — どこへ行く？</h2><p class="small">残り ${state.periodHours==null?4:state.periodHours}時間</p><div class="card">${list.map(o=>`<button class="option" onclick="meetAt(${o.i})">${o.x.icon} ${o.x.name.replace(o.x.icon+" ","")} <span class="small">${o.x.hours}時間 · ${o.x.cost?"$"+o.x.cost:"無料"}</span></button>`).join("")}</div><button class="secondary" onclick="day()">← 戻る</button>`;
+ A.innerHTML=`<h2>🗺️ ${periodLabel()} — どこへ行く？</h2><p class="small">残り ${state.periodHours==null?4:state.periodHours}時間</p><div class="card">${list.map(o=>`<button class="option" onclick="meetAt(${o.i})">${o.x.icon} ${o.x.name.replace(o.x.icon+" ","")} <span class="small">${o.x.hours}時間 · ${o.x.cost?"$"+o.x.cost:"無料"}</span></button>`).join("")}</div><button class="secondary" onclick="day()">← Back</button>`;
 }
 function getMeeting(i){
  const p=outingPlaces[Number(i)];if(!p)return null;
  const conv={
- "☕ カフェ":["この店のコーヒー、飲んだことある？",["朝はコーヒー派？","カフェってよく来る？","おすすめの店ある？"]],
+ "☕ カフェ":["この店のCoffee、飲んだことある？",["朝はCoffee派？","カフェってよく来る？","おすすめの店ある？"]],
  "🚶 朝の散歩":["朝に歩くと気持ちいいね。よく散歩する？",["朝型？夜型？","この辺よく歩く？","運動は好き？"]],
- "📚 図書館":["その本、面白そうだね。何を探してるの？",["普段どんな本読む？","静かな場所好き？","最近読んでよかった本ある？"]],
- "🛍️ ショッピング":["それ買おうか迷ってる？",["買い物は計画する派？","服とか見るの好き？","今日は何を探してる？"]],
+ "📚 図書館":["そのBooks、面白そうだね。何を探してるの？",["普段どんなBooks読む？","静かな場所好き？","最近読んでよかったBooksある？"]],
+ "🛍️ ショッピング":["それ買おうか迷ってる？",["買い物は計画する派？","Fashionとか見るの好き？","今日は何を探してる？"]],
  "🥐 ベーカリー":["ここ、焼きたてのパンが人気らしいよ。",["甘いパンと惣菜パンどっち派？","朝ごはんちゃんと食べる？","お気に入りのパン屋ある？"]],
- "🐕 ドッグパーク":["犬好き？見てるだけでも楽しいよね。",["ペット飼ってる？","犬派？猫派？","休みの日も外に出る？"]],
- "🌿 ファーマーズマーケット":["何かいいもの見つけた？",["料理する？","地元のお店って好き？","野菜とか選ぶの得意？"]],
+ "🐕 ドッグパーク":["犬好き？見てるだけでも楽しいよね。",["Pets飼ってる？","犬派？猫派？","休みの日も外に出る？"]],
+ "🌿 ファーマーズマーケット":["何かいいもの見つけた？",["Do you cook?","地元のお店 — do you like it?","野菜とか選ぶの得意？"]],
  "🏋️ ジム":["よくここでトレーニングしてる？",["どんな運動が好き？","週に何回くらい運動する？","運動のあとのご褒美ってある？"]],
  "🧘 ヨガクラス":["今日のクラス、思ったよりきつかったね。",["ヨガ長いの？","リラックスするとき何する？","運動は一人派？一緒にする派？"]],
  "🥾 ハイキング":["このコース初めて？",["山とか自然好き？","もっと難しいコースも行く？","旅行でもアウトドアする？"]],
  "🎪 お祭り":["思ったより人多いね。何から見る？",["屋台なら何食べる？","お祭りよく行く？","人混み平気？"]],
  "🏛️ 美術館":["この作品、なんか気になるね。",["美術館よく来る？","どんなアートが好き？","一人で見る派？誰かと見る派？"]],
- "🎨 アートクラス":["それ上手だね。こういうのよくやる？",["絵を描くの好き？","他に作る趣味ある？","完成したら飾る？"]],
- "🍳 料理教室":["いい匂いしてきたね。料理する？",["得意料理ある？","家でよく作る？","誰かに料理するの好き？"]],
- "🎮 ゲームショップ":["何か探してるゲームある？",["普段ゲームする？","一人用と対戦どっち好き？","最近ハマったゲームある？"]],
- "🎳 ボウリング":["スコアどれくらいいけそう？",["ボウリング得意？","負けず嫌い？","友達とよく遊びに行く？"]],
+ "🎨 アートクラス":["それ上手だね。こういうのよくやる？",["絵を描くの好き？","他に作るHobbiesある？","完成したら飾る？"]],
+ "🍳 Cooking教室":["いい匂いしてきたね。Do you cook?",["得意Cookingある？","家でよく作る？","誰かにCookingするの好き？"]],
+ "🎮 Gamesショップ":["何か探してるGamesある？",["普段Gamesする？","一人用と対戦どっち好き？","最近ハマったGamesある？"]],
+ "🎳 ボウリング":["スコアどれくらいいけそう？",["ボウリング得意？","負けず嫌い？","Friendsとよく遊びに行く？"]],
  "🏖️ 湖・ビーチ":["今日は外にいるだけで気持ちいいね。",["泳ぐの好き？","海と山ならどっち？","夏は外で遊ぶ派？"]],
  "🚲 サイクリング":["結構いいルートだね。よく自転車乗る？",["長距離も走る？","運動好き？","行ってみたい場所ある？"]],
  "🌱 ガーデンセンター":["この植物かわいいね。育てたことある？",["家に植物ある？","庭いじり好き？","花と観葉植物どっちが好き？"]],
- "🧋 ティーショップ":["何頼むか決めた？",["甘い飲み物好き？","いつも同じもの頼む？","コーヒーとお茶ならどっち？"]],
- "🍸 バー":["ここ初めて？雰囲気いいね。",["バーってよく来る？","静かなバーと賑やかな店どっち好き？","仕事帰りに飲むことある？"]],
- "💃 クラブ":["この曲いいね。踊るの好き？",["クラブよく来る？","どんな音楽聴く？","夜更かし得意？"]],
- "🎬 ひとり映画":["この映画観に来たの？僕も気になってた。",["映画館によく来る？","どんなジャンル好き？","一人映画って平気？"]],
- "🎤 ライブハウス":["このバンド知ってる？",["ライブよく行く？","どんな音楽好き？","好きなアーティストいる？"]],
+ "🧋 ティーショップ":["何頼むか決めた？",["甘い飲み物好き？","いつも同じもの頼む？","Coffeeとお茶ならどっち？"]],
+ "🍸 バー":["ここ初めて？雰囲気いいね。",["バーってよく来る？","静かなバーと賑やかな店どっち好き？","Work帰りに飲むことある？"]],
+ "💃 クラブ":["この曲いいね。踊るの好き？",["クラブよく来る？","どんなMusic聴く？","夜更かし得意？"]],
+ "🎬 ひとりMovies":["このMovies観に来たの？僕も気になってた。",["Movies館によく来る？","どんなジャンル好き？","一人Moviesって平気？"]],
+ "🎤 ライブハウス":["このバンド知ってる？",["ライブよく行く？","どんなMusic好き？","好きなアーティストいる？"]],
  "🎵 カラオケ":["何歌うか決めた？",["カラオケ得意？","よく歌う曲ある？","みんなで歌うの好き？"]],
  "🍜 ラーメン店":["それ美味しそう。ここ初めて？",["ラーメン何味が好き？","辛いもの平気？","夜に食べたくなるものある？"]],
  "🌃 夜景スポット":["ここ、夜景きれいだね。",["こういう静かな場所好き？","夜に出かけること多い？","お気に入りの景色ある？"]],
- "🎲 ボードゲームカフェ":["何かやったことあるゲームある？",["ボードゲーム好き？","協力系と対戦系どっち派？","負けたら悔しい？"]],
+ "🎲 ボードGamesカフェ":["何かやったことあるGamesある？",["ボードGames好き？","協力系と対戦系どっち派？","負けたら悔しい？"]],
  "🧠 トリビアナイト":["この問題わかる？意外と難しいね。",["クイズ得意？","得意ジャンルある？","チーム戦好き？"]],
- "🍽️ レストラン":["何頼むか迷うね。おすすめある？",["外食よくする？","好きな料理は？","新しい店試すの好き？"]]
+ "🍽️ レストラン":["何頼むか迷うね。おすすめある？",["外食よくする？","好きなCookingは？","新しい店試すの好き？"]]
  };
  const c=conv[p.name]||["ここ、よく来る？",["今日は一人？","こういう場所好き？","休みの日は何してる？"]];
  return {place:p.name,cost:p.cost,hours:p.hours,tags:p.tags,intro:`${p.name}で過ごしていると、近くにいた人と自然に話すきっかけができた。`,open:c[0],qs:c[1]};
@@ -359,40 +359,40 @@ function getMeeting(i){
 function meetAt(placeIndex){
  try{
   const place=Number(placeIndex),m=getMeeting(place);if(!m)throw new Error("出会いデータが見つかりません");
-  if((state.periodHours==null?4:state.periodHours)<m.hours){A.innerHTML='<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="goOut()">戻る</button></div>';return}
-  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">戻る</button></div>';return}
+  if((state.periodHours==null?4:state.periodHours)<m.hours){A.innerHTML='<div class="card"><h2>⏰ 時間が足りない</h2><button class="primary" onclick="goOut()">Back</button></div>';return}
+  if((state.money||0)<m.cost){A.innerHTML='<div class="card"><h2>💵 お金が足りません</h2><button class="primary" onclick="goOut()">Back</button></div>';return}
   state.encounterCount=(state.encounterCount||0)+1;
   let candidates=npcs.map((n,idx)=>idx).filter(idx=>!npcs[idx].blocked&&npcInterests(npcs[idx],idx).some(t=>m.tags.includes(t)));
   if(!candidates.length)candidates=npcs.map((n,idx)=>idx).filter(idx=>!n.blocked);
   const seed=(state.day||1)*11+place*7+state.encounterCount*5;window.currentNpc=candidates[seed%candidates.length];window.currentPlace=place;window.convoStep=0;
   const n=npcs[window.currentNpc];state.money-=m.cost;useHours(m.hours);
   A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">${m.intro}</p><p><b>${n.name.split(" ")[0]}:</b> “${m.open}”</p><button class="option" onclick="talk()">💬 話してみる</button><button class="option" onclick="day()">👋 笑顔で別れる</button></div>`;
- }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家に戻る</button></div>`}
+ }catch(e){A.innerHTML=`<div class="card"><h2>⚠️ 外出エラー</h2><p>${String(e.message||e)}</p><button class="primary" onclick="day()">家にBack</button></div>`}
 }
 function talk(){window.convoStep=0;conversation()}
 function answersFor(q,step){
  if(step===0){
-  if(/コーヒー/.test(q))return ["うん、飲んだことあるよ","まだ。何がおすすめ？","コーヒーよりお茶派かな"];
+  if(/Coffee/.test(q))return ["うん、飲んだことあるよ","まだ。何がおすすめ？","Coffeeよりお茶派かな"];
   if(/散歩/.test(q))return ["うん、よく歩くよ","たまに散歩する","朝の散歩はあまりしないかな"];
-  if(/本|探して/.test(q))return ["小説を探してる","気になってた本を見に来た","今日は特に決めてないよ"];
+  if(/Books|探して/.test(q))return ["小説を探してる","気になってたBooksを見に来た","今日は特に決めてないよ"];
   if(/買おう|迷って/.test(q))return ["うん、買おうか迷ってる","見るだけのつもり","別のものを探してるよ"];
   if(/トレーニング/.test(q))return ["うん、よく来るよ","最近通い始めた","今日は体験で来たよ"];
   if(/コース/.test(q))return ["うん、初めて","前にも来たことあるよ","この辺はまだ詳しくない"];
   if(/人多い/.test(q))return ["まず屋台見たい","イベントから見たい","少しぶらぶらしたい"];
   if(/踊る/.test(q))return ["好き！","たまになら","見る方が好きかな"];
-  if(/映画/.test(q))return ["うん、この映画観に来た","別の作品と迷ってた","なんとなく映画が観たくて"];
+  if(/Movies/.test(q))return ["うん、このMovies観に来た","別の作品と迷ってた","なんとなくMoviesが観たくて"];
   return ["うん、ここ気になってた","たまに来るよ","今日はたまたま来てみた"];
  }
  if(/どんな運動/.test(q))return ["ヨガや軽い運動が好き","ランニングが好き","筋トレが好き"];
  if(/朝型.*夜型/.test(q))return ["朝型かな","夜型かな","どっちでもないかも"];
  if(/海と山/.test(q))return ["海が好き","山が好き","どっちも好き"];
- if(/犬派.*猫派/.test(q))return ["犬派！","猫派！","どっちも好き"];
+ if(/犬派.*猫派/.test(q))return ["Dogs!","Cats!","どっちも好き"];
  if(/一人.*誰か|一人派.*一緒/.test(q))return ["一人で楽しむのが好き","誰かと一緒が好き","どっちも好き"];
  if(/静かな.*賑やか/.test(q))return ["静かなところが好き","賑やかなところが好き","その日の気分かな"];
  if(/協力系.*対戦系/.test(q))return ["協力系が好き","対戦系が好き","どっちも好き"];
- if(/何食べる/.test(q))return ["甘いものかな","しょっぱいもの","気になった屋台を試す"];
+ if(/何食べる/.test(q))return ["Sweetsかな","しょっぱいもの","気になった屋台を試す"];
  if(/何味/.test(q))return ["醤油が好き","味噌が好き","豚骨が好き"];
- if(/どんな|何を|何歌う|得意料理|ジャンル|曲|アート|本/.test(q))return ["定番のものが好きかな","その時の気分で変わる","新しいものも試してみたい"];
+ if(/どんな|何を|何歌う|得意Cooking|ジャンル|曲|アート|Books/.test(q))return ["定番のものが好きかな","その時の気分で変わる","新しいものも試してみたい"];
  if(/よく|普段|週に何回|多い/.test(q))return ["けっこうするよ","たまにかな","あまりしないかな"];
  if(/好き|平気|得意/.test(q))return ["うん、好き！","まあまあかな","実はあまり得意じゃない"];
  if(/ある|いる|飼ってる/.test(q))return ["あるよ","まだないけど興味ある","今のところないかな"];
@@ -408,12 +408,12 @@ function conversation(){
 }
 function choice(label,next){return `<button class="option" onclick="chooseConversation(${next})">${label}</button>`}
 function chooseConversation(next){window.convoStep=next;conversation()}
-function askContactChoice(){let n=npcs[window.currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>あなた:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
+function askContactChoice(){let n=npcs[window.currentNpc],name=n.name.split(" ")[0];if(Math.random()<.5){A.innerHTML=`<div class="card"><p><b>${name}:</b> よかったら連絡先交換しない？</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">今日は交換しない</button></div>`}else{A.innerHTML=`<div class="card"><p><b>You:</b> よかったら連絡先交換しない？</p><p><b>${name}:</b> うん、いいよ。</p><button class="primary" onclick="contactYes()">交換する</button><button class="secondary" onclick="day()">やっぱりやめる</button></div>`}}
 function contactYes(){let n=npcs[window.currentNpc];state.met=true;if(!Array.isArray(state.contacts))state.contacts=[];if(!state.contacts.includes(window.currentNpc))state.contacts.push(window.currentNpc);A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>📱 連絡先を交換しました</h2><p><b>${n.name}</b> が連絡先に追加されました。</p><button class="primary" onclick="day()">続ける</button></div>`}
 function phone(){
  const ids=Array.isArray(state.contacts)?state.contacts:[];
  const list=ids.length?ids.map(i=>{const n=npcs[i];return `<button class="option" onclick="openContact(${i})"><span style="font-size:28px;margin-right:10px">${n.emoji}</span><b>${n.name}</b><br><span class="small">${n.age}歳 · ${n.job}</span></button>`}).join(""):'<p class="small">まだ連絡先を交換した人はいません。</p>';
- A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3>${list}</div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>${nav()}`;
+ A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3>${list}</div><button class="secondary" onclick="state.screen='day';render()">← Back</button>${nav()}`;
 }
 function affinity(i){if(!state.affinity)state.affinity={};return state.affinity[i]||0}
 function addAffinity(i,n){if(!state.affinity)state.affinity={};state.affinity[i]=Math.max(0,Math.min(100,affinity(i)+n))}
@@ -422,38 +422,38 @@ function openContact(i){
  A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age}歳 · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 メッセージ</button><button class="secondary" onclick="phone()">← 連絡先へ</button></div>`;
 }
 const chatCategories=[
- {name:"日常",icon:"☀️",topics:["今日あったこと","仕事","ランチ","帰り道","天気","眠い","最近忙しい？","今日の予定"]},
- {name:"趣味",icon:"🎧",topics:["音楽","映画","ドラマ","ゲーム","本","スポーツ","料理","写真"]},
- {name:"好きなもの",icon:"🍜",topics:["好きな食べ物","コーヒー","甘いもの","お酒","好きな店","服","旅行先","季節"]},
- {name:"もっと知りたい",icon:"💭",topics:["休日の過ごし方","子どもの頃","学生時代","友達","ペット","得意なこと","苦手なこと","最近ハマってること"]},
- {name:"価値観",icon:"🌱",topics:["仕事と生活","家族","お金の使い方","一人の時間","連絡頻度","将来","住みたい場所","人生で大切なこと"]},
- {name:"恋愛",icon:"💕",topics:["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]},
- {name:"ふざける",icon:"😂",topics:["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]}
+ {name:"日常",icon:"☀️",topics:["Today","Work","Lunch","Commute home","Weather","Feeling tired","Been busy lately?","Plans for today"]},
+ {name:"Hobbies",icon:"🎧",topics:["Music","Movies","TV shows","Games","Books","Sports","Cooking","Photography"]},
+ {name:"Favorites",icon:"🍜",topics:["Favorite food","Coffee","Sweets","Drinks","Favorite places","Fashion","Travel","Seasons"]},
+ {name:"Get to know you",icon:"💭",topics:["Days off","Childhood","School days","Friends","Pets","Strengths","Weaknesses","Current interests"]},
+ {name:"Values",icon:"🌱",topics:["Workと生活","Family","Money","Alone time","Texting frequency","The future","Where to live","What matters in life"]},
+ {name:"Relationships",icon:"💕",topics:["Ideal date","Space in a relationship","Your type","Anniversaries","Jealousy","Marriage","Living together","What you want in a partner"]},
+ {name:"Just for fun",icon:"😂",topics:["Winning the lottery","Desert island","Weird food combos","Childhoodの黒歴史","Superpowers","A surprise day off","Dogs or cats","Morning or night person"]}
 ];
 const topicChat={};
-const casualTopics=new Set(["音楽","映画","ドラマ","ゲーム","本","スポーツ","料理","写真","好きな食べ物","コーヒー","甘いもの","お酒","好きな店","服","旅行先","季節","ペット","最近ハマってること"]);
-const questionTopics=new Set(["今日あったこと","仕事","ランチ","帰り道","天気","眠い","最近忙しい？","今日の予定","休日の過ごし方","子どもの頃","学生時代","友達","得意なこと","苦手なこと"]);
-const valueTopics=new Set(["仕事と生活","家族","お金の使い方","一人の時間","連絡頻度","将来","住みたい場所","人生で大切なこと"]);
-const romanceTopics=new Set(["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]);
-const funTopics=new Set(["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]);
+const casualTopics=new Set(["Music","Movies","TV shows","Games","Books","Sports","Cooking","Photography","Favorite food","Coffee","Sweets","Drinks","Favorite places","Fashion","Travel","Seasons","Pets","Current interests"]);
+const questionTopics=new Set(["Today","Work","Lunch","Commute home","Weather","Feeling tired","Been busy lately?","Plans for today","Days off","Childhood","School days","Friends","Strengths","Weaknesses"]);
+const valueTopics=new Set(["Workと生活","Family","Money","Alone time","Texting frequency","The future","Where to live","What matters in life"]);
+const romanceTopics=new Set(["Ideal date","Space in a relationship","Your type","Anniversaries","Jealousy","Marriage","Living together","What you want in a partner"]);
+const funTopics=new Set(["Winning the lottery","Desert island","Weird food combos","Childhoodの黒歴史","Superpowers","A surprise day off","Dogs or cats","Morning or night person"]);
 function topicScript(topic){
  const scripts={
- "今日あったこと":{start:"今日どんな一日だった？",choices:["けっこういい日だったよ。","まあまあかな。","ちょっと疲れた。","いろいろあった（笑）"],replies:["それはよかった！何かいいことあった？","平和な日って感じ？","おつかれさま。大丈夫？","その言い方、気になる（笑）何があったの？"]},
- "仕事":{start:"今日は仕事どうだった？",choices:["順調だったよ。","忙しかった。","ちょっと大変だった。","今日は仕事休み。"],replies:["いい日だったんだね。","おつかれさま。ちゃんと休めそう？","それは疲れるね。何かあった？","いいね。今日は何してたの？"]},
- "ランチ":{start:"今日ランチ何食べた？",choices:["お弁当。","外で食べたよ。","簡単に済ませた。","まだ食べてない（笑）"],replies:["いいね。自分で作ったの？","何食べたの？","忙しかった？","え、ちゃんと食べて（笑）"]},
- "音楽":{start:"最近どんな音楽聴いてる？",choices:["ポップ系をよく聴くよ。","落ち着いた曲が好き。","最近あまり聴いてない。","おすすめある？"],replies:["いいね。最近お気に入りの曲ある？","夜とかに聴きたくなるよね。","そうなんだ。普段は何して気分転換する？","あるよ。好み聞いて選びたい（笑）"]},
- "映画":{start:"映画ってよく観る？",choices:["けっこう観るよ！","家で観る方が好き。","映画館で観るのが好き。","最近のおすすめある？"],replies:["いいね。どんなジャンルが好き？","家でゆっくり観るのいいよね。","映画館の雰囲気いいよね。","あるよ。どんなジャンルが好き？"]},
- "スポーツ":{start:"スポーツってする？それとも観る方？",choices:["自分でする方が好き。","観る方が好き！","どっちも好き。","あまり詳しくない。"],replies:["何するのが一番好き？","好きな競技ある？","いいね。僕も両方楽しめる。","僕も詳しくない競技多いよ。"]},
- "ゲーム":{start:"ゲームってする？",choices:["よくするよ！","たまにする。","見る方が好き。","あまりしない。"],replies:["何系が好き？","気分転換にちょうどいいよね。","配信見るのも楽しいよね。","そうなんだ。ほかに何して過ごすことが多い？"]},
- "料理":{start:"料理する？",choices:["けっこうするよ。","簡単なものなら。","食べる方が好き（笑）","得意料理ある？"],replies:["得意料理なに？","簡単でおいしいのが一番だよね。","それもわかる（笑）好きな料理は？","僕は簡単なものが多いかな。"]},
- "好きな食べ物":{start:"好きな食べ物って何？",choices:["お寿司！","イタリアン。","甘いもの。","何でも食べる（笑）"],replies:["好きなネタは？","パスタなら何系が好き？","ケーキとか？","強い（笑）苦手なものないの？"]},
- "コーヒー":{start:"コーヒー飲む？",choices:["毎日飲む！","たまに飲む。","紅茶の方が好き。","おすすめのカフェある？"],replies:["僕も。朝飲む派？","たまに飲むくらいもいいよね。","紅茶もいいね。何系が好き？","あるよ。今度一緒に行ってみる？"]},
- "犬派猫派":{start:"急だけど、犬派？猫派？",choices:["犬派！","猫派！","どっちも好き。","選べない（笑）"],replies:["犬いいよね。飼ったことある？","猫いいよね。飼ったことある？","わかる。もし飼うならどっち？","それが一番平和（笑）"]},
- "朝型夜型":{start:"朝型？夜型？",choices:["朝型かな。","完全に夜型。","日による。","どっちにもなれない（笑）"],replies:["朝強いのすごい。何時くらいに起きる？","夜って集中できるよね。","それが一番現実的（笑）","わかる。ずっと眠い日あるよね（笑）"]}
+ "Today":{start:"今日どんな一日だった？",choices:["けっこういい日だったよ。","It's been okay.","ちょっと疲れた。","いろいろあった（笑）"],replies:["それはよかった！何かいいことあった？","平和な日って感じ？","おつかれさま。大丈夫？","その言い方、気になる（笑）何があったの？"]},
+ "Work":{start:"今日はWorkどうだった？",choices:["順調だったよ。","忙しかった。","ちょっと大変だった。","今日はWork休み。"],replies:["いい日だったんだね。","おつかれさま。ちゃんと休めそう？","それは疲れるね。何かあった？","いいね。今日は何してたの？"]},
+ "Lunch":{start:"今日Lunch何食べた？",choices:["お弁当。","外で食べたよ。","簡単に済ませた。","まだ食べてない（笑）"],replies:["いいね。自分で作ったの？","何食べたの？","忙しかった？","え、ちゃんと食べて（笑）"]},
+ "Music":{start:"What kind of music have you been listening to lately?",choices:["ポップ系をよく聴くよ。","落ち着いた曲が好き。","最近あまり聴いてない。","おすすめある？"],replies:["いいね。最近お気に入りの曲ある？","夜とかに聴きたくなるよね。","そうなんだ。普段は何して気分転換する？","あるよ。好み聞いて選びたい（笑）"]},
+ "Movies":{start:"Do you watch movies often?",choices:["I watch them pretty often!","I prefer watching at home.","Movies館で観るのが好き。","Any recent recommendations?"],replies:["いいね。どんなジャンルが好き？","家でゆっくり観るのいいよね。","Movies館の雰囲気いいよね。","あるよ。どんなジャンルが好き？"]},
+ "Sports":{start:"Do you play sports, or are you more into watching them?",choices:["I prefer playing.","I prefer watching!","I like both.","あまり詳しくない。"],replies:["何するのが一番好き？","好きな競技ある？","いいね。僕も両方楽しめる。","僕も詳しくない競技多いよ。"]},
+ "Games":{start:"Do you play games?",choices:["Yeah, pretty often!","Sometimes.","見る方が好き。","あまりしない。"],replies:["何系が好き？","気分転換にちょうどいいよね。","配信見るのも楽しいよね。","そうなんだ。ほかに何して過ごすことが多い？"]},
+ "Cooking":{start:"Do you cook?",choices:["Pretty often.","If it's something simple.","I'd rather eat it, honestly lol.","得意Cookingある？"],replies:["得意Cookingなに？","簡単でおいしいのが一番だよね。","それもわかる（笑）好きなCookingは？","僕は簡単なものが多いかな。"]},
+ "Favorite food":{start:"Favorite foodって何？",choices:["お寿司！","イタリアン。","Sweets。","何でも食べる（笑）"],replies:["好きなネタは？","パスタなら何系が好き？","ケーキとか？","強い（笑）苦手なものないの？"]},
+ "Coffee":{start:"Do you drink coffee?",choices:["Every day!","たまに飲む。","I prefer tea.","Know any good cafés?"],replies:["僕も。朝飲む派？","たまに飲むくらいもいいよね。","紅茶もいいね。何系が好き？","あるよ。今度一緒に行ってみる？"]},
+ "Dogs or cats":{start:"急だけど、犬派？猫派？",choices:["Dogs!","Cats!","I like both.","I can't choose lol."],replies:["犬いいよね。飼ったことある？","猫いいよね。飼ったことある？","わかる。もし飼うならどっち？","それが一番平和（笑）"]},
+ "Morning or night person":{start:"朝型？夜型？",choices:["Probably a morning person.","Definitely a night owl.","日による。","どっちにもなれない（笑）"],replies:["朝強いのすごい。何時くらいに起きる？","夜って集中できるよね。","それが一番現実的（笑）","わかる。ずっとFeeling tired日あるよね（笑）"]}
  };
  if(scripts[topic])return scripts[topic];
- if(romanceTopics.has(topic))return {start:topic+"についてどう思う？",choices:["大事だと思う。","相手によるかな。","あまりこだわらない。","あなたはどう？"],replies:["僕も大事だと思う。","うん、関係によって変わるよね。","なるほど。そういう考えもあるね。","僕は二人で話して決めたいかな。"]};
- if(valueTopics.has(topic))return {start:topic+"についてどう考えてる？",choices:["かなり大切。","バランスが大事。","まだ分からない。","あなたは？"],replies:["そこを大切にしてるんだね。","僕もバランスは大事だと思う。","答えって変わることもあるよね。","僕は相手の考えも聞きながら決めたい。"]};
+ if(romanceTopics.has(topic))return {start:topic+" — what do you think about it?",choices:["大事だと思う。","It depends on the person.","あまりこだわらない。","Youはどう？"],replies:["僕も大事だと思う。","うん、関係によって変わるよね。","なるほど。そういう考えもあるね。","僕は二人で話して決めたいかな。"]};
+ if(valueTopics.has(topic))return {start:topic+"についてどう考えてる？",choices:["かなり大切。","バランスが大事。","まだ分からない。","Youは？"],replies:["そこを大切にしてるんだね。","僕もバランスは大事だと思う。","答えって変わることもあるよね。","僕は相手の考えも聞きながら決めたい。"]};
  if(funTopics.has(topic))return {start:topic+"。これどう答える？（笑）",choices:["すぐ答えられる（笑）","迷う！","変な答えになりそう。","先に答えて！"],replies:["じゃあ聞かせて（笑）","こういうの迷うよね。","それ気になる（笑）","僕から？ちょっと考える（笑）"]};
  return {start:topic+"の話してもいい？",choices:["いいよ。","うん、好き。","あまり詳しくない。","聞きたい！"],replies:["じゃあ聞きたいことある。","いいね。僕も。","大丈夫。僕も詳しくないこと多いよ。","もちろん。何から話そうか。"]};
 }
@@ -464,7 +464,7 @@ function chatVariant(i,topicIndex){
 }
 function messageMenu(i){
  i=Number(i); const n=npcs[i]; if(!n)return;
- A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card"><button class="option" onclick="topicMenu('+i+')">💬 話題を選んで話す</button><button class="option" onclick="randomMessage('+i+')">🎲 おまかせで話す</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>💬 '+n.name+'</h2><div class="card"><button class="option" onclick="topicMenu('+i+')">💬 Choose a topic</button><button class="option" onclick="randomMessage('+i+')">🎲 Pick a topic for me</button><button class="secondary" onclick="openContact('+i+')">← Back</button></div>';
 }
 function randomMessage(i){
  i=Number(i); const list=allChatTopics(); if(!npcs[i]||!list.length)return;
@@ -473,9 +473,9 @@ function randomMessage(i){
 }
 function topicMenu(i){
  i=Number(i); if(!npcs[i])return;
- let html='<h2>💬 何を話す？</h2><div class="card">';
+ let html='<h2>💬 What do you want to talk about?</h2><div class="card">';
  chatCategories.forEach(function(c,ci){html+='<button type="button" class="option" onclick="openTopicCategory('+i+','+ci+')">'+c.icon+' '+c.name+'</button>';});
- html+='</div><button class="secondary" onclick="messageMenu('+i+')">← 戻る</button>';
+ html+='</div><button class="secondary" onclick="messageMenu('+i+')">← Back</button>';
  A.innerHTML=html;
 }
 function openTopicCategory(i,ci){
@@ -483,18 +483,18 @@ function openTopicCategory(i,ci){
  let start=0;for(let x=0;x<ci;x++)start+=chatCategories[x].topics.length;
  let html='<h2>'+c.icon+' '+c.name+'</h2><div class="card">';
  c.topics.forEach(function(t,ti){html+='<button type="button" class="option" onclick="sendChatTopic('+i+','+(start+ti)+')">'+t+'</button>';});
- html+='</div><button class="secondary" onclick="topicMenu('+i+')">← カテゴリーへ</button>';
+ html+='</div><button class="secondary" onclick="topicMenu('+i+')">← Back to categories</button>';
  A.innerHTML=html;
 }
 function messageReplyTiming(i){
  const n=npcs[i];if(!n)return '';
- if(n.textStyle==='frequent')return 'すぐに返信がきた。';
- if(n.textStyle==='space')return '少し時間がたってから返信がきた。';
- return 'しばらくして返信がきた。';
+ if(n.textStyle==='frequent')return 'He replied right away.';
+ if(n.textStyle==='space')return 'He replied a little later.';
+ return 'A little while later, he replied.';
 }
 function sendChatTopic(i,topicIndex){
  i=Number(i);topicIndex=Number(topicIndex);const n=npcs[i];if(!n)return;
- if(!useHours(2)){A.innerHTML='<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">戻る</button></div>';return;}
+ if(!useHours(2)){A.innerHTML='<div class="card"><h2>⏰ メッセージする時間が足りない</h2><button class="primary" onclick="day()">Back</button></div>';return;}
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
  const today=state.day||1;if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0;}
  state.chatCount[i]=(state.chatCount[i]||0)+1;
@@ -505,34 +505,34 @@ function sendChatTopic(i,topicIndex){
 }
 function showPlayerMessageChoices(i,topicIndex){
  const n=npcs[i],v=chatVariant(i,topicIndex);
- let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた → '+n.name.split(' ')[0]+':</b> '+v.opener+'</p><p class="small">続けて送る内容を選んでください</p>';
+ let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>You → '+n.name.split(' ')[0]+':</b> '+v.opener+'</p><p class="small">Choose what to send next</p>';
  v.choices.forEach(function(c,idx){html+='<button class="option" onclick="sendPlayerReply('+i+','+topicIndex+','+idx+')">'+c+'</button>';});
- html+='<button class="secondary" onclick="openTopicCategory('+i+','+v.ci+')">← 戻る</button></div>';
+ html+='<button class="secondary" onclick="openTopicCategory('+i+','+v.ci+')">← Back</button></div>';
  A.innerHTML=html;
 }
 function continueChat(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
  const v=chatVariant(i,topicIndex);
  const follow={
- "今日あったこと":[
-  ["それはよかった。何が一番印象に残った？",["仕事のことかな。","ちょっと嬉しいことがあった。","特に何もない平和な日（笑）","いろいろありすぎた（笑）"]],
+ "Today":[
+  ["それはよかった。何が一番印象に残った？",["Workのことかな。","ちょっと嬉しいことがあった。","特に何もない平和な日（笑）","いろいろありすぎた（笑）"]],
   ["まあまあな日ってあるよね。今日は忙しかった？",["けっこう忙しかった。","普通くらい。","むしろ暇だった。","疲れたけど大丈夫。"]],
-  ["おつかれさま。何か疲れることあった？",["仕事が忙しかった。","ちょっと寝不足。","人付き合いで疲れた。","理由はないけど疲れた（笑）"]],
-  ["僕はまあまあだったよ。そっちは何してた？",["仕事してたよ。","のんびりしてた。","ちょっと出かけてた。","いろいろしてた（笑）"]]
+  ["おつかれさま。何か疲れることあった？",["Workが忙しかった。","ちょっと寝不足。","人付き合いで疲れた。","理由はないけど疲れた（笑）"]],
+  ["僕はまあまあだったよ。そっちは何してた？",["Workしてたよ。","のんびりしてた。","ちょっと出かけてた。","いろいろしてた（笑）"]]
  ],
- "映画":[
-  ["どんなジャンルが一番好き？",["コメディ！","ホラーかな。","恋愛もの。","アクションが好き。"]],
-  ["家で観るなら何系を選ぶことが多い？",["コメディ。","ドラマ系。","ドキュメンタリー。","その日の気分かな。"]],
-  ["最近映画館で何か観た？",["観たよ！","まだ観てない。","観たい作品がある。","最近は家で観てる。"]],
+ "Movies":[
+  ["どんなジャンルが一番好き？",["コメディ！","ホラーかな。","Relationshipsもの。","アクションが好き。"]],
+  ["家で観るなら何系を選ぶことが多い？",["コメディ。","TV shows系。","ドキュメンタリー。","その日の気分かな。"]],
+  ["最近Movies館で何か観た？",["観たよ！","まだ観てない。","観たい作品がある。","最近は家で観てる。"]],
   ["じゃあ好み聞いておすすめ考える（笑）どんな感じがいい？",["笑えるやつ。","泣けるやつ。","ハラハラするやつ。","考えさせられるやつ。"]]
  ],
- "音楽":[
+ "Music":[
   ["最近よく聴くアーティストいる？",["いるよ！","曲単位で聴くことが多い。","昔の曲をよく聴く。","おすすめ探してる。"]],
-  ["落ち着いた曲いいよね。どんな時に聴く？",["寝る前。","運転中。","仕事中。","家でのんびりするとき。"]],
-  ["普段は何して気分転換する？",["映画観る。","散歩する。","ゲームする。","何もしない（笑）"]],
+  ["落ち着いた曲いいよね。どんな時に聴く？",["寝る前。","運転中。","Work中。","家でのんびりするとき。"]],
+  ["普段は何して気分転換する？",["Movies観る。","散歩する。","Gamesする。","何もしない（笑）"]],
   ["じゃあ今度おすすめ交換しようよ。",["いいね！","ぜひ。","楽しそう。","それやろう！"]]
  ],
- "犬派猫派":[
+ "Dogs or cats":[
   ["犬いいよね。飼ったことある？",["あるよ！","ないけど飼ってみたい。","今は飼ってないよ。","猫も好きだよ。"]],
   ["猫のどんなところが好き？",["自由なところ。","甘えてくるところ。","見てるだけで癒される。","犬も好きだけどね。"]],
   ["どっちもかわいいよね。もし飼うならどっち？",["犬かな！","猫かな！","両方（笑）","まだ決められない。"]],
@@ -548,7 +548,7 @@ function continueChat(i,topicIndex,choiceIndex){
    ];row=neutral[choiceIndex]||neutral[0];
  }
  state.pendingFollow={person:i,topicIndex:topicIndex,npc:row[0],choices:row[1]};saveGame();
- let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+row[0]+'</p><p class="small">返信する</p>';
+ let html='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+row[0]+'</p><p class="small">Reply</p>';
  row[1].forEach(function(x,k){html+='<button class="option" onclick="finishChat('+i+','+topicIndex+','+k+')">'+x+'</button>';});
  html+='</div>';A.innerHTML=html;
 }
@@ -558,7 +558,7 @@ function finishChat(i,topicIndex,k){
  const ends=["うん、また話そう。","話せてよかった。","ありがとう。なんか少し君のこと知れた気がする。","また今度ゆっくり話そう。"];
  const reply=ends[(i+Number(topicIndex)+k+(state.day||1))%ends.length];
  state.pendingFollow=null;saveGame();
- A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>あなた:</b> '+mine+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><button class="primary" onclick="messageMenu('+i+')">💬 別の話題でメッセージ</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>You:</b> '+mine+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><button class="primary" onclick="messageMenu('+i+')">💬 Message about something else</button><button class="secondary" onclick="openContact('+i+')">← Back</button></div>';
 }
 function sendPlayerReply(i,topicIndex,choiceIndex){
  i=Number(i);topicIndex=Number(topicIndex);choiceIndex=Number(choiceIndex);const n=npcs[i];if(!n)return;
@@ -569,11 +569,11 @@ function sendPlayerReply(i,topicIndex,choiceIndex){
  const npcReply=(v.replies&&v.replies[choiceIndex])||'そうなんだ。もっと聞きたい。';
  const count=(state.chatCount&&state.chatCount[i])||1;
  let gain=0,reaction='';
- if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction='メッセージを楽しんでいるみたい。';}
- else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
- else{gain=count<=2?2:0;reaction='自然に会話が続いた。';}
+ if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction='He seems to be enjoying the conversation.';}
+ else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'He may be feeling a little overwhelmed by the messages.':'He replied at his own pace.';}
+ else{gain=count<=2?2:0;reaction='The conversation flowed naturally.';}
  addAffinity(i,gain);state.pendingChat=null;saveGame();
- A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+playerText+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+npcReply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="continueChat('+i+','+topicIndex+','+choiceIndex+')">💬 会話を続ける</button><button class="option" onclick="messageMenu('+i+')">別の話題にする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>You:</b> '+playerText+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+npcReply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="continueChat('+i+','+topicIndex+','+choiceIndex+')">💬 Keep talking</button><button class="option" onclick="messageMenu('+i+')">Change topic</button><button class="secondary" onclick="openContact('+i+')">← Back</button></div>';
 }
 window.showPlayerMessageChoices=showPlayerMessageChoices;window.sendPlayerReply=sendPlayerReply;window.continueChat=continueChat;window.finishChat=finishChat;
 function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
@@ -586,16 +586,16 @@ function morningMessage(){
  const chance=n.textStyle==="frequent"?2:n.textStyle==="warm"?4:6;
  if((day+i*3)%chance!==0)return "";
  addAffinity(i,2);
- return `<div class="card"><h3>📩 朝のメッセージ</h3><p><b>${n.name.split(" ")[0]}:</b> おはよう。今日は何してる？</p><button class="option" onclick="messageMenu(${i})">返信する</button></div>`;
+ return `<div class="card"><h3>📩 Morning message</h3><p><b>${n.name.split(" ")[0]}:</b> おはよう。今日は何してる？</p><button class="option" onclick="messageMenu(${i})">Reply</button></div>`;
 }
 function dateScene(i){
- if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">戻る</button></div>';return}
+ if((state.dailyActions||0)>=(state.maxDailyActions||4)){A.innerHTML='<div class="card"><h2>🌙 今日はもう疲れた</h2><p>今日はこれ以上デートできません。</p><button class="primary" onclick="day()">Back</button></div>';return}
  state.dailyActions=(state.dailyActions||0)+2;
  const n=npcs[i];addAffinity(i,10);state.stress=Math.max(0,(state.stress||0)-12);state.energy=Math.max(0,(state.energy||0)-15);
  A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h2>💕 ${n.name}とデート</h2><p>カフェでゆっくり話して、一緒に街を歩いた。前より少し自然に話せるようになった。</p><p class="small">💗 +10　🧠 ストレス -12　⚡ -15</p><button class="primary" onclick="day()">デートを終える</button></div>`;
 }
 function relationships(){
- A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
+ A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
 }
 function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
 function render(){saveGame();var screens={title:title,create:create,quiz:quiz,day:day};(screens[state.screen]||title)()}
