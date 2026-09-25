@@ -45,7 +45,7 @@ input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:13px;fo
 const A=document.querySelector("#app");
 const state={screen:"title",name:"",age:27,gender:"female",target:"male",q:0,score:{family:50,career:50,social:50,contact:50,adventure:50},money:1850,energy:100,stress:20,day:1,time:"7:00 AM",period:"morning",periodHours:4,met:false,contacts:[],workedDay:0,lowMoodUntil:0,inventory:[],encounterCount:0,affinity:{},lastChatDay:{},dailyActions:0,maxDailyActions:4,
 look:{hair:0,color:0,face:0,eye:0,skin:0,brow:0,nose:0,mouth:0},partnerLook:{hair:0,face:0},
-education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0};
+education:null,career:null,school:null,schoolDays:0,schoolPaid:false,careerExperience:{},careerLastDay:0,friends:[],scheduledDates:[]};
 const SAVE_KEY="soulmate-life-save-v1";
 function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(state))}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const data=JSON.parse(raw);if(!data||typeof data!=="object")return false;Object.assign(state,data);return true}catch(e){return false}}
@@ -251,16 +251,29 @@ function moodStatus(){
 }
 function periodLabel(){return state.period==="morning"?"🌅 AM":state.period==="afternoon"?"☀️ PM":"🌙 Night"}
 function statusBar(c){return `<div class="statbar"><span class="pill">${periodLabel()} ${state.periodHours==null?4:state.periodHours}h</span><span class="pill">🌸 Year 1</span><span class="pill">${c.month} ${c.date}<br>${c.weekday}</span><span class="pill">📅 ${c.d}/365</span><span class="pill">💵 ${state.money}</span><span class="pill">⚡ ${state.energy}</span><span class="pill">🧠 ${state.stress||0}%</span><span class="pill">🕒 ${state.dailyActions||0}/${state.maxDailyActions||4}</span></div>`}
+function ensureSocialState(){if(!Array.isArray(state.friends))state.friends=[];if(!Array.isArray(state.scheduledDates))state.scheduledDates=[]}
+function dateForDay(d){ensureSocialState();return state.scheduledDates.find(x=>x&&x.day===d&&!x.cancelled&&!x.done)}
+function scheduleSummary(){
+ ensureSocialState();const upcoming=state.scheduledDates.filter(x=>x&&!x.cancelled&&!x.done&&x.day>=(state.day||1)).sort((a,b)=>a.day-b.day).slice(0,3);
+ if(!upcoming.length)return '<p class="small">📅 No upcoming plans.</p>';
+ return '<p class="small"><b>📅 Schedule:</b><br>'+upcoming.map(x=>{const c=calendarInfoFor(x.day),n=npcs[x.npc];return c.weekday+' '+c.month+' '+c.date+' — Date with '+(n?n.name.split(" ")[0]:"someone")}).join('<br>')+'</p>';
+}
+function calendarInfoFor(day){const d=Math.max(1,Math.min(365,day||1)),date=new Date(2026,0,d),weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return {d,weekday:weekdays[date.getDay()],month:months[date.getMonth()],date:date.getDate(),weekend:[0,6].includes(date.getDay())}}
+function todayDateCard(){
+ const plan=dateForDay(state.day||1);if(!plan)return '';
+ const n=npcs[plan.npc];if(!n)return '';
+ return '<div class="card"><h3>💕 DATE TODAY — '+n.name.split(" ")[0]+'</h3><p>Your date is scheduled for today.</p><button class="primary" onclick="goScheduledDate('+plan.npc+')">Go on Date</button><button class="secondary" onclick="cancelScheduledDate('+plan.npc+')">Cancel Date</button></div>';
+}
 function day(){
  const c=calendarInfo(),blocked=moodCheck(),m=moodStatus(),worked=state.workedDay===c.d;
  if(!state.period)state.period="morning";
- const isMorning=state.period==="morning",isAfternoon=state.period==="afternoon",isNight=state.period==="night";
- const intro=isMorning?(c.weekend?"It's a free morning. How do you want to spend today?":"Morning. How do you want to spend today?"):isAfternoon?"It's afternoon. You still have some time.":"It's evening. How do you want to finish the day?";
+ const isMorning=state.period==="morning",isNight=state.period==="night";
+ const dayType=c.weekend?'🎉 WEEKEND — FREE DAY':'💼 WEEKDAY — WORK DAY';
+ const intro=c.weekend?(isMorning?'Your whole day is free starting this morning.':'Enjoy your weekend free time.'):(worked?'Work is finished. Your evening is free.':'Work is scheduled from morning through afternoon.');
  let note=m?'<div class="card"><h3>'+m.title+'</h3><p>'+m.text+'</p></div>':'';
- if(blocked){
-  A.innerHTML=statusBar(c)+note+'<div class="card"><h2>Rest Day</h2><p>Your body and mind need recovery today.</p><button class="primary" onclick="endDay()">🛌 Rest for the whole day</button></div>'+nav();return;
- }
- A.innerHTML=statusBar(c)+note+(isMorning?morningMessage():"")+'<div class="card"><h2>Day '+c.d+' — '+periodLabel()+'</h2><p class="event">'+intro+'</p>'+((isMorning&&!c.weekend&&!worked)?(state.school?'<button class="primary" onclick="attendSchool()">🎓 Go to School</button>':'<button class="primary" onclick="work()">💼 Go to Work</button>'):'')+'<button class="option" onclick="careerMenu()">💼 Career & School</button><button class="secondary" onclick="goOut()">🗺️ Go Out</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Relax</button>'+(!isNight?'<button class="primary" onclick="nextPeriod()">⏩ Next Time</button>':'<button class="primary" onclick="endDay()">🌙 Sleep</button>')+'</div>'+nav();
+ if(blocked){A.innerHTML=statusBar(c)+note+'<div class="card"><h2>Rest Day</h2><p>Your body and mind need recovery today.</p><button class="primary" onclick="endDay()">🛌 Rest for the whole day</button></div>'+nav();return}
+ if(!c.weekend&&isMorning&&!worked){A.innerHTML=statusBar(c)+note+todayDateCard()+'<div class="card"><h2>'+dayType+'</h2><p><b>Schedule:</b> Work · Morning → Afternoon</p>'+scheduleSummary()+(state.school?'<button class="primary" onclick="attendSchool()">🎓 Attend School Today</button>':'<button class="primary" onclick="work()">💼 Start Work Day</button>')+'</div>'+nav();return}
+ A.innerHTML=statusBar(c)+note+todayDateCard()+(isMorning?morningMessage():"")+'<div class="card"><h2>'+dayType+'</h2><p class="event">'+intro+'</p>'+scheduleSummary()+'<button class="option" onclick="careerMenu()">💼 Career & School</button><button class="secondary" onclick="goOut()">🗺️ Go Out</button><button class="secondary" onclick="shopping()">🛍️ Shopping</button><button class="secondary" onclick="refresh()">🛁 Relax</button>'+(!isNight?'<button class="primary" onclick="nextPeriod()">⏩ Next Time</button>':'<button class="primary" onclick="endDay()">🌙 Sleep</button>')+'</div>'+nav();
 }
 function nextPeriod(){
  if(state.period==="morning"){state.period="afternoon";state.time="1:00 PM";state.periodHours=4}
@@ -520,19 +533,23 @@ function phone(){
 function affinity(i){if(!state.affinity)state.affinity={};return state.affinity[i]||0}
 function addAffinity(i,n){if(!state.affinity)state.affinity={};state.affinity[i]=Math.max(0,Math.min(100,affinity(i)+n))}
 function openContact(i){
- const n=npcs[i];if(!n)return phone();
- A.innerHTML=`<h2>📱 ${n.name}</h2><div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><h3>${n.name}</h3><p class="small">${n.age} · ${n.job}</p><button class="primary" onclick="messageMenu(${i})">💬 Message</button><button class="option" onclick="askDate(${i})">💕 Ask on a Date</button><button class="secondary" onclick="phone()">← Contacts</button></div>`;
+ ensureSocialState();const n=npcs[i];if(!n)return phone();const friend=state.friends.includes(Number(i));
+ A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p><p><b>'+(friend?'💙 FRIEND ZONE — Platonic Friend':'💬 Acquaintance / Romantic possibility')+'</b></p><button class="primary" onclick="messageMenu('+i+')">💬 Message</button><button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button>'+(friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button>':'<button class="option" onclick="friendZone('+i+')">💙 Become Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
 }
+function friendZone(i){ensureSocialState();i=Number(i);if(!state.friends.includes(i))state.friends.push(i);saveGame();openContact(i)}
+function friendPlans(i){const n=npcs[i];A.innerHTML='<h2>💙 Plans with '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>FRIEND ZONE:</b> These are platonic plans.</p><button class="option" onclick="doFriendPlan('+i+',\'Party\')">🎉 Go to a Party</button><button class="option" onclick="doFriendPlan('+i+',\'Club\')">💃 Go to a Club</button><button class="option" onclick="doFriendPlan('+i+',\'Hang Out\')">☕ Hang Out</button><button class="option" onclick="doFriendPlan('+i+',\'Weekend Trip\')">✈️ Weekend Trip</button></div><button class="secondary" onclick="openContact('+i+')">← Back</button>'}
+function doFriendPlan(i,type){const c=calendarInfo();if(type==="Weekend Trip"&&!c.weekend){A.innerHTML='<div class="card"><h2>✈️ Weekend only</h2><p>Travel with friends is available on Saturday or Sunday.</p><button class="primary" onclick="friendPlans('+i+')">Back</button></div>';return}state.energy=Math.max(0,(state.energy||0)-(type==="Weekend Trip"?25:12));state.stress=Math.max(0,(state.stress||0)-(type==="Weekend Trip"?30:15));addAffinity(i,4);saveGame();A.innerHTML='<div class="card"><h2>💙 '+type+'</h2><p>You spent time together as friends.</p><p class="small">FRIEND ZONE · Platonic</p><button class="primary" onclick="day()">Continue</button></div>'}
 function askDate(i){
- i=Number(i);const n=npcs[i];if(!n)return phone();
- const a=affinity(i),need=n.dateStyle==="casual"?12:n.dateStyle==="balanced"?22:32;
- if(a>=need){
-  A.innerHTML=`<h2>💕 Ask ${n.name.split(" ")[0]} on a Date</h2><div class="card"><p><b>You:</b> Would you like to go out with me sometime?</p><p><b>${n.name.split(" ")[0]}:</b> Yeah, I'd like that. 😊</p><button class="primary" onclick="dateScene(${i})">Go on the date</button><button class="secondary" onclick="openContact(${i})">Maybe later</button></div>`;
- }else{
-  const replies=n.dateStyle==="serious"?"I'd like to get to know you a little better first.":"Maybe not yet, but let's keep talking.";
-  A.innerHTML=`<h2>💕 Ask ${n.name.split(" ")[0]} on a Date</h2><div class="card"><p><b>You:</b> Would you like to go out with me sometime?</p><p><b>${n.name.split(" ")[0]}:</b> ${replies}</p><p class="small">Their feelings are hidden. Spending time together and having conversations can change their answer later.</p><button class="primary" onclick="openContact(${i})">Okay</button></div>`;
- }
+ ensureSocialState();i=Number(i);const n=npcs[i];if(!n)return phone();const a=affinity(i),need=n.dateStyle==="casual"?12:n.dateStyle==="balanced"?22:32;
+ if(state.friends.includes(i)){A.innerHTML='<div class="card"><h2>💙 Friend Zone</h2><p>You and '+n.name.split(" ")[0]+' are currently platonic friends.</p><button class="primary" onclick="openContact('+i+')">Back</button></div>';return}
+ if(a<need){const reply=n.dateStyle==="serious"?"I'd like to get to know you a little better first.":"Maybe not yet, but let's keep talking.";A.innerHTML='<h2>💕 Ask '+n.name.split(" ")[0]+' on a Date</h2><div class="card"><p><b>'+n.name.split(" ")[0]+':</b> '+reply+'</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';return}
+ let html='<h2>💕 Set a Date with '+n.name.split(" ")[0]+'</h2><div class="card"><p>They said yes! Choose a day:</p>';
+ for(let off=1;off<=7;off++){const d=(state.day||1)+off,c=calendarInfoFor(d);html+='<button class="option" onclick="scheduleDate('+i+','+d+')">'+c.weekday+' · '+c.month+' '+c.date+(c.weekend?' · Weekend':' · After work')+'</button>'}
+ html+='</div><button class="secondary" onclick="openContact('+i+')">← Back</button>';A.innerHTML=html;
 }
+function scheduleDate(i,d){ensureSocialState();state.scheduledDates=state.scheduledDates.filter(x=>x.npc!==Number(i)||x.done||x.cancelled);state.scheduledDates.push({npc:Number(i),day:Number(d),cancelled:false,done:false});saveGame();const c=calendarInfoFor(d),n=npcs[i];A.innerHTML='<div class="card"><h2>📅 Date Scheduled</h2><p><b>'+n.name.split(" ")[0]+'</b> · '+c.weekday+', '+c.month+' '+c.date+'</p><p>'+(c.weekend?'Weekend — your day is free.':'Weekday — the date will be after work.')+'</p><button class="primary" onclick="day()">Done</button></div>'}
+function cancelScheduledDate(i){ensureSocialState();const p=dateForDay(state.day||1);if(p&&p.npc===Number(i))p.cancelled=true;saveGame();day()}
+function goScheduledDate(i){ensureSocialState();const p=dateForDay(state.day||1);if(p&&p.npc===Number(i))p.done=true;saveGame();dateScene(Number(i))}
 const chatCategories=[
  {name:"日常",icon:"☀️",topics:["Today","Work","Lunch","Commute home","Weather","Feeling tired","Been busy lately?","Plans for today"]},
  {name:"Hobbies",icon:"🎧",topics:["Music","Movies","TV shows","Games","Books","Sports","Cooking","Photography"]},
@@ -763,7 +780,7 @@ function bootGame(){
  window.addEventListener("beforeunload",saveGame);
  window.nextPeriod=nextPeriod; window.goOut=goOut; window.meetAt=meetAt; window.getMeeting=getMeeting; window.talk=talk; window.day=day; window.endDay=endDay;
  window.work=work; window.careerMenu=careerMenu; window.jobMarket=jobMarket; window.chooseJob=chooseJob; window.schoolMenu=schoolMenu; window.startSchool=startSchool; window.attendSchool=attendSchool; window.quitSchool=quitSchool; window.shopping=shopping; window.buyItem=buyItem; window.refresh=refresh; window.render=render; window.conversation=conversation; window.chooseConversation=chooseConversation;
- window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
+ window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.friendZone=friendZone; window.friendPlans=friendPlans; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledDate=cancelScheduledDate; window.goScheduledDate=goScheduledDate; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
