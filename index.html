@@ -430,32 +430,31 @@ const chatCategories=[
  {name:"恋愛",icon:"💕",topics:["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]},
  {name:"ふざける",icon:"😂",topics:["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]}
 ];
-const playerMessageStarts=[
- "{topic}って好き？","そういえば、{topic}ってどう？","{topic}について聞きたいんだけど、どう思う？","最近{topic}がちょっと気になってる。","{topic}の話しない？","急なんだけど、{topic}って興味ある？"
-];
-const playerMessageChoices=[
- ["私はけっこう好き！","最近ちょうど気になってる。","私はあまり詳しくないかも。","あなたはどう？"],
- ["私は大事だと思う。","その時によるかな。","私はちょっと違う考えかも。","もっと聞きたい！"],
- ["それ楽しそう。","私もやってみたい。","実はちょっと苦手（笑）","おすすめ教えて。"],
- ["私はそういうの好きだよ。","まだよく分からないかな。","意外と気にしないかも。","あなたの場合はどう？"]
-];
-const npcReplySets={
- frequent:["わかる！僕もそれ好き。話し始めると止まらないかも（笑）","ちょうど僕もその話したかった。気が合うね。","いいね！それなら今度一緒にやってみたい。","返信早すぎた？（笑）でもその話、気になった。","それ面白い。もうちょっと詳しく聞かせて！","僕は結構好き。こういう話できるの嬉しい。","それならおすすめあるよ。今度教える！","え、僕も同じこと考えてた（笑）"],
- warm:["うん、それいいね。僕もわりと好きだよ。","なるほど。そういう考え方も素敵だと思う。","僕は少し違うけど、話を聞くのは好き。","それ、もう少し聞いてみたいな。","なんとなく君らしい答えな気がする。","僕の場合は少し違うかな。でも面白いね。","こういう話、ゆっくりできるのいいね。","今度会ったときにもその話したいな。"],
- space:["なるほど。僕はわりとマイペースかな。","そうなんだ。僕は少し違うかも。","面白いね。また時間あるとき話そう。","僕はあまり詳しくないけど、ちょっと気になる。","うん、そういう考えもあるよね。","僕ならたぶん別の方を選ぶかな。","へえ。意外だった。","それについては少し考えてみたいかも。"]
-};
+const topicChat={};
+const casualTopics=new Set(["音楽","映画","ドラマ","ゲーム","本","スポーツ","料理","写真","好きな食べ物","コーヒー","甘いもの","お酒","好きな店","服","旅行先","季節","ペット","最近ハマってること"]);
+const questionTopics=new Set(["今日あったこと","仕事","ランチ","帰り道","天気","眠い","最近忙しい？","今日の予定","休日の過ごし方","子どもの頃","学生時代","友達","得意なこと","苦手なこと"]);
+const valueTopics=new Set(["仕事と生活","家族","お金の使い方","一人の時間","連絡頻度","将来","住みたい場所","人生で大切なこと"]);
+const romanceTopics=new Set(["理想のデート","恋人との距離感","好きなタイプ","記念日","嫉妬","結婚","一緒に住むこと","恋人に求めること"]);
+const funTopics=new Set(["もし宝くじが当たったら","無人島に持っていくもの","変な食べ合わせ","子どもの頃の黒歴史","超能力なら何がいい？","急に休みになったら","犬派猫派","朝型夜型"]);
+function topicScript(topic){
+ if(topic==="音楽")return {start:"最近どんな音楽聴いてる？",choices:["私はポップ系をよく聴くよ。","落ち着いた曲が好き。","最近あまり聴いてないかも。","おすすめの曲ある？"],replies:["ポップいいね。ドライブ中とか聴きたくなる。","落ち着いた曲いいよね。夜に聴くの好き。","そうなんだ。僕は移動中によく聴くよ。","あるよ。今度お気に入り送る！"]};
+ if(topic==="映画")return {start:"映画ってよく観る？",choices:["けっこう観るよ！","家で観る方が好き。","映画館で観るのが好き。","最近のおすすめある？"],replies:["いいね。どんなジャンルが好き？","家でゆっくり観るのもいいよね。","わかる。映画館の雰囲気って特別だよね。","最近観た中だと何本かおすすめあるよ。"]};
+ if(topic==="スポーツ")return {start:"スポーツってする？それとも観る方？",choices:["自分でする方が好き。","観る方が好き！","どっちも好き。","あまり詳しくないかも。"],replies:["いいね。何するのが一番好き？","観戦楽しいよね。好きなチームある？","それ最高。僕も両方楽しむタイプ。","全然大丈夫。僕も詳しくない競技多いよ。"]};
+ if(topic==="ゲーム")return {start:"ゲームってする？",choices:["よくするよ！","たまにする。","見る方が好きかも。","あまりしないかな。"],replies:["お、何系が好き？","たまにやるくらいも楽しいよね。","配信とか見るのも面白いよね。","そうなんだ。僕は気分転換にたまにやるよ。"]};
+ if(topic==="料理")return {start:"料理する？",choices:["けっこうするよ。","簡単なものなら。","食べる方が好き（笑）","得意料理ある？"],replies:["いいね。得意料理なに？","わかる。簡単でおいしいのが一番。","それも大事（笑）おいしい店探すの楽しいよね。","僕は簡単なものが多いけど、いくつかあるよ。"]};
+ if(topic==="コーヒー")return {start:"コーヒー飲む？",choices:["毎日飲む！","たまに飲むよ。","紅茶の方が好き。","おすすめのカフェある？"],replies:["僕も。朝の一杯ないと始まらない（笑）","たまに飲むくらいがちょうどいいよね。","紅茶もいいね。僕もたまに飲む。","あるよ。今度一緒に行ってみる？"]};
+ if(topic==="犬派猫派")return {start:"急だけど、犬派？猫派？",choices:["犬派！","猫派！","どっちも好き。","選べない（笑）"],replies:["犬いいよね。散歩も一緒にできるし。","猫のマイペースな感じいいよね。","わかる。どっちも違うかわいさがある。","それが一番平和な答えかも（笑）"]};
+ if(topic==="朝型夜型")return {start:"朝型？夜型？",choices:["朝型かな。","完全に夜型。","日による（笑）","どっちにもなれない。"],replies:["朝強いのすごい。僕は起きるまで時間かかる。","夜って妙に集中できるよね。","それが一番現実的かも（笑）","わかる。朝も夜も眠い日あるよね。"]};
+ if(romanceTopics.has(topic))return {start:topic+"についてどう思う？",choices:["けっこう大事だと思う。","相手によるかな。","あまりこだわらないかも。","あなたはどう思う？"],replies:["僕も大事だと思う。価値観が近いと安心するよね。","うん、相手との関係によって変わるよね。","なるほど。そういう考え方もわかる。","僕は無理せず二人で決めていけるのが理想かな。"]};
+ if(valueTopics.has(topic))return {start:topic+"って、どんな考え？",choices:["私はかなり大切にしたい。","バランスが大事かな。","まだ答えは決まってない。","あなたの考えも聞きたい。"],replies:["なるほど。そこを大切にしてるんだね。","僕もバランスは大事だと思う。","そうだよね。経験で変わることもあるし。","僕は自分だけじゃなく相手の考えも大事にしたいかな。"]};
+ if(funTopics.has(topic))return {start:topic+"って聞かれたら何て答える？",choices:["すぐ答えられる（笑）","めっちゃ迷う。","たぶん変な答えになる（笑）","先にあなたの答え聞きたい！"],replies:["気になる（笑）答え聞かせて。","わかる。こういう質問ほど迷うよね。","それ絶対面白いやつ（笑）","え、僕から？じゃあ真面目に考える（笑）"]};
+ if(questionTopics.has(topic))return {start:topic+"のこと聞いてもいい？",choices:["うん、今日はいい感じ。","まあまあかな。","ちょっと疲れ気味。","そっちはどう？"],replies:["それならよかった。","そういう日もあるよね。","おつかれさま。今日はゆっくりできるといいね。","僕はまあまあかな。話せてちょっと気分転換になった。"]};
+ return {start:topic+"って好き？",choices:["好きだよ！","まあまあ好き。","あまり詳しくないかも。","あなたはどう？"],replies:["いいね。何が一番好き？","僕もそんな感じ。","そうなんだ。興味あったら今度話そう。","僕はけっこう好きだよ。"]};
+}
 function allChatTopics(){return chatCategories.flatMap((c,ci)=>c.topics.map((t,ti)=>({category:c.name,icon:c.icon,topic:t,ci,ti})))}
 function chatVariant(i,topicIndex){
- const list=allChatTopics(),d=state.day||1,a=affinity(i),count=(state.chatCount&&state.chatCount[i])||0;
- const x=list[topicIndex==null?0:Math.abs(Number(topicIndex))%list.length];
- const seed=Math.abs(d*101+i*193+a*47+count*271+x.ci*59+x.ti*83);
- const start=playerMessageStarts[seed%playerMessageStarts.length].replace("{topic}",x.topic);
- const choiceSet=playerMessageChoices[(seed+x.ti)%playerMessageChoices.length];
- const style=(npcs[i]&&npcs[i].textStyle)||"warm";
- const replies=npcReplySets[style]||npcReplySets.warm;
- const reply=replies[Math.floor(seed/7)%replies.length];
- const id=(x.ci*8+x.ti)*48+(seed%48)+1;
- return {category:x.category,icon:x.icon,topic:x.topic,ci:x.ci,ti:x.ti,opener:start,choices:choiceSet,reply:reply,id:id};
+ const list=allChatTopics();const x=list[Math.abs(Number(topicIndex)||0)%list.length];const script=topicScript(x.topic);
+ return {category:x.category,icon:x.icon,topic:x.topic,ci:x.ci,ti:x.ti,opener:script.start,choices:script.choices,replies:script.replies,id:x.ci*100+x.ti};
 }
 function messageMenu(i){
  i=Number(i); const n=npcs[i]; if(!n)return;
@@ -511,13 +510,14 @@ function sendPlayerReply(i,topicIndex,choiceIndex){
  const choices=v.choices;
  const you=choices[choiceIndex]||choices[0];
  const playerText=you;
+ const npcReply=(v.replies&&v.replies[choiceIndex])||'そうなんだ。もっと聞きたい。';
  const count=(state.chatCount&&state.chatCount[i])||1;
  let gain=0,reaction='';
  if(n.textStyle==='frequent'){gain=count<=3?4:0;reaction='メッセージを楽しんでいるみたい。';}
  else if(n.textStyle==='space'){gain=count===1?2:(count>=3?-2:0);reaction=count>=3?'少しメッセージが多いと感じているみたい。':'ゆっくりしたペースで返信がきた。';}
  else{gain=count<=2?2:0;reaction='自然に会話が続いた。';}
  addAffinity(i,gain);state.pendingChat=null;saveGame();
- A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+playerText+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+v.reply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
+ A.innerHTML='<h2>'+v.icon+' '+v.topic+'</h2><div class="card"><p><b>あなた:</b> '+playerText+'</p><div class="event">'+messageReplyTiming(i)+'</div><p><b>'+n.name.split(' ')[0]+':</b> '+npcReply+'</p><p class="small">'+reaction+'</p><button class="primary" onclick="messageMenu('+i+')">💬 もう一度メッセージする</button><button class="secondary" onclick="openContact('+i+')">← 戻る</button></div>';
 }
 window.showPlayerMessageChoices=showPlayerMessageChoices;window.sendPlayerReply=sendPlayerReply;
 function casualMessage(i,topicIndex){sendChatTopic(i,topicIndex);}
