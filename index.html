@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#fff7fb"/>
-<title>Soulmate Life</title>
+<title>Soulmate 生活</title>
 <style>
 :root{--pink:#f86f9b;--blue:#78b8e8;--ink:#26344b;--muted:#718096;--card:#fff;--bg:#fff7fb}
 *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:linear-gradient(#fff7fb,#f4f8ff);color:var(--ink)}
@@ -36,7 +36,7 @@ const questions=[
 ["将来、子どもについては？",[["ほしい",["family",18]],["まだ分からない",["family",0]],["ほしくない",["family",-20]]]],
 ["恋人との連絡は？",[["毎日たくさん",["contact",18]],["ほどほど",["contact",3]],["必要な時だけ",["contact",-18]]]],
 ["仕事と恋愛がぶつかったら？",[["恋愛を優先しがち",["career",-12]],["バランスを取りたい",["career",0]],["キャリアを優先",["career",15]]]],
-["理想の週末デートは？",[["家で映画",["adventure",-8]],["Cafeと街歩き",["social",5]],["ハイキング",["adventure",15]]]]
+["理想の週末デートは？",[["家で映画",["adventure",-8]],["カフェと街歩き",["social",5]],["ハイキング",["adventure",15]]]]
 ];
 const npcs=[
 {name:"Noah Bennett",age:29,job:"Physical Therapist",emoji:"👨🏻",traits:{family:85,career:55,social:45,contact:68,adventure:55}},
@@ -48,44 +48,44 @@ const npcs=[
 ];
 function compatibility(n){let s=0;for(const k in state.score)s+=100-Math.abs(state.score[k]-n.traits[k]);return s/5}
 function pickSoulmate(){state.soulmate=npcs.filter(n=>!n.blocked).sort((a,b)=>compatibility(b)-compatibility(a))[0].name}
-function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">Life ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">NEW GAME</button></div></div>`}
-function create(){A.innerHTML=`<h2>主人公を作る</h2><div class="card"><label>名前</label><input id="nm" value="${state.name}" placeholder="Your name"><br><br><label>年齢</label><select id="age">${Array.from({length:14},(_,i)=>`<option ${state.age==22+i?"selected":""}>${22+i}</option>`).join("")}</select></div>
+function title(){A.innerHTML=`<div style="padding-top:16vh;text-align:center"><div class="logo">Soulmate <span class="heart">生活 ♥</span></div><p>70人の中に、あなたのSoulmateがひとりいる。</p><div class="card"><div class="portrait">💗</div><h2>5年間で見つけられる？</h2><p class="small">ゲームはSoulmateが誰か教えてくれません。会話、価値観、生活の中からあなた自身で見つけます。</p><button class="primary" onclick="state.screen='create';render()">ニューゲーム</button></div></div>`}
+function create(){A.innerHTML=`<h2>主人公を作る</h2><div class="card"><label>名前</label><input id="nm" value="${state.name}" placeholder="名前を入力"><br><br><label>年齢</label><select id="age">${Array.from({length:14},(_,i)=>`<option ${state.age==22+i?"selected":""}>${22+i}</option>`).join("")}</select></div>
 <div class="card"><h3>髪型</h3><div class="grid">${hair.map((x,i)=>`<button class="face ${state.look.hair==i?"selected":""}" onclick="state.look.hair=${i};render()">💇‍♀️<span class="small">${i+1}</span></button>`).join("")}</div></div>
 <div class="card"><h3>髪色</h3><div class="grid">${colors.map((x,i)=>`<button class="swatch ${state.look.color==i?"selected":""}" style="background:${x}" onclick="state.look.color=${i};render()"></button>`).join("")}</div></div>
 <div class="card"><h3>輪郭</h3><div class="grid">${["丸","卵型","面長","ベース","逆三角","ハート","Soft","Sharp"].map((x,i)=>`<button type="button" class="face ${state.look.face===i?'selected':''}" onclick="selectFace(${i})">${x}</button>`).join("")}</div><h3>目</h3><div class="grid">${["丸目","切れ長","たれ目","つり目","大きめ","小さめ","一重","奥二重","二重","アーモンド","Soft","Sharp"].map((x,i)=>`<button type="button" class="face ${state.look.eye===i?'selected':''}" onclick="selectEye(${i})">👁️<span class="small">${x}</span></button>`).join("")}</div></div>
 <button class="primary" onclick="state.name=document.querySelector('#nm').value||'Mika';state.age=+document.querySelector('#age').value;state.screen='quiz';render()">次へ：性格・価値観診断</button>`}
-function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="day";return render()} A.innerHTML=`<div class="small">QUESTION ${state.q+1} / ${questions.length}</div><div class="card"><h2>${q[0]}</h2>${q[1].map((o,i)=>`<button class="option" onclick="answer(${i})">${o[0]}</button>`).join("")}</div>`}
+function quiz(){let q=questions[state.q]; if(!q){pickSoulmate();state.screen="day";return render()} A.innerHTML=`<div class="small">質問 ${state.q+1} / ${questions.length}</div><div class="card"><h2>${q[0]}</h2>${q[1].map((o,i)=>`<button class="option" onclick="answer(${i})">${o[0]}</button>`).join("")}</div>`}
 function selectFace(i){state.look.face=i;render()}
 function selectEye(i){state.look.eye=i;render()}
 function answer(i){let [k,d]=questions[state.q][1][i][1];state.score[k]=Math.max(0,Math.min(100,state.score[k]+d));state.q++;render()}
-function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 Year 1</span><span class="pill">Mon 7:00 AM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>Day 1 — Your Apartment</h2><p class="event">新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。</p><button class="primary" onclick="work()">💼 Go to Work</button><button class="secondary" onclick="goOut()">🗺️ Go Out</button></div>${nav()}`}
+function day(){A.innerHTML=`<div class="statbar"><span class="pill">🌸 1年目</span><span class="pill">Mon 7:00 AM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>1日目 — 自宅</h2><p class="event">新しい一年が始まった。今日は9:00から仕事。仕事の後は自由に過ごせる。</p><button class="primary" onclick="work()">💼 仕事へ行く</button><button class="secondary" onclick="goOut()">🗺️ 出かける</button></div>${nav()}`}
 function work(){state.money+=168;state.energy-=20;A.innerHTML=`<div class="statbar"><span class="pill">Mon 5:00 PM</span><span class="pill">💵 $${state.money}</span><span class="pill">⚡ ${state.energy}</span></div><div class="card"><h2>仕事が終わった</h2><p>今日は大きな問題もなく終了した。</p><p class="small">+$168　⚡ -20</p><button class="primary" onclick="goOut()">仕事帰りに出かける</button><button class="secondary" onclick="state.screen='day';render()">家に帰る</button></div>`}
-function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option" onclick="cafe()">🌳 Park <span class="small">1 hour · Free</span></button><button class="option" onclick="cafe()">🛍️ Shopping <span class="small">1–2 hours</span></button><button class="option" onclick="cafe()">📚 Library / Study <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← Back</button>`}
-function cafe(){state.money-=8;let n=npcs[0];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにCafeへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “Hey, do you come here often?”</p><button class="option" onclick="talk()">💬 Talk to him</button><button class="option" onclick="number()">📱 Ask for his number</button><button class="option" onclick="state.screen='day';render()">👋 Smile and leave</button></div>`}
+function goOut(){A.innerHTML=`<h2>どこへ行く？</h2><div class="card"><button class="option" onclick="cafe()">☕ Café <span class="small">1 hour · $8</span></button><button class="option" onclick="cafe()">🌳 Park <span class="small">1 hour · Free</span></button><button class="option" onclick="cafe()">🛍️ ショッピング <span class="small">1–2 hours</span></button><button class="option" onclick="cafe()">📚 図書館 / 勉強 <span class="small">2 hours</span></button></div><button class="secondary" onclick="state.screen='day';render()">← 戻る</button>`}
+function cafe(){state.money-=8;let n=npcs[0];state.met=true;A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">${n.emoji}</div><div class="name">${n.name}, ${n.age}</div><div class="small">${n.job}</div></div><div class="card"><p class="event">仕事帰りにカフェへ寄った。窓際の席に座ろうとすると、近くにいた男性と目が合った。</p><p><b>${n.name.split(" ")[0]}:</b> “こんにちは。ここにはよく来るの？”</p><button class="option" onclick="talk()">💬 話しかける</button><button class="option" onclick="number()">📱 連絡先を聞く</button><button class="option" onclick="state.screen='day';render()">👋 笑顔で別れる</button></div>`}
 function talk(){
- A.innerHTML=`<h2>☕ Conversation</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto"><p><b>Noah:</b> Hey, do you come here often?</p></div><div class="row"><input id="chatInput" placeholder="Type a message..." autocomplete="off"><button type="button" class="primary" style="width:auto" onclick="sendChat()">Send</button></div><button type="button" class="secondary" onclick="askNumber()">📱 Ask for his number</button><button type="button" class="secondary" onclick="day()">今日は帰る</button></div>`;
+ A.innerHTML=`<h2>☕ 会話</h2><div class="card"><div id="chat" style="min-height:180px;max-height:360px;overflow:auto"><p><b>Noah:</b> こんにちは。ここにはよく来るの？</p></div><div class="row"><input id="chatInput" placeholder="メッセージを入力…" autocomplete="off"><button type="button" class="primary" style="width:auto" onclick="sendChat()">送信</button></div><button type="button" class="secondary" onclick="askNumber()">📱 連絡先を聞く</button><button type="button" class="secondary" onclick="day()">今日は帰る</button></div>`;
 }
 function sendChat(){
  var input=document.getElementById("chatInput"); var chat=document.getElementById("chat"); if(!input||!chat)return; var msg=input.value.trim(); if(!msg)return;
- var mine=document.createElement("p"); mine.textContent="You: "+msg; chat.appendChild(mine); input.value="";
- var m=msg.toLowerCase(); var reply="That’s interesting. Tell me more about that.";
- if(m.indexOf("work")>=0||m.indexOf("仕事")>=0) reply="I’m a physical therapist. I like helping people. What about you?";
- else if(m.indexOf("weekend")>=0||m.indexOf("休日")>=0) reply="I like coffee and getting outside. What’s your ideal weekend?";
- else if(m.indexOf("family")>=0||m.indexOf("家族")>=0||m.indexOf("子ども")>=0) reply="Family is important to me. I think I’d like a family of my own someday.";
- else if(m.indexOf("hi")>=0||m.indexOf("hello")>=0||m.indexOf("こんにちは")>=0) reply="Hey! I’m glad you decided to talk to me. How’s your day going?";
+ var mine=document.createElement("p"); mine.textContent="あなた: "+msg; chat.appendChild(mine); input.value="";
+ var m=msg.toLowerCase(); var reply="そうなんだ。もう少し聞かせて。";
+ if(m.indexOf("work")>=0||m.indexOf("仕事")>=0) reply="理学療法士をしてるんだ。人の役に立てる仕事が好き。あなたは？";
+ else if(m.indexOf("weekend")>=0||m.indexOf("休日")>=0) reply="コーヒーを飲んだり、外に出かけたりするのが好き。理想の休日はどんな感じ？";
+ else if(m.indexOf("family")>=0||m.indexOf("家族")>=0||m.indexOf("子ども")>=0) reply="家族は大切だと思ってる。いつか自分の家庭も持ちたいかな。";
+ else if(m.indexOf("hi")>=0||m.indexOf("hello")>=0||m.indexOf("こんにちは")>=0) reply="話しかけてくれてうれしい。今日はどんな一日だった？";
  var his=document.createElement("p"); his.textContent="Noah: "+reply; chat.appendChild(his); chat.scrollTop=chat.scrollHeight;
 }
 function askNumber(){
- var chance=state.met?0.8:0.55; if(Math.random()>chance){A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>Maybe another time</h2><p>Noah: “It was nice meeting you, but I’d rather not exchange numbers yet.”</p><button class="primary" onclick="day()">Continue</button></div>`;return;}
- state.met=true; A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>Contact Added 📱</h2><p><b>Noah Bennett</b> がContactsに追加された。</p><button class="primary" onclick="day()">Continue</button></div>`;
+ var chance=state.met?0.8:0.55; if(Math.random()>chance){A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>また今度</h2><p>Noah：「会えて楽しかった。でも、連絡先を交換するのはもう少し仲良くなってからがいいかな。」</p><button class="primary" onclick="day()">続ける</button></div>`;return;}
+ state.met=true; A.innerHTML=`<div class="card" style="text-align:center"><div class="portrait">👨🏻</div><h2>連絡先を交換しました 📱</h2><p><b>Noah Bennett</b> が連絡先に追加された。</p><button class="primary" onclick="day()">続ける</button></div>`;
 }
 function number(){askNumber()}
 function phone(){
- A.innerHTML=`<h2>📱 Phone</h2><div class="card"><h3>Contacts</h3><p class="small">Contacts screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
+ A.innerHTML=`<h2>📱 スマホ</h2><div class="card"><h3>連絡先</h3><p class="small">連絡先 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
 function relationships(){
- A.innerHTML=`<h2>❤️ Relationships</h2><div class="card"><h3>People you know</h3><p class="small">Relationships screen</p></div><button class="secondary" onclick="render()">← Back</button>${nav()}`
+ A.innerHTML=`<h2>❤️ 人間関係</h2><div class="card"><h3>知り合い</h3><p class="small">人間関係 screen</p></div><button class="secondary" onclick="render()">← 戻る</button>${nav()}`
 }
-function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 Life</button><button class="ghost" onclick="relationships()">❤️ Relationships</button><button class="ghost" onclick="phone()">📱 Phone</button><button class="ghost" onclick="goOut()">🗺️ Go Out</button></div>`}
+function nav(){return `<div class="nav"><button class="ghost" onclick="render()">🏠 生活</button><button class="ghost" onclick="relationships()">❤️ 人間関係</button><button class="ghost" onclick="phone()">📱 スマホ</button><button class="ghost" onclick="goOut()">🗺️ 出かける</button></div>`}
 function render(){({title,create,quiz,day}[state.screen]||title)()} render();
 </script></body></html>
