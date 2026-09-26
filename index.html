@@ -642,7 +642,7 @@ function relationshipLabel(i){
 function phone(){
  ensureSocialState();if(!state.officialPartners)state.officialPartners={};
  const ids=Array.isArray(state.contacts)?state.contacts:[];
- const list=ids.length?ids.map(i=>{const n=npcs[i],label=relationshipLabel(i);return '<button class="option" onclick="openContact('+i+')"><span style="font-size:28px;margin-right:10px">'+n.emoji+'</span><b>'+n.name+'</b>'+(label?' <span class="small">· '+label+'</span>':'')+'<br><span class="small">'+n.age+' · '+n.job+'</span></button>'}).join(""):'<p class="small">No contacts yet.</p>';
+ const list=ids.length?ids.map(i=>{const n=npcs[i],label=relationshipLabel(i),platonic=state.friends.includes(Number(i))&&!state.officialPartners?.[i],style=platonic?' style="background:#e8f4ff;border-color:#8bc4ef"':'';return '<button class="option"'+style+' onclick="openContact('+i+')"><span style="font-size:28px;margin-right:10px">'+n.emoji+'</span><b>'+n.name+'</b>'+(label?' <span class="small">· '+label+'</span>':'')+'<br><span class="small">'+n.age+' · '+n.job+'</span></button>'}).join(""):'<p class="small">No contacts yet.</p>';
  A.innerHTML='<h2>📱 Phone</h2><div class="card"><h3>Contacts</h3>'+list+'</div><button class="secondary" onclick="state.screen=\'day\';render()">← Back</button>'+nav();
 }
 function affinity(i){if(!state.affinity)state.affinity={};return state.affinity[i]||0}
