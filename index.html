@@ -909,11 +909,14 @@ function friendDatingAdvice(friendId,target){
 }
 function createIncomingMessage(){
  ensureIncoming();ensureSocialState();ensureNpcRelationships();
+ if(!state.incomingHandledSenders||typeof state.incomingHandledSenders!=="object")state.incomingHandledSenders={};
  const day=state.day||1,friendIds=(state.friends||[]).map(Number);
+ if(!Array.isArray(state.incomingHandledSenders[day]))state.incomingHandledSenders[day]=[];
+ const handled=state.incomingHandledSenders[day].map(Number);
  const todays=Object.values(state.incomingMessages).filter(m=>m&&m.day===day);
  // Friends sometimes initiate plans or pass along dating news. Multiple friends may text on the same day.
  friendIds.forEach(function(fi,idx){
-  if(todays.some(m=>m&&m.sender===fi))return;
+  if(handled.includes(fi)||todays.some(m=>m&&m.sender===fi))return;
   const roll=(day+fi*11+idx*7)%11;
   if(roll===0){addIncomingMessage(fi,{friendPlan:true});return}
   if(roll===1||roll===2||roll===3){
@@ -924,7 +927,7 @@ function createIncomingMessage(){
  const ids=Array.isArray(state.contacts)?state.contacts.map(Number):[];
  const eligible=ids.filter(i=>affinity(i)>=8 || friendIds.includes(i));
  eligible.forEach(function(i,idx){
-  if(Object.values(state.incomingMessages).some(m=>m&&m.day===day&&m.sender===i))return;
+  if(handled.includes(i)||Object.values(state.incomingMessages).some(m=>m&&m.day===day&&m.sender===i))return;
   const n=npcs[i],chance=n.textStyle==="frequent"?4:n.textStyle==="warm"?6:8;
   if((day+i*3+idx)%chance!==0)return;
   addIncomingMessage(i,{template:(day+i)%incomingMessageTemplates.length});
@@ -957,10 +960,17 @@ function replyIncomingKey(key,k){
  if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
  const today=state.day||1;if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0;}
  state.chatCount[i]=(state.chatCount[i]||0)+1;
+ if(!state.incomingHandledSenders||typeof state.incomingHandledSenders!=="object")state.incomingHandledSenders={};
+ if(!Array.isArray(state.incomingHandledSenders[today]))state.incomingHandledSenders[today]=[];
+ if(!state.incomingHandledSenders[today].includes(i))state.incomingHandledSenders[today].push(i);
  addAffinity(i,3);delete state.incomingMessages[key];saveGame();
  A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>You:</b> '+ch.text+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+ch.reply+'</p><button class="primary" onclick="messageMenu('+i+')">Keep talking</button><button class="secondary" onclick="day()">Back to day</button></div>';
 }
-function ignoreIncomingKey(key){ensureIncoming();if(state.incomingMessages[key])state.incomingMessages[key].read=true;saveGame();day()}
+function ignoreIncomingKey(key){
+ ensureIncoming();const m=state.incomingMessages[key];
+ if(m){m.read=true;const day=state.day||1,i=Number(m.sender);if(!state.incomingHandledSenders||typeof state.incomingHandledSenders!=="object")state.incomingHandledSenders={};if(!Array.isArray(state.incomingHandledSenders[day]))state.incomingHandledSenders[day]=[];if(!state.incomingHandledSenders[day].includes(i))state.incomingHandledSenders[day].push(i)}
+ saveGame();day();
+}
 function openIncoming(i){const e=Object.entries(state.incomingMessages||{}).find(([k,m])=>m&&(m.sender===Number(i)||k===String(i)));if(e)return openIncomingKey(e[0]);phone()}
 function replyIncoming(i,k){const e=Object.entries(state.incomingMessages||{}).find(([key,m])=>m&&(m.sender===Number(i)||key===String(i)));if(e)return replyIncomingKey(e[0],k);phone()}
 function ignoreIncoming(i){const e=Object.entries(state.incomingMessages||{}).find(([key,m])=>m&&(m.sender===Number(i)||key===String(i)));if(e)return ignoreIncomingKey(e[0]);day()}
