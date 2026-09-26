@@ -651,7 +651,7 @@ function openContact(i){
  ensureSocialState();if(!state.officialPartners)state.officialPartners={};const n=npcs[i];if(!n)return phone();i=Number(i);
  const friend=state.friends.includes(i),official=state.officialPartners[i]||"";
  const status=official?'❤️ '+official:(friend?'💙 Friend':'');
- A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p>'+(status?'<p><b>'+status+'</b></p>':'')+'<button class="primary" onclick="messageMenu('+i+')">💬 Message</button>' +(friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button>':official?'<button class="option" onclick="askDate('+i+')">💕 Plan a Date</button>':'<button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button><button class="option" onclick="friendZone('+i+')">💙 Become Platonic Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
+ A.innerHTML='<h2>📱 '+n.name+'</h2><div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h3>'+n.name+'</h3><p class="small">'+n.age+' · '+n.job+'</p>'+(status?'<p><b>'+status+'</b></p>':'')+'<button class="primary" onclick="messageMenu('+i+')">💬 Message</button>' +(official?'<button class="option" onclick="askDate('+i+')">💕 Plan a Date</button>':friend?'<button class="option" onclick="friendPlans('+i+')">🎉 Make Friend Plans</button><button class="option" onclick="tryRomanceFromFriend('+i+')">💕 See if there could be something more</button>':'<button class="option" onclick="askDate('+i+')">💕 Ask on a Date</button><button class="option" onclick="friendZone('+i+')">💙 Become Platonic Friends</button>')+'<button class="secondary" onclick="phone()">← Contacts</button></div>';
 }
 function friendZone(i){
  ensureSocialState();i=Number(i);if(!state.officialPartners)state.officialPartners={};
@@ -659,10 +659,20 @@ function friendZone(i){
  if(!state.friends.includes(i))state.friends.push(i);
  saveGame();openContact(i);
 }
+function tryRomanceFromFriend(i){
+ ensureSocialState();i=Number(i);const n=npcs[i];if(!n)return;
+ const a=affinity(i),need=n.dateStyle==="casual"?12:n.dateStyle==="balanced"?22:32;
+ if(npcDatingStatus(i)==="taken"){A.innerHTML='<div class="card"><h2>💕 Not Available</h2><p>'+n.name.split(" ")[0]+' tells you they are seeing someone right now.</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';return}
+ if(a<need){A.innerHTML='<div class="card"><h2>💙 Friends for now</h2><p>'+n.name.split(" ")[0]+' values your friendship, but the romantic timing does not feel right yet.</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';return}
+ let html='<h2>💕 Maybe More Than Friends?</h2><div class="card"><p>'+n.name.split(" ")[0]+' is open to seeing if there could be something romantic between you. Choose a date:</p>';
+ for(let off=1;off<=7;off++){const d=(state.day||1)+off,c=calendarInfoFor(d);html+='<button class="option" onclick="scheduleDate('+i+','+d+')">'+fullWeekday(c.weekday)+' · '+c.month+' '+c.date+(c.weekend?' · Weekend':' · After work')+'</button>'}
+ html+='</div><button class="secondary" onclick="openContact('+i+')">← Back</button>';A.innerHTML=html;
+}
 function becomeOfficial(i){
  ensureSocialState();ensureDatingStory();i=Number(i);const n=npcs[i];if(!n)return;
  if(!state.officialPartners)state.officialPartners={};
- state.friends=state.friends.filter(x=>Number(x)!==i);
+ // Keep them in the friend list/history even after romance starts.
+ // The visible contact label changes to Boyfriend/Girlfriend because official status takes priority.
  const label=(n.gender==="female"?"Girlfriend":"Boyfriend");
  state.officialPartners[i]=label;
  saveGame();
