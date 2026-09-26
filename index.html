@@ -949,7 +949,9 @@ function incomingCards(){
 }
 function morningMessage(){return incomingCards()}
 function openFriendTip(key){
- ensureIncoming();const m=state.incomingMessages[key];if(!m)return day();m.read=true;saveGame();openContact(Number(m.target));
+ ensureIncoming();const m=state.incomingMessages[key];if(!m)return day();const target=Number(m.target),dayNum=state.day||1,i=Number(m.sender);
+ if(!state.incomingHandledSenders||typeof state.incomingHandledSenders!=="object")state.incomingHandledSenders={};if(!Array.isArray(state.incomingHandledSenders[dayNum]))state.incomingHandledSenders[dayNum]=[];if(!state.incomingHandledSenders[dayNum].includes(i))state.incomingHandledSenders[dayNum].push(i);
+ delete state.incomingMessages[key];saveGame();openContact(target);
 }
 function openIncomingKey(key){
  ensureIncoming();const m=state.incomingMessages[key];if(!m)return phone();const i=Number(m.sender),n=npcs[i],t=incomingMessageTemplates[m.template];m.read=true;saveGame();
@@ -968,7 +970,7 @@ function replyIncomingKey(key,k){
 }
 function ignoreIncomingKey(key){
  ensureIncoming();const m=state.incomingMessages[key];
- if(m){m.read=true;const day=state.day||1,i=Number(m.sender);if(!state.incomingHandledSenders||typeof state.incomingHandledSenders!=="object")state.incomingHandledSenders={};if(!Array.isArray(state.incomingHandledSenders[day]))state.incomingHandledSenders[day]=[];if(!state.incomingHandledSenders[day].includes(i))state.incomingHandledSenders[day].push(i)}
+ if(m){const day=state.day||1,i=Number(m.sender);if(!state.incomingHandledSenders||typeof state.incomingHandledSenders!=="object")state.incomingHandledSenders={};if(!Array.isArray(state.incomingHandledSenders[day]))state.incomingHandledSenders[day]=[];if(!state.incomingHandledSenders[day].includes(i))state.incomingHandledSenders[day].push(i);delete state.incomingMessages[key]}
  saveGame();day();
 }
 function openIncoming(i){const e=Object.entries(state.incomingMessages||{}).find(([k,m])=>m&&(m.sender===Number(i)||k===String(i)));if(e)return openIncomingKey(e[0]);phone()}
