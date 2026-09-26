@@ -954,6 +954,9 @@ function openIncomingKey(key){
 }
 function replyIncomingKey(key,k){
  ensureIncoming();k=Number(k);const m=state.incomingMessages[key];if(!m)return phone();const i=Number(m.sender),n=npcs[i],t=incomingMessageTemplates[m.template],ch=t.choices[k]||t.choices[0];
+ if(!state.chatCountDay)state.chatCountDay={};if(!state.chatCount)state.chatCount={};
+ const today=state.day||1;if(state.chatCountDay[i]!==today){state.chatCountDay[i]=today;state.chatCount[i]=0;}
+ state.chatCount[i]=(state.chatCount[i]||0)+1;
  addAffinity(i,3);delete state.incomingMessages[key];saveGame();
  A.innerHTML='<h2>💬 '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>You:</b> '+ch.text+'</p><p><b>'+n.name.split(" ")[0]+':</b> '+ch.reply+'</p><button class="primary" onclick="messageMenu('+i+')">Keep talking</button><button class="secondary" onclick="day()">Back to day</button></div>';
 }
