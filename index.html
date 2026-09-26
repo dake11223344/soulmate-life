@@ -331,10 +331,20 @@ function scheduleSummary(){
 }
 
 function todayDateCard(){
- const plan=dateForDay(state.day||1);if(!plan)return '';
- const n=npcs[plan.npc];if(!n)return '';
- return '<div class="card"><h3>💕 DATE TODAY — '+n.name.split(" ")[0]+'</h3><p>Your date is scheduled for today.</p><button class="primary" onclick="goScheduledDate('+plan.npc+')">Go on Date</button><button class="secondary" onclick="cancelScheduledDate('+plan.npc+')">Cancel Date</button></div>';
+ ensureSocialState();const plans=(state.scheduledDates||[]).filter(x=>x&&x.day===(state.day||1)&&!x.cancelled&&!x.done);
+ if(!plans.length)return '';
+ return plans.map((plan,idx)=>{
+  const n=npcs[plan.npc];if(!n)return '';
+  if(plan.kind==="friend")return '<div class="card"><h3>💙 PLAN TODAY — '+plan.planType+' with '+n.name.split(" ")[0]+'</h3><p>You planned this for today. You can still choose what you want to do.</p><button class="primary" onclick="goScheduledFriendPlan('+idx+')">Go to Plan</button><button class="secondary" onclick="cancelScheduledPlan('+idx+')">Cancel Plan</button><button class="secondary" onclick="skipScheduledPlan('+idx+')">Do My Own Thing</button></div>';
+  return '<div class="card"><h3>💕 DATE TODAY — '+n.name.split(" ")[0]+'</h3><p>Your date is scheduled for today. You can still change your mind.</p><button class="primary" onclick="goScheduledPlan('+idx+')">Go on Date</button><button class="secondary" onclick="cancelScheduledPlan('+idx+')">Cancel Date</button><button class="secondary" onclick="skipScheduledPlan('+idx+')">Do My Own Thing</button></div>';
+ }).join("");
 }
+function todaysActivePlans(){return (state.scheduledDates||[]).filter(x=>x&&x.day===(state.day||1)&&!x.cancelled&&!x.done)}
+function planByTodayIndex(idx){return todaysActivePlans()[Number(idx)]}
+function goScheduledPlan(idx){const p=planByTodayIndex(idx);if(!p)return day();p.done=true;saveGame();dateScene(Number(p.npc))}
+function goScheduledFriendPlan(idx){const p=planByTodayIndex(idx);if(!p)return day();p.done=true;saveGame();doFriendPlan(Number(p.npc),p.planType||"Hang Out")}
+function cancelScheduledPlan(idx){const p=planByTodayIndex(idx);if(p)p.cancelled=true;saveGame();day()}
+function skipScheduledPlan(idx){const p=planByTodayIndex(idx);if(p)p.done=true;saveGame();day()}
 function day(){
  const c=calendarInfo(),blocked=moodCheck(),m=moodStatus(),worked=state.workedDay===c.d;
  if(!state.period)state.period="morning";
@@ -658,8 +668,22 @@ function becomeOfficial(i){
  saveGame();
  A.innerHTML='<div class="card" style="text-align:center"><div class="portrait">'+n.emoji+'</div><h2>❤️ Official</h2><p>You and '+n.name.split(" ")[0]+' decided to be exclusive.</p><p><b>'+label+'</b> will now appear next to their name in Contacts.</p><button class="primary" onclick="openContact('+i+')">Continue</button></div>';
 }
-function friendPlans(i){const n=npcs[i];A.innerHTML='<h2>💙 Plans with '+n.name.split(" ")[0]+'</h2><div class="card"><p><b>Platonic Friend:</b> Make plans to meet up, go out, or travel together.</p><button class="option" onclick="doFriendPlan('+i+',\'Party\')">🎉 Go to a Party</button><button class="option" onclick="doFriendPlan('+i+',\'Club\')">💃 Go to a Club</button><button class="option" onclick="doFriendPlan('+i+',\'Hang Out\')">☕ Hang Out</button><button class="option" onclick="doFriendPlan('+i+',\'Weekend Trip\')">✈️ Weekend Trip</button></div><button class="secondary" onclick="openContact('+i+')">← Back</button>'}
-function doFriendPlan(i,type){const c=calendarInfo();if(type==="Weekend Trip"&&!c.weekend){A.innerHTML='<div class="card"><h2>✈️ Weekend only</h2><p>Travel with friends is available on Saturday or Sunday.</p><button class="primary" onclick="friendPlans('+i+')">Back</button></div>';return}state.energy=Math.max(0,(state.energy||0)-(type==="Weekend Trip"?25:12));state.stress=Math.max(0,(state.stress||0)-(type==="Weekend Trip"?30:15));addAffinity(i,4);saveGame();A.innerHTML='<div class="card"><h2>💙 '+type+'</h2><p>You spent time together as friends.</p><p class="small">FRIEND ZONE · Platonic</p><button class="primary" onclick="day()">Continue</button></div>'}
+function friendPlans(i){
+ const n=npcs[i];A.innerHTML='<h2>💙 Plans with '+n.name.split(" ")[0]+'</h2><div class="card"><p>What would you like to plan?</p><button class="option" onclick="chooseFriendPlanDate('+i+',\'Party\')">🎉 Go to a Party</button><button class="option" onclick="chooseFriendPlanDate('+i+',\'Club\')">💃 Go to a Club</button><button class="option" onclick="chooseFriendPlanDate('+i+',\'Hang Out\')">☕ Hang Out</button><button class="option" onclick="chooseFriendPlanDate('+i+',\'Weekend Trip\')">✈️ Weekend Trip</button></div><button class="secondary" onclick="openContact('+i+')">← Back</button>';
+}
+function chooseFriendPlanDate(i,type){
+ let html='<h2>📅 Plan '+type+'</h2><div class="card"><p>Choose a date with '+npcs[i].name.split(" ")[0]+':</p>';
+ for(let off=1;off<=14;off++){const d=(state.day||1)+off,c=calendarInfoFor(d);if(type==="Weekend Trip"&&!c.weekend)continue;html+='<button class="option" onclick="scheduleFriendPlan('+i+',\''+type+'\','+d+')">'+fullWeekday(c.weekday)+' · '+c.month+' '+c.date+(c.weekend?' · Weekend':'')+'</button>'}
+ html+='</div><button class="secondary" onclick="friendPlans('+i+')">← Back</button>';A.innerHTML=html;
+}
+function scheduleFriendPlan(i,type,d){
+ ensureSocialState();state.scheduledDates.push({npc:Number(i),day:Number(d),kind:"friend",planType:type,cancelled:false,done:false});saveGame();
+ const c=calendarInfoFor(d),n=npcs[i];A.innerHTML='<div class="card"><h2>📅 Plan Scheduled</h2><p><b>'+type+' with '+n.name.split(" ")[0]+'</b></p><p>'+fullWeekday(c.weekday)+', '+c.month+' '+c.date+'</p><p class="small">When the day arrives, you can decide whether to go, cancel, or just do your own thing.</p><button class="primary" onclick="day()">Done</button></div>';
+}
+function doFriendPlan(i,type){
+ state.energy=Math.max(0,(state.energy||0)-(type==="Weekend Trip"?25:12));state.stress=Math.max(0,(state.stress||0)-(type==="Weekend Trip"?30:15));addAffinity(i,4);saveGame();
+ A.innerHTML='<div class="card"><h2>💙 '+type+'</h2><p>You spent time together as friends.</p><p class="small">Platonic friendship · 💙 +4</p><button class="primary" onclick="day()">Continue</button></div>';
+}
 function askDate(i){
  ensureSocialState();i=Number(i);const n=npcs[i];if(!n)return phone();const a=affinity(i),need=n.dateStyle==="casual"?12:n.dateStyle==="balanced"?22:32;
  if(!(state.officialPartners&&state.officialPartners[i])&&npcDatingStatus(i)==="taken"){A.innerHTML='<div class="card"><h2>💕 Not Available</h2><p>'+n.name.split(" ")[0]+' tells you they are seeing someone right now, so they do not want to go on a date.</p><button class="primary" onclick="openContact('+i+')">Okay</button></div>';return}
@@ -669,9 +693,7 @@ function askDate(i){
  for(let off=1;off<=7;off++){const d=(state.day||1)+off,c=calendarInfoFor(d);html+='<button class="option" onclick="scheduleDate('+i+','+d+')">'+c.weekday+' · '+c.month+' '+c.date+(c.weekend?' · Weekend':' · After work')+'</button>'}
  html+='</div><button class="secondary" onclick="openContact('+i+')">← Back</button>';A.innerHTML=html;
 }
-function scheduleDate(i,d){ensureSocialState();state.scheduledDates=state.scheduledDates.filter(x=>x.npc!==Number(i)||x.done||x.cancelled);state.scheduledDates.push({npc:Number(i),day:Number(d),cancelled:false,done:false});saveGame();const c=calendarInfoFor(d),n=npcs[i];A.innerHTML='<div class="card"><h2>📅 Date Scheduled</h2><p><b>'+n.name.split(" ")[0]+'</b> · '+c.weekday+', '+c.month+' '+c.date+'</p><p>'+(c.weekend?'Weekend — your day is free.':'Weekday — the date will be after work.')+'</p><button class="primary" onclick="day()">Done</button></div>'}
-function cancelScheduledDate(i){ensureSocialState();const p=dateForDay(state.day||1);if(p&&p.npc===Number(i))p.cancelled=true;saveGame();day()}
-function goScheduledDate(i){ensureSocialState();const p=dateForDay(state.day||1);if(p&&p.npc===Number(i))p.done=true;saveGame();dateScene(Number(i))}
+function scheduleDate(i,d){ensureSocialState();state.scheduledDates=state.scheduledDates.filter(x=>x.npc!==Number(i)||x.done||x.cancelled);state.scheduledDates.push({npc:Number(i),day:Number(d),kind:"date",cancelled:false,done:false});saveGame();const c=calendarInfoFor(d),n=npcs[i];A.innerHTML='<div class="card"><h2>📅 Date Scheduled</h2><p><b>'+n.name.split(" ")[0]+'</b> · '+c.weekday+', '+c.month+' '+c.date+'</p><p>'+(c.weekend?'Weekend — your day is free.':'Weekday — the date will be after work.')+'</p><button class="primary" onclick="day()">Done</button></div>'}
 const chatCategories=[
  {name:"日常",icon:"☀️",topics:["Today","Work","Lunch","Commute home","Weather","Feeling tired","Been busy lately?","Plans for today"]},
  {name:"Hobbies",icon:"🎧",topics:["Music","Movies","TV shows","Games","Books","Sports","Cooking","Photography"]},
