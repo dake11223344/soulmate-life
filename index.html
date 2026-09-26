@@ -343,6 +343,14 @@ function todaysActivePlans(){return (state.scheduledDates||[]).filter(x=>x&&x.da
 function planByTodayIndex(idx){return todaysActivePlans()[Number(idx)]}
 function goScheduledPlan(idx){const p=planByTodayIndex(idx);if(!p)return day();p.done=true;saveGame();dateScene(Number(p.npc))}
 function goScheduledFriendPlan(idx){const p=planByTodayIndex(idx);if(!p)return day();p.done=true;saveGame();doFriendPlan(Number(p.npc),p.planType||"Hang Out")}
+function cancelScheduledDate(i){
+ ensureSocialState();const p=(state.scheduledDates||[]).find(x=>x&&x.day===(state.day||1)&&Number(x.npc)===Number(i)&&!x.cancelled&&!x.done);
+ if(p)p.cancelled=true;saveGame();day();
+}
+function goScheduledDate(i){
+ ensureSocialState();const p=(state.scheduledDates||[]).find(x=>x&&x.day===(state.day||1)&&Number(x.npc)===Number(i)&&!x.cancelled&&!x.done);
+ if(p)p.done=true;saveGame();dateScene(Number(i));
+}
 function cancelScheduledPlan(idx){const p=planByTodayIndex(idx);if(p)p.cancelled=true;saveGame();day()}
 function skipScheduledPlan(idx){const p=planByTodayIndex(idx);if(p)p.done=true;saveGame();day()}
 function day(){
@@ -1066,7 +1074,7 @@ function bootGame(){
  window.randomMessage=randomMessage; window.topicMenu=topicMenu; window.casualMessage=casualMessage; window.morningMessage=morningMessage; window.askContactChoice=askContactChoice; window.askDate=askDate; window.extendGameOneYear=extendGameOneYear;
  window.openIncomingKey=openIncomingKey; window.replyIncomingKey=replyIncomingKey; window.ignoreIncomingKey=ignoreIncomingKey; window.openFriendTip=openFriendTip;
  window.friendInviteMessage=friendInviteMessage;
- window.friendZone=friendZone; window.friendPlans=friendPlans; window.chooseFriendPlanDate=chooseFriendPlanDate; window.scheduleFriendPlan=scheduleFriendPlan; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledPlan=cancelScheduledPlan; window.skipScheduledPlan=skipScheduledPlan; window.goScheduledPlan=goScheduledPlan; window.goScheduledFriendPlan=goScheduledFriendPlan; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
+ window.cancelScheduledDate=cancelScheduledDate; window.goScheduledDate=goScheduledDate; window.friendZone=friendZone; window.friendPlans=friendPlans; window.chooseFriendPlanDate=chooseFriendPlanDate; window.scheduleFriendPlan=scheduleFriendPlan; window.doFriendPlan=doFriendPlan; window.scheduleDate=scheduleDate; window.cancelScheduledPlan=cancelScheduledPlan; window.skipScheduledPlan=skipScheduledPlan; window.goScheduledPlan=goScheduledPlan; window.goScheduledFriendPlan=goScheduledFriendPlan; window.contactYes=contactYes; window.phone=phone; window.openContact=openContact; window.messageMenu=messageMenu; window.casualMessage=casualMessage; window.dateScene=dateScene; window.relationships=relationships;
  render();
 }
 document.addEventListener("click",function(e){
